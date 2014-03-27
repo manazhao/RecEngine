@@ -1,0 +1,4 @@
+RecEngine
+=========
+
+recommendation algorithms
