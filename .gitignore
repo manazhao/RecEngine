@@ -12,3 +12,8 @@
 *.la
 *.a
 
+/Debug
+/Release
+*.log
+*.out
+tmp*
