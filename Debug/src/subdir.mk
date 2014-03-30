@@ -12,7 +12,8 @@ CPP_SRCS += \
 ../src/MFVB.cpp \
 ../src/RecEngine.cpp \
 ../src/UserObject.cpp \
-../src/VLImplicitModel.cpp 
+../src/VLImplicitModel.cpp \
+../src/csv.cpp 
 
 OBJS += \
 ./src/FeatureObject.o \
@@ -23,7 +24,8 @@ OBJS += \
 ./src/MFVB.o \
 ./src/RecEngine.o \
 ./src/UserObject.o \
-./src/VLImplicitModel.o 
+./src/VLImplicitModel.o \
+./src/csv.o 
 
 CPP_DEPS += \
 ./src/FeatureObject.d \
@@ -34,7 +36,8 @@ CPP_DEPS += \
 ./src/MFVB.d \
 ./src/RecEngine.d \
 ./src/UserObject.d \
-./src/VLImplicitModel.d 
+./src/VLImplicitModel.d \
+./src/csv.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

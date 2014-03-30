@@ -6,7 +6,7 @@
  */
 
 #include "MFImplicitModel.h"
-#include "csv.h"
+#include "../data/csv.h"
 #include <math.h>
 #include <fstream>
 #include <boost/algorithm/string.hpp>

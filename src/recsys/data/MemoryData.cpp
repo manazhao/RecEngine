@@ -8,7 +8,7 @@
 #include "MemoryData.h"
 #include <algorithm>
 #include <string>
-#include "../../csv.h"
+#include "csv.h"
 #include <boost/lexical_cast.hpp>
 #include "../data/json/elements.h"
 #include "../data/json/reader.h"

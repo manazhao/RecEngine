@@ -11,7 +11,7 @@
 #include <string>
 #include "MFImplicitModel.h"
 #include "VLImplicitModel.h"
-#include "csv.h"
+#include "recsys/data/csv.h"
 #include "recsys/data/SQL.h"
 #include "recsys/data/Entity.h"
 #include "recsys/data/UserRecommendation.h"

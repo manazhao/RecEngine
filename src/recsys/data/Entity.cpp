@@ -118,7 +118,6 @@ void Entity::write() {
 		read();
 		prepared_statement_ptr& updateStmtPtr =
 				Entity::m_sharedData.m_updateStmtPtr;
-		bool isNull;
 		updateStmtPtr->setInt(1, m_mapped_id);
 		updateStmtPtr->setString(2, entityValue);
 		updateStmtPtr->setString(3, m_id);

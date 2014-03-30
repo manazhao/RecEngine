@@ -8,6 +8,7 @@
 #ifndef SQLSERIALIZE_H_
 #define SQLSERIALIZE_H_
 
+#include <boost/shared_ptr.hpp>
 #include <string>
 #include <map>
 #include <cppconn/driver.h>
@@ -16,6 +17,7 @@
 #include <cppconn/exception.h>
 using namespace sql;
 using namespace std;
+using namespace boost;
 
 namespace recsys {
 
@@ -33,21 +35,26 @@ protected:
 	string m_userName;
 	string m_password;
 	string m_dbName;
+	string m_conf_file;
 	Driver* m_driver;
 	Connection* m_connection;
 	Statement* m_statement;
 protected:
-	SQL();
+	SQL(string const& confFile);
 	SQL(SQL const& rhs);
 	SQL operator=(SQL const& rhs);
 	bool _initConnection();
-	void _createEntityTables();
+	bool _load_from_conf();
+	void _create_entity_tables();
+	void _set_schema(string const& schema);
 public:
-	static SQL& ref() {
-		static SQL instance;
-		return instance;
+	static SQL& ref(string const& confFile = "/home/manazhao/git/RecEngine/src/recsys/data/mysql.conf") {
+		static shared_ptr<SQL> instance_ptr;
+		if(!instance_ptr.get() || confFile != instance_ptr->m_conf_file){
+			instance_ptr.reset(new SQL(confFile));
+		}
+		return *instance_ptr;
 	}
-	void setSchema(string const& schema);
 	bool execute(string const& stmtStr);
 	virtual ~SQL();
 };
