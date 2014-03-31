@@ -59,21 +59,31 @@ Entity::SharedData Entity::init_shared_data() {
 
 Entity::SharedData Entity::m_sharedData = Entity::init_shared_data();
 
-Entity::entity_ptr Entity::query_by_nameAndType(string const& name, ushort const& type, bool memoryMode = true){
-	Entity ent(name,type,memoryMode);
+Entity::type_entity_map Entity::m_type_entity_map;
+/// store the maximum id for a given entity type
+Entity::type_max_id_map Entity::m_type_max_id_map;
+/// entity name to internal id lookup table
+Entity::type_name_id_map Entity::m_type_name_id_map;
+/// internal id to entity name lookup
+Entity::type_id_name_map Entity::m_type_id_name_map;
+
+
+Entity::entity_ptr Entity::query_by_nameAndType(string const& name, ushort const& type, bool memoryMode){
+	Entity ent(name,type,js::Object(),memoryMode);
+	entity_ptr result;
 	if(ent.exist()){
-		ent.read();
+		ent._retrieve();
 		if(memoryMode){
-			return m_type_entity_map[type][ent.m_mapped_id];
+			result = m_type_entity_map[type][ent.m_mapped_id];
+		}else{
+			/// we have to create one
+			result = entity_ptr(new Entity(ent));
 		}
-		/// we have to create one
-		return entity_ptr(new Entity(this));
 	}
-	/// null pointer returned
-	return entity_ptr();
+	return result;
 }
 
-string json_to_string(js::Object& jsObj){
+string json_to_string(js::Object const& jsObj){
 	/// encode the json object to string
 	stringstream ss;
 	js::Writer::Write(jsObj,ss);
@@ -84,7 +94,7 @@ js::Object string_to_json(string const& jsonStr){
 	stringstream ss;
 	ss << jsonStr;
 	js::Object obj;
-	js::Reader::Read(obj,jsonStr);
+	js::Reader::Read(obj,ss);
 	return obj;
 }
 
@@ -108,21 +118,29 @@ unsigned int Entity::_get_max_mapped_id(bool &isNull) {
 	}
 }
 
-bool Entity::exist() {
+bool Entity::exist(size_t& mappedId) {
+	bool existFlag;
 	if (!m_memory_mode) {
 		prepared_statement_ptr& queryStmtPtr =
 				Entity::m_sharedData.m_queryStmtPtr;
 		queryStmtPtr->setString(1, m_id);
 		queryStmtPtr->setInt(2, m_type);
 		auto_ptr<ResultSet> rs(queryStmtPtr->executeQuery());
-		return rs->next();
+		existFlag =  rs->next();
+		if(existFlag){
+			mappedId = rs->getInt("mapped_id");
+		}
 	} else {
-		return !(m_type_name_id_map[m_type].find(m_id)
-				== m_type_name_id_map.end());
+		existFlag = !(m_type_name_id_map[m_type].find(m_id)
+				== m_type_name_id_map[m_type].end());
+		if(existFlag){
+			mappedId = m_type_name_id_map[m_type][m_id];
+		}
 	}
+	return existFlag;
 }
 
-void Entity::read() {
+void Entity::_retrieve() {
 	string jsonStr;
 	if(!m_memory_mode){
 		prepared_statement_ptr& queryStmtPtr = Entity::m_sharedData.m_queryStmtPtr;
@@ -136,10 +154,10 @@ void Entity::read() {
 		}
 	}else{
 		/// try to retrieve from the map
-		if(m_type_name_id_map[m_type].find(m_id) != m_type_name_id_map.end()){
+		if(m_type_name_id_map[m_type].find(m_id) != m_type_name_id_map[m_type].end()){
 			m_mapped_id = m_type_name_id_map[m_type][m_id];
 			/// retrieve the json string from the entity map
-			jsonStr = m_type_entity_map[m_type].find(m_mapped_id);
+			*this = *(m_type_entity_map[m_type][m_mapped_id]);
 		}
 	}
 	if(!jsonStr.empty()){
@@ -147,21 +165,24 @@ void Entity::read() {
 	}
 }
 
-void Entity::write() {
+Entity::entity_ptr Entity::index_if_not_exist() {
+	entity_ptr resultEntityPtr;
 	if (exist()) {
 		/// just update an existing entity
-		read();
+		_retrieve();
 		if(m_memory_mode){
+			resultEntityPtr = m_type_entity_map[m_type][m_mapped_id];
 			/// replace the entity
-			m_type_entity_map[m_type][m_mapped_id] = shared_ptr<Entity>(this);
+			*resultEntityPtr = *this;
 		}else{
 			prepared_statement_ptr& updateStmtPtr =
 					Entity::m_sharedData.m_updateStmtPtr;
 			updateStmtPtr->setInt(1, m_mapped_id);
-			updateStmtPtr->setString(2, jsonStr);
+			updateStmtPtr->setString(2, json_to_string(m_json_value));
 			updateStmtPtr->setString(3, m_id);
 			updateStmtPtr->setInt(4, m_type);
 			updateStmtPtr->executeUpdate();
+			resultEntityPtr  = entity_ptr(new Entity(*this));
 		}
 
 	} else {
@@ -171,9 +192,10 @@ void Entity::write() {
 			m_mapped_id++;
 		}
 		if(m_memory_mode){
-			m_type_name_id_map[m_id] = m_mapped_id;
-			m_type_id_name_map[m_mapped_id] = m_id;
-			m_type_entity_map[m_mapped_id] = shared_ptr<Entity>(new Entity(*this));
+			m_type_name_id_map[m_type][m_id] = m_mapped_id;
+			m_type_id_name_map[m_type][m_mapped_id] = m_id;
+			resultEntityPtr = entity_ptr(new Entity(*this));
+			m_type_entity_map[m_type][m_mapped_id] = resultEntityPtr;
 		}else{
 			prepared_statement_ptr& insertStmtPtr =
 					Entity::m_sharedData.m_insertStmtPtr;
@@ -182,8 +204,10 @@ void Entity::write() {
 			insertStmtPtr->setInt(3, m_type);
 			insertStmtPtr->setString(4, json_to_string(m_json_value));
 			insertStmtPtr->execute();
+			resultEntityPtr  = entity_ptr(new Entity(*this));
 		}
 	}
+	return resultEntityPtr;
 }
 
 ostream& operator<<(ostream& oss, Entity const& entity) {
@@ -192,32 +216,6 @@ ostream& operator<<(ostream& oss, Entity const& entity) {
 }
 
 
-void test_entity() {
-	Entity entity("zq", Entity::ENT_USER);
-	entity.attachFeature("age", Feature::NUMERICAL, "30");
-	entity.attachFeature("gender", Feature::CATEGORY, "1");
-	entity.read();
-	entity.attachFeature("occupation", Feature::CATEGORY, "student");
-	entity.write();
-	entity = Entity("someone", Entity::ENT_USER);
-	entity.attachFeature("age", Feature::NUMERICAL, "20");
-	entity.attachFeature("gender", Feature::CATEGORY, "0");
-	entity.attachFeature("occupation", Feature::CATEGORY, "engineer");
-	entity.write();
-	entity = Entity("xbox", Entity::ENT_ITEM);
-	entity.attachFeature("merchant", Feature::CATEGORY, "ms");
-	entity.attachFeature("price", Feature::NUMERICAL, "499");
-	entity.write();
-	entity = Entity("0x59373", Entity::ENT_ITEM);
-	entity.attachFeature("merchant", Feature::CATEGORY, "amazon");
-	entity.attachFeature("price", Feature::NUMERICAL, "79.99");
-	entity.write();
-	entity = Entity("0xdfdfdf", Entity::ENT_ITEM);
-	entity.attachFeature("merchant", Feature::CATEGORY, "amazon");
-	entity.attachFeature("price", Feature::NUMERICAL, "79.99");
-	entity.write();
-	cout << entity;
-}
 
 }
 

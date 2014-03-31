@@ -24,6 +24,7 @@ C_UPPER_DEPS :=
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 src/recsys/thrift/gen-cpp \
+src/recsys \
 src/recsys/data \
 src/recsys/algorithm \
 

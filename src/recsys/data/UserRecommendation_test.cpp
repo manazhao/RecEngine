@@ -14,7 +14,7 @@ void test_user_recommendation(){
 	UserRecommendation uRec1("qizhao");
 	uRec1.add_item_recommendation(UserRecommendation::Recommendation("kinnect",4.3));
 	uRec1.add_item_recommendation(UserRecommendation::Recommendation("machinelearning",5.0));
-	uRec1.write();
+	uRec1.index_if_not_exist();
 #endif
 #ifdef TEST_READ
 	vector<UserRecommendation> recs = UserRecommendation::query_by_user("qizhao");

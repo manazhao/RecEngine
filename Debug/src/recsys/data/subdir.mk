@@ -5,6 +5,8 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/recsys/data/Entity.cpp \
+../src/recsys/data/EntityInteraction.cpp \
+../src/recsys/data/EntityInteraction_test.cpp \
 ../src/recsys/data/MD5.cpp \
 ../src/recsys/data/MD5_test.cpp \
 ../src/recsys/data/MemoryData.cpp \
@@ -18,6 +20,8 @@ CPP_SRCS += \
 
 OBJS += \
 ./src/recsys/data/Entity.o \
+./src/recsys/data/EntityInteraction.o \
+./src/recsys/data/EntityInteraction_test.o \
 ./src/recsys/data/MD5.o \
 ./src/recsys/data/MD5_test.o \
 ./src/recsys/data/MemoryData.o \
@@ -31,6 +35,8 @@ OBJS += \
 
 CPP_DEPS += \
 ./src/recsys/data/Entity.d \
+./src/recsys/data/EntityInteraction.d \
+./src/recsys/data/EntityInteraction_test.d \
 ./src/recsys/data/MD5.d \
 ./src/recsys/data/MD5_test.d \
 ./src/recsys/data/MemoryData.d \

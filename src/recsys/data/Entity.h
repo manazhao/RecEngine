@@ -16,6 +16,7 @@
 #include <recsys/data/json/reader.h>
 #include <recsys/data/json/writer.h>
 #include <cppconn/prepared_statement.h>
+#include <boost/lexical_cast.hpp>
 #include "SQL.h"
 
 using namespace std;
@@ -26,17 +27,41 @@ namespace js=json;
 
 namespace recsys {
 
-string json_to_string(js::Object& jsObj);
+string json_to_string(js::Object const& jsObj);
 js::Object string_to_json(string const& jsonStr);
+
+struct JSObjectWrapper{
+	js::Object m_obj;
+	template <class T>
+	JSObjectWrapper& add(string const &key, T const& val){
+		/// cast to string anyway
+		string strVal = lexical_cast<string>(val);
+		m_obj[key] = js::String(strVal);
+		return *this;
+	}
+	operator js::Object (){
+		return m_obj;
+	}
+	template<class T>
+	T operator[](string key) const{
+		js::String val = m_obj[key];
+		return lexical_cast<T>(val.Value());
+	}
+
+
+};
+
+enum FEAT_TYPE {FEAT_CAT,FEAT_REAL};
 
 typedef shared_ptr<PreparedStatement> prepared_statement_ptr;
 typedef unsigned short ushort;
 
 class Entity {
 	friend ostream& operator<<(ostream&, Entity const&);
+	friend class EntityInteraction;
 public:
 	enum ENTITY_TYPE {
-		ENT_DEFAULT, ENT_USER, ENT_ITEM
+		ENT_DEFAULT, ENT_USER, ENT_ITEM,ENT_FEATURE
 	};
 public:
 	struct SharedData {
@@ -83,9 +108,10 @@ protected:
 	js::Object m_json_value;
 protected:
 	unsigned int _get_max_mapped_id(bool &exist);
+	void _retrieve();
 public:
-	Entity(string const& id = "", size_t const& type = ENT_DEFAULT, bool memoryMode = true) :m_memory_mode(memoryMode),
-			m_id(id),m_mapped_id(0),m_type(type) {
+	Entity(string const& id = "", size_t const& type = ENT_DEFAULT, js::Object const& val = js::Object(), bool memoryMode = true) :m_memory_mode(memoryMode),
+			m_id(id),m_mapped_id(0),m_type(type),m_json_value(val) {
 	}
 	inline string get_id() {
 		return m_id;
@@ -93,9 +119,16 @@ public:
 	inline size_t get_mapped_id(){
 		return m_mapped_id;
 	}
-	bool exist();
-	void write();
-	void read();
+	bool exist(size_t& mappedId);
+	bool exist(){
+		size_t mappedId;
+		return exist(mappedId);
+	}
+	static void get_mapped_id(string const& name, ushort const& type, bool& exist, size_t& mappedId, bool memoryMode = true){
+		Entity ent(name,type,js::Object(),memoryMode);
+		exist = ent.exist(mappedId);
+	}
+	entity_ptr index_if_not_exist();
 	virtual ~Entity() {
 	}
 public:
@@ -105,12 +138,8 @@ public:
 };
 
 ostream& operator<<(ostream& oss, Entity const&);
-enum FEATURE_TYPE {
-	NUMERICAL=1, CATEGORY=2, ORDINAL=3
-};
 
 
-void test_entity();
 
 }
 
