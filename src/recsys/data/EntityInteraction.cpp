@@ -21,7 +21,7 @@ EntityInteraction::SharedData EntityInteraction::init_shared_data() {
 				createTbSql =
 						"CREATE TABLE IF NOT EXISTS entity_interaction ("
 						"from_id INT NOT NULL, from_type TINYINT NOT NULL, to_id INT NOT NULL, to_type TINYINT NOT NULL,"
-						"INDEX(from_id,from_type),"
+						"PRIMARY KEY(from_id,from_type,to_id,to_type),"
 						"value TEXT)";
 		SQL_INST.m_statement->execute(createTbSql);
 		/// create the PreparedStatement for entity insertion
@@ -72,34 +72,45 @@ void EntityInteraction::add_to_entity(string const& id, ushort type,
 	m_to_entity = _index_entity(id, type, val);
 }
 
-EntityInteraction::entity_interact_vec EntityInteraction::query(
+EntityInteraction::entity_interact_vec_ptr EntityInteraction::query(
 		string const& entityName, ushort const& entityType, bool memoryMode, bool isFrom) {
 	// get the mapped id given the entityName and entityType
-	Entity::entity_ptr entityPtr = Entity::query_by_nameAndType(entityName,
-			entityType, memoryMode);
-	return query(entityPtr->m_mapped_id, entityType,memoryMode);
+	entity_interact_vec_ptr resultVecPtr;
+	Entity entity(entityName,entityType,js::Object(),memoryMode);
+	if(entity.retrieve()){
+		resultVecPtr =  query(entity.m_mapped_id, entity.m_type, memoryMode, isFrom);
+	}
+	return resultVecPtr;
 }
 
-EntityInteraction::entity_interact_vec EntityInteraction::query(
+EntityInteraction::entity_interact_vec_ptr EntityInteraction::query(
 		size_t const& entityId, ushort const& entityType, bool memoryMode, bool isFrom) {
-	static entity_interact_vec empty_vec;
+	entity_interact_vec_ptr resultVecPtr;
 	if(memoryMode){
-		if (m_type_entity_interact_map[entityType].find(entityId)
-				!= m_type_entity_interact_map[entityType].end()) {
-			return m_type_entity_interact_map[entityType][entityId];
-		}else{
-			return empty_vec;
-		}
+		if(m_type_entity_interact_map[entityType].find(entityId) != m_type_entity_interact_map[entityType].end())
+			resultVecPtr = m_type_entity_interact_map[entityType][entityId];
 	}else{
 		prepared_statement_ptr queryStmtPtr = (isFrom ? m_sharedData.m_queryByFromStmtPtr : m_sharedData.m_queryByToStmtPtr);
 		queryStmtPtr->setInt64(1,entityId);
 		queryStmtPtr->setInt(2,entityType);
 		auto_ptr<ResultSet> rs(queryStmtPtr->executeQuery());
+		resultVecPtr.reset(new entity_interact_vec());
 		while(rs->next()){
-
+			ushort type = rs->getInt("type");
+			string valStr = rs->getString("val");
+			entity_interact_ptr tmpPtr(new EntityInteraction(type,string_to_json(valStr),memoryMode));
+			size_t fromId = rs->getInt64("from_id");
+			size_t toId = rs->getInt64("to_id");
+			ushort fromType = rs->getInt("from_type");
+			ushort toType = rs->getInt("to_type");
+			tmpPtr->m_from_entity = Entity::entity_ptr(new Entity(fromId,fromType,js::Object(),memoryMode));
+			tmpPtr->m_from_entity->retrieve();
+			tmpPtr->m_to_entity = Entity::entity_ptr(new Entity(toId,toType,js::Object(),memoryMode));
+			tmpPtr->m_to_entity->retrieve();
+			resultVecPtr->push_back(tmpPtr);
 		}
 	}
-	return empty_vec;
+	return resultVecPtr;
 }
 
 EntityInteraction::entity_interact_ptr EntityInteraction::index_if_not_exist() {

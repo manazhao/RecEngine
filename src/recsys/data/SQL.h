@@ -30,6 +30,7 @@ class SQL {
 	friend class Entity;
 	friend class UserRecommendation;
 	friend class UserActivity;
+	friend class EntityInteraction;
 protected:
 	string m_host;
 	string m_userName;

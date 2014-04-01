@@ -67,6 +67,7 @@ public:
 	struct SharedData {
 		prepared_statement_ptr m_insertStmtPtr;
 		prepared_statement_ptr m_queryStmtPtr;
+		prepared_statement_ptr m_queryByIdStmtPtr;
 		prepared_statement_ptr m_updateStmtPtr;
 		prepared_statement_ptr m_maxIdStmtPtr;
 	};
@@ -101,40 +102,33 @@ protected:
 	bool m_memory_mode;
 	string m_id;
 	/// an unsigned integer id used internally.
-	unsigned int m_mapped_id;
+	size_t m_mapped_id;
 	size_t m_type;
 	/// use a json object to hold all information about the entity
 	/// e.g. attributes(features) about a user or an item
 	js::Object m_json_value;
 protected:
 	unsigned int _get_max_mapped_id(bool &exist);
-	void _retrieve();
 public:
 	Entity(string const& id = "", size_t const& type = ENT_DEFAULT, js::Object const& val = js::Object(), bool memoryMode = true) :m_memory_mode(memoryMode),
 			m_id(id),m_mapped_id(0),m_type(type),m_json_value(val) {
 	}
+	Entity(size_t const& id, ushort const& type, js::Object const& val = js::Object(), bool memoryMode = true);
 	inline string get_id() {
 		return m_id;
 	}
 	inline size_t get_mapped_id(){
 		return m_mapped_id;
 	}
-	bool exist(size_t& mappedId);
-	bool exist(){
-		size_t mappedId;
-		return exist(mappedId);
-	}
-	static void get_mapped_id(string const& name, ushort const& type, bool& exist, size_t& mappedId, bool memoryMode = true){
-		Entity ent(name,type,js::Object(),memoryMode);
-		exist = ent.exist(mappedId);
-	}
+
+	bool retrieve();
+	static void get_mapped_id(string const& name, ushort const& type, bool& exist, size_t& mappedId, bool memoryMode = true);
 	entity_ptr index_if_not_exist();
 	virtual ~Entity() {
 	}
 public:
 	static type_name_map init_type_name_map();
 	static SharedData init_shared_data();
-	static entity_ptr query_by_nameAndType(string const& name, ushort const& type, bool memory_mode = true);
 };
 
 ostream& operator<<(ostream& oss, Entity const&);
