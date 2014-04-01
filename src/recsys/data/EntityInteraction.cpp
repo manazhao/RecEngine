@@ -163,9 +163,9 @@ EntityInteraction::~EntityInteraction() {
 }
 
 ostream& operator<<(ostream& oss, EntityInteraction const& rhs) {
-	oss << rhs.m_from_entity->m_id << "-" << rhs.m_from_entity->m_mapped_id
-			<< "->" << rhs.m_to_entity->m_id << "-"
-			<< rhs.m_to_entity->m_mapped_id << ", type:" << rhs.m_type
+	oss << "Edge: [" << rhs.m_from_entity->m_id << "-" << rhs.m_from_entity->m_mapped_id << "]"
+			<< " -> " << "[" << rhs.m_to_entity->m_id << "-"
+			<< rhs.m_to_entity->m_mapped_id << "], type:" << rhs.m_type
 			<< ", value:" << json_to_string(rhs.m_val);
 	return oss;
 }

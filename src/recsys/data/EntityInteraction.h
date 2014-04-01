@@ -60,6 +60,12 @@ protected:
 	entity_interact_vec_ptr _create_vec_if_not_exist(ushort const& entType, size_t const& entId);
 public:
 	EntityInteraction(ushort const& type, js::Object const& val, bool memoryMode = true);
+	inline void set_from_entity(Entity::entity_ptr const& fromEntityPtr){
+		m_from_entity = fromEntityPtr;
+	}
+	inline void set_to_entity(Entity::entity_ptr const& toEntityPtr){
+		m_to_entity = toEntityPtr;
+	}
 	void add_from_entity(string const& id, ushort type, js::Object const& val = js::Object());
 	void add_to_entity(string const& id, ushort type, js::Object const& val = js::Object());
 	entity_interact_ptr index_if_not_exist();
