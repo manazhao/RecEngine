@@ -11,6 +11,5 @@ using namespace recsys;
 
 int main(int argc, char** argv){
 	test_entity_interaction();
-
 	return 0;
 }

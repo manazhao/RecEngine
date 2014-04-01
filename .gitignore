@@ -18,3 +18,4 @@
 *.out
 tmp*
 *.conf
+/Debug

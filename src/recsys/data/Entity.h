@@ -56,7 +56,10 @@ enum FEAT_TYPE {FEAT_CAT,FEAT_REAL};
 typedef shared_ptr<PreparedStatement> prepared_statement_ptr;
 typedef unsigned short ushort;
 
+class EntityInteraction;
+
 class Entity {
+	friend ostream& operator<<(ostream&, EntityInteraction const&);
 	friend ostream& operator<<(ostream&, Entity const&);
 	friend class EntityInteraction;
 public:

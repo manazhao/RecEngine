@@ -15,6 +15,7 @@ using namespace std;
 namespace recsys {
 
 class EntityInteraction {
+	friend ostream& operator<<(ostream& oss, EntityInteraction const& rhs);
 public:
 	enum INTERACTION_TYPE{
 		VIEW_ITEM = 0,
@@ -56,6 +57,7 @@ protected:
 	static type_entity_interact_map m_type_entity_interact_map;
 protected:
 	Entity::entity_ptr _index_entity(string const& id, ushort type, js::Object const& val);
+	entity_interact_vec_ptr _create_vec_if_not_exist(ushort const& entType, size_t const& entId);
 public:
 	EntityInteraction(ushort const& type, js::Object const& val, bool memoryMode = true);
 	void add_from_entity(string const& id, ushort type, js::Object const& val = js::Object());
@@ -68,6 +70,7 @@ public:
 	static entity_interact_vec_ptr query(size_t const& entityId, ushort const& entityType, bool memoryMode = true, bool isFrom = true);
 };
 
+ostream& operator<<(ostream& oss, EntityInteraction const& rhs);
 void test_entity_interaction();
 
 }
