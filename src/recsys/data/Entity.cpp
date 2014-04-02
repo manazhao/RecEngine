@@ -5,6 +5,7 @@
  *      Author: qzhao2
  */
 #include "Entity.h"
+#include "AppConfig.h"
 #include <memory>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
@@ -27,7 +28,7 @@ Entity::SharedData Entity::init_shared_data() {
 	static bool inited = false;
 	if (!inited) {
 		/// create the entity table
-		SQL& SQL_INST = SQL::ref();
+		SQL& SQL_INST = SQL::ref(AppConfig::ref().m_sql_conf);
 		string
 				createTbSql =
 						"CREATE TABLE IF NOT EXISTS entity (id VARCHAR(255) NOT NULL, mapped_id  INT NOT NULL, type TINYINT(1) NOT NULL, value TEXT, INDEX (mapped_id), PRIMARY KEY(id,type) )";
@@ -53,12 +54,13 @@ Entity::SharedData Entity::init_shared_data() {
 						SQL_INST.m_connection->prepareStatement(
 								"SELECT MAX(mapped_id) AS max_id FROM entity WHERE type = ?"));
 		inited = true;
+		Entity::m_sharedData = sharedData;
 		return sharedData;
 	}
 	return Entity::m_sharedData;
 }
 
-Entity::SharedData Entity::m_sharedData = Entity::init_shared_data();
+Entity::SharedData Entity::m_sharedData;
 
 Entity::type_entity_map Entity::m_type_entity_map;
 /// store the maximum id for a given entity type

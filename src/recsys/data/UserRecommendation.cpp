@@ -6,14 +6,15 @@
  */
 
 #include "UserRecommendation.h"
+#include "AppConfig.h"
 
 namespace recsys {
 
-UserRecommendation::SharedData UserRecommendation::initSharedData() {
+UserRecommendation::SharedData UserRecommendation::init_shared_data() {
 	static bool inited = false;
 	if (!inited) {
 		/// create the entity table
-		SQL& SQL_INST = SQL::ref();
+		SQL& SQL_INST = SQL::ref(AppConfig::ref().m_sql_conf);
 		string createTbSql =
 				"CREATE TABLE IF NOT EXISTS user_recommendation (id INT AUTO_INCREMENT PRIMARY KEY, user_id VARCHAR(255) NOT NULL, rec_list TEXT, time DATETIME NOT NULL)";
 		SQL_INST.m_statement->execute(createTbSql);
@@ -27,13 +28,13 @@ UserRecommendation::SharedData UserRecommendation::initSharedData() {
 				SQL_INST.m_connection->prepareStatement(
 						"SELECT * FROM user_recommendation WHERE user_id = ?"));
 		inited = true;
+		UserRecommendation::m_sharedData = sharedData;
 		return sharedData;
 	}
 	return UserRecommendation::m_sharedData;
 }
 
-UserRecommendation::SharedData UserRecommendation::m_sharedData =
-		UserRecommendation::initSharedData();
+UserRecommendation::SharedData UserRecommendation::m_sharedData;
 
 void UserRecommendation::add_item_recommendation(Recommendation const& rec) {
 	m_rec_map["i"].push_back(rec);

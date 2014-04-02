@@ -6,6 +6,7 @@
  */
 
 #include "EntityInteraction.h"
+#include "AppConfig.h"
 
 namespace recsys {
 
@@ -15,7 +16,7 @@ EntityInteraction::SharedData EntityInteraction::init_shared_data() {
 	static bool inited = false;
 	if (!inited) {
 		/// create the entity table
-		SQL& SQL_INST = SQL::ref();
+		SQL& SQL_INST = SQL::ref(AppConfig::ref().m_sql_conf);
 		string createTbSql =
 				"CREATE TABLE IF NOT EXISTS entity_interaction ("
 						"from_id INT NOT NULL, from_type TINYINT NOT NULL, to_id INT NOT NULL, to_type TINYINT NOT NULL,"
@@ -37,13 +38,13 @@ EntityInteraction::SharedData EntityInteraction::init_shared_data() {
 						SQL_INST.m_connection->prepareStatement(
 								"SELECT * FROM entity_interaction WHERE to_id = ? AND to_type = ?"));
 		inited = true;
+		EntityInteraction::m_sharedData = sharedData;
 		return sharedData;
 	}
 	return EntityInteraction::m_sharedData;
 }
 
-EntityInteraction::SharedData EntityInteraction::m_sharedData =
-		EntityInteraction::init_shared_data();
+EntityInteraction::SharedData EntityInteraction::m_sharedData;
 
 EntityInteraction::EntityInteraction(ushort const& type, js::Object const& val,
 		bool memoryMode) :

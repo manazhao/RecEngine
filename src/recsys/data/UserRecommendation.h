@@ -62,7 +62,7 @@ public:
 	UserRecommendation(string const& id = string(), string const& recList = string()) :
 			m_user_id(id), m_rec_list(recList) {
 	}
-	static SharedData initSharedData();
+	static SharedData init_shared_data();
 	void add_item_recommendation(Recommendation const& rec);
 	bool exist();
 	void write();

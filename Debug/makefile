@@ -8,11 +8,11 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include subdir.mk
 -include src/recsys/thrift/gen-cpp/subdir.mk
--include src/recsys/subdir.mk
 -include src/recsys/data/subdir.mk
 -include src/recsys/algorithm/subdir.mk
+-include src/recsys/subdir.mk
+-include subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -47,7 +47,7 @@ all: RecEngine
 RecEngine: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++  -o"RecEngine" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++  -o "RecEngine" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

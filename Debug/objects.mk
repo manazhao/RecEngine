@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -larmadillo -lthrift -lthriftz -lmysqlcppconn -lboost_system -lboost_filesystem
+LIBS := -larmadillo -lboost_program_options -lthrift -lthriftz -lmysqlcppconn -lboost_system -lboost_filesystem
 

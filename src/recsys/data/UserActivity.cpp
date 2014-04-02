@@ -7,7 +7,7 @@
 
 #include "UserActivity.h"
 #include <ctime>
-
+#include "AppConfig.h"
 
 namespace recsys {
 
@@ -15,7 +15,7 @@ UserActivity::SharedData UserActivity::initSharedData(){
 	static bool inited = false;
 	if (!inited) {
 		/// create the entity table
-		SQL& SQL_INST = SQL::ref();
+		SQL& SQL_INST = SQL::ref(AppConfig::ref().m_sql_conf);
 		string createTbSql =
 				"CREATE TABLE IF NOT EXISTS user_activity (id INT AUTO_INCREMENT PRIMARY KEY, user_id VARCHAR(255) NOT NULL, type TINYINT NOT NULL, context TEXT, time DATETIME)";
 		SQL_INST.m_statement->execute(createTbSql);
@@ -29,12 +29,13 @@ UserActivity::SharedData UserActivity::initSharedData(){
 				SQL_INST.m_connection->prepareStatement(
 						"SELECT user_id,type,context,time FROM user_activity WHERE user_id = ?"));
 		inited = true;
+		UserActivity::m_sharedData = sharedData;
 		return sharedData;
 	}
 	return UserActivity::m_sharedData;
 }
 
-UserActivity::SharedData UserActivity::m_sharedData = UserActivity::initSharedData();
+UserActivity::SharedData UserActivity::m_sharedData;
 
 bool UserActivity::exist(){
 	prepared_statement_ptr& queryStmt = m_sharedData.m_queryByUserStmtPtr;

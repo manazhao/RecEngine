@@ -22,10 +22,10 @@ SQL::SQL(string const& confFile) :m_conf_file(confFile)
 		,m_driver(
 				NULL), m_connection(NULL), m_statement(NULL) {
 	// TODO Auto-generated constructor stub
+	cout << "---setup mysql database" << endl;
 	assert(_load_from_conf());
-	cout << "-----------initialize database connection-----------" << endl;
-	assert(_initConnection());
-	cout << "-----------initialization done!-----------" << endl;
+	assert(_init_connection());
+	cout << "---database connection goes well" << endl;
 }
 
 bool SQL::_load_from_conf(){
@@ -64,7 +64,7 @@ void SQL::_set_schema(string const& schema){
 	m_statement->execute("use " + schema);
 }
 
-bool SQL::_initConnection(){
+bool SQL::_init_connection(){
 	try{
 		m_driver = get_driver_instance();
 	}catch(sql::SQLException& e){
@@ -72,6 +72,7 @@ bool SQL::_initConnection(){
 		return false;
 	}
 	try{
+		cout << "connect to " << m_host << " as user:" << m_userName << endl;
 		m_connection = m_driver->connect(m_host,m_userName,m_password);
 	}catch(SQLException& e){
 		cerr << "Could not connect to the database with the provided credential. Error message:" << e.what() << endl;

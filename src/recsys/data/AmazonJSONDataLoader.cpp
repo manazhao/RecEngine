@@ -46,6 +46,7 @@ void AmazonJSONDataLoader::load_author_profile(string const& fileName){
 	/// open the file and read
 	string line;
 	cout << "start to load user profile..." << endl;
+	timer t;
 	while(std::getline(fs,line)){
 		stringstream ss;
 		ss << line;
@@ -77,15 +78,9 @@ void AmazonJSONDataLoader::load_author_profile(string const& fileName){
 			tmpEI.set_to_entity(tmpEntityPtr);
 			tmpEI.index_if_not_exist();
 		}
-//		size_t authorMappedId = authorEntityPtr->get_mapped_id();
-//		EntityInteraction::entity_interact_vec_ptr authorFeatVec = EntityInteraction::query(authorMappedId,Entity::ENT_USER);
-//		if(authorFeatVec){
-//			for(EntityInteraction::entity_interact_vec::iterator iter = authorFeatVec->begin(); iter < authorFeatVec->end(); ++iter){
-//				cout << **iter << endl;
-//			}
-//		}
 	}
 	fs.close();
+	cout << "time elapsed: " << t.elapsed() << endl;
 	m_author_inited = true;
 }
 
@@ -133,13 +128,13 @@ void AmazonJSONDataLoader::load_item_profile(string const& fileName){
 		}
 	}
 	fs.close();
-	cout << "time elapsed for reading item json:" << t.elapsed() << endl;
+	cout << "time elapsed:" << t.elapsed() << endl;
 	m_item_inited = true;
 }
 
 void AmazonJSONDataLoader::load_rating_file(string const& fileName){
 	/// make sure both author profile and item profile are well initialized prior to loading the ratings
-//	assert(m_author_inited && m_item_inited);
+	assert(m_author_inited && m_item_inited);
 	fstream fs(fileName.c_str());
 	assert(fs.good());
 	/// open the file and read
@@ -161,7 +156,7 @@ void AmazonJSONDataLoader::load_rating_file(string const& fileName){
 		ei.index_if_not_exist();
 	}
 	fs.close();
-	cout << "time loading ratings:" << t.elapsed() << endl;
+	cout << "time elapsed:" << t.elapsed() << endl;
 }
 
 AmazonJSONDataLoader::AmazonJSONDataLoader():m_author_inited(false),m_item_inited(false){

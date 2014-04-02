@@ -44,12 +44,15 @@ protected:
 	SQL(string const& confFile);
 	SQL(SQL const& rhs);
 	SQL operator=(SQL const& rhs);
-	bool _initConnection();
+	bool _init_connection();
 	bool _load_from_conf();
 	void _create_entity_tables();
 	void _set_schema(string const& schema);
 public:
-	static SQL& ref(string const& confFile = "/home/manazhao/git/RecEngine/src/recsys/data/mysql.conf") {
+	static SQL& init_instance(string const& confFile){
+		return ref(confFile);
+	}
+	static SQL& ref(string const& confFile) {
 		static shared_ptr<SQL> instance_ptr;
 		if(!instance_ptr.get() || confFile != instance_ptr->m_conf_file){
 			instance_ptr.reset(new SQL(confFile));
