@@ -21,7 +21,6 @@ Entity::type_name_map Entity::init_type_name_map() {
 	typeNameMap[ENT_ITEM] = "item";
 	return typeNameMap;
 }
-
 Entity::type_name_map Entity::m_typeNameMap = Entity::init_type_name_map();
 
 Entity::SharedData Entity::init_shared_data() {
@@ -53,7 +52,6 @@ Entity::SharedData Entity::init_shared_data() {
 				= prepared_statement_ptr(
 						SQL_INST.m_connection->prepareStatement(
 								"SELECT MAX(mapped_id) AS max_id FROM entity WHERE type = ?"));
-
 		inited = true;
 		return sharedData;
 	}
@@ -72,10 +70,9 @@ Entity::type_id_name_map Entity::m_type_id_name_map;
 
 Entity::Entity(size_t const& id, ushort const& type, js::Object const& val,
 		bool memoryMode) :m_memory_mode(memoryMode),
-	m_mapped_id(id), m_type(type), m_json_value(val)  {
+	m_mapped_id(id), m_type(type), m_value(val)  {
 
 }
-
 
 string json_to_string(js::Object const& jsObj) {
 	/// encode the json object to string
@@ -130,7 +127,7 @@ bool Entity::retrieve() {
 				/// get the mapped id
 				m_mapped_id = rs->getInt("mapped_id");
 				jsonStr = rs->getString("value");
-				m_json_value = string_to_json(jsonStr);
+				m_value = string_to_json(jsonStr);
 				found = true;
 			}
 		}else{
@@ -141,7 +138,7 @@ bool Entity::retrieve() {
 			if(rs->next()){
 				m_id = rs->getString("id");
 				jsonStr = rs->getString("value");
-				m_json_value = string_to_json(jsonStr);
+				m_value = string_to_json(jsonStr);
 				found = true;
 			}
 		}
@@ -153,6 +150,8 @@ bool Entity::retrieve() {
 					!= m_type_name_id_map[m_type].end()) {
 				m_mapped_id = m_type_name_id_map[m_type][m_id];
 				/// retrieve the json string from the entity map
+//				cout << "original:" << *this << endl;
+//				cout << "from map:" <<  *(m_type_entity_map[m_type][m_mapped_id]) << endl;
 				*this = *(m_type_entity_map[m_type][m_mapped_id]);
 				found = true;
 			}
@@ -189,15 +188,16 @@ Entity::entity_ptr Entity::index_if_not_exist() {
 		if(m_memory_mode){
 			resultEntityPtr = m_type_entity_map[m_type][m_mapped_id];
 			/// replacement
-			*resultEntityPtr = bk;
+			resultEntityPtr->m_value = bk.m_value;
 		}else{
 			prepared_statement_ptr& updateStmtPtr =
 					Entity::m_sharedData.m_updateStmtPtr;
-			updateStmtPtr->setString(1, json_to_string(m_json_value));
+			updateStmtPtr->setString(1, json_to_string(bk.m_value));
 			updateStmtPtr->setInt(2, m_mapped_id);
 			updateStmtPtr->setInt(3, m_type);
 			updateStmtPtr->executeUpdate();
-			resultEntityPtr = entity_ptr(new Entity(bk));
+			m_value = bk.m_value;
+			resultEntityPtr = entity_ptr(new Entity(*this));
 		}
 	}else {
 		bool isNull;
@@ -205,8 +205,11 @@ Entity::entity_ptr Entity::index_if_not_exist() {
 		if (!isNull) {
 			m_mapped_id++;
 		}
+		/// update the maximum id of a given entity type
+		m_type_max_id_map[m_type] = m_mapped_id;
 		resultEntityPtr = entity_ptr(new Entity(*this));
 		if (m_memory_mode) {
+			/// update the name <-> id lookup table
 			m_type_name_id_map[m_type][m_id] = m_mapped_id;
 			m_type_id_name_map[m_type][m_mapped_id] = m_id;
 			m_type_entity_map[m_type][m_mapped_id] = resultEntityPtr;
@@ -216,7 +219,7 @@ Entity::entity_ptr Entity::index_if_not_exist() {
 			insertStmtPtr->setString(1, m_id);
 			insertStmtPtr->setInt(2, m_mapped_id);
 			insertStmtPtr->setInt(3, m_type);
-			insertStmtPtr->setString(4, json_to_string(m_json_value));
+			insertStmtPtr->setString(4, json_to_string(m_value));
 			insertStmtPtr->execute();
 		}
 	}
@@ -224,8 +227,8 @@ Entity::entity_ptr Entity::index_if_not_exist() {
 }
 
 ostream& operator<<(ostream& oss, Entity const& entity) {
-	oss << "id:" << entity.m_id << ",value:" << json_to_string(
-			entity.m_json_value) << endl;
+	oss << "id:" << entity.m_id  << "-" << entity.m_mapped_id << ",type:" << entity.m_type << ",value:" << json_to_string(
+			entity.m_value) << endl;
 	return oss;
 }
 

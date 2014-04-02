@@ -31,6 +31,8 @@ public:
 	void load_rating_file(string const& file);
 	virtual ~AmazonJSONDataLoader();
 };
+
+void test_amazon_data_loader();
 }
 
 #endif /* JSONDATALOADER_H_ */

@@ -16,7 +16,6 @@
 
 namespace recsys{
 
-
 AmazonJSONDataLoader::str_set_ptr AmazonJSONDataLoader::_get_item_cat_nodes(string const& catStr){
 	str_set_ptr resultSetPtr(new str_set());
 	/// split the cats by | and then by /
@@ -45,6 +44,7 @@ void AmazonJSONDataLoader::load_author_profile(string const& fileName){
 	assert(fs.good());
 	/// open the file and read
 	string line;
+	cout << "start to load user profile..." << endl;
 	while(std::getline(fs,line)){
 		stringstream ss;
 		ss << line;
@@ -54,12 +54,13 @@ void AmazonJSONDataLoader::load_author_profile(string const& fileName){
 		/// location is yet normalized, hold up using it.
 //		js::String location = itemObj["l"];
 		/// create user entity
-		Entity authorEntity(authorId,Entity::ENT_USER);
+		Entity authorEntity(authorId.Value(),Entity::ENT_USER);
 		Entity::entity_ptr authorEntityPtr =  authorEntity.index_if_not_exist();
-		/// create feature entity and the interactions between user and feature
 		if(authorObj.Find("age") != authorObj.End()){
 			js::String age = authorObj["age"];
-			Entity tmpEntity("ag_" + age.Value(), Entity::ENT_FEATURE);
+			float ageF = lexical_cast<float>(age.Value());
+			ushort ageI = (ushort)ageF / 5;
+			Entity tmpEntity("ag_" + lexical_cast<string>(ageI), Entity::ENT_FEATURE);
 			Entity::entity_ptr tmpEntityPtr = tmpEntity.index_if_not_exist();
 			EntityInteraction tmpEI(EntityInteraction::ADD_FEATURE,JSObjectWrapper().add("v",1));
 			tmpEI.set_from_entity(authorEntityPtr);
@@ -75,7 +76,13 @@ void AmazonJSONDataLoader::load_author_profile(string const& fileName){
 			tmpEI.set_to_entity(tmpEntityPtr);
 			tmpEI.index_if_not_exist();
 		}
-
+//		size_t authorMappedId = authorEntityPtr->get_mapped_id();
+//		EntityInteraction::entity_interact_vec_ptr authorFeatVec = EntityInteraction::query(authorMappedId,Entity::ENT_USER);
+//		if(authorFeatVec){
+//			for(EntityInteraction::entity_interact_vec::iterator iter = authorFeatVec->begin(); iter < authorFeatVec->end(); ++iter){
+//				cout << **iter << endl;
+//			}
+//		}
 	}
 	fs.close();
 	m_author_inited = true;
@@ -88,6 +95,7 @@ void AmazonJSONDataLoader::load_item_profile(string const& fileName){
 	assert(fs.good());
 	/// open the file and read
 	string line;
+	cout << "start to load item profile..." << endl;
 	while(std::getline(fs,line)){
 		stringstream ss;
 		ss << line;
@@ -132,6 +140,7 @@ void AmazonJSONDataLoader::load_rating_file(string const& fileName){
 	assert(fs.good());
 	/// open the file and read
 	string line;
+	cout << "start to loading user-item ratings..." << endl;
 	while(std::getline(fs,line)){
 		stringstream ss;
 		ss << line;

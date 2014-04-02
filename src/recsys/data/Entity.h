@@ -109,12 +109,12 @@ protected:
 	size_t m_type;
 	/// use a json object to hold all information about the entity
 	/// e.g. attributes(features) about a user or an item
-	js::Object m_json_value;
+	js::Object m_value;
 protected:
 	unsigned int _get_max_mapped_id(bool &exist);
 public:
 	Entity(string const& id = "", size_t const& type = ENT_DEFAULT, js::Object const& val = js::Object(), bool memoryMode = true) :m_memory_mode(memoryMode),
-			m_id(id),m_mapped_id(0),m_type(type),m_json_value(val) {
+			m_id(id),m_mapped_id(0),m_type(type),m_value(val) {
 	}
 	Entity(size_t const& id, ushort const& type, js::Object const& val = js::Object(), bool memoryMode = true);
 	inline string get_id() {
