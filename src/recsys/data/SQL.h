@@ -49,7 +49,7 @@ protected:
 	void _create_entity_tables();
 	void _set_schema(string const& schema);
 public:
-	static SQL& ref(string const& confFile = "/home/qzhao2/git/RecEngine/src/recsys/data/mysql.conf") {
+	static SQL& ref(string const& confFile = "/home/manazhao/git/RecEngine/src/recsys/data/mysql.conf") {
 		static shared_ptr<SQL> instance_ptr;
 		if(!instance_ptr.get() || confFile != instance_ptr->m_conf_file){
 			instance_ptr.reset(new SQL(confFile));

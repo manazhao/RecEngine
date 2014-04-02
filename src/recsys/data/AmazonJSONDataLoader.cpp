@@ -10,6 +10,7 @@
 #include <recsys/data/AmazonJSONDataLoader.h>
 #include <fstream>
 #include <set>
+#include <boost/timer.hpp>
 #include <assert.h>
 #include "Entity.h"
 #include "EntityInteraction.h"
@@ -96,6 +97,8 @@ void AmazonJSONDataLoader::load_item_profile(string const& fileName){
 	/// open the file and read
 	string line;
 	cout << "start to load item profile..." << endl;
+
+	timer t;
 	while(std::getline(fs,line)){
 		stringstream ss;
 		ss << line;
@@ -130,17 +133,19 @@ void AmazonJSONDataLoader::load_item_profile(string const& fileName){
 		}
 	}
 	fs.close();
+	cout << "time elapsed for reading item json:" << t.elapsed() << endl;
 	m_item_inited = true;
 }
 
 void AmazonJSONDataLoader::load_rating_file(string const& fileName){
 	/// make sure both author profile and item profile are well initialized prior to loading the ratings
-	assert(m_author_inited && m_item_inited);
+//	assert(m_author_inited && m_item_inited);
 	fstream fs(fileName.c_str());
 	assert(fs.good());
 	/// open the file and read
 	string line;
 	cout << "start to loading user-item ratings..." << endl;
+	timer t;
 	while(std::getline(fs,line)){
 		stringstream ss;
 		ss << line;
@@ -156,6 +161,7 @@ void AmazonJSONDataLoader::load_rating_file(string const& fileName){
 		ei.index_if_not_exist();
 	}
 	fs.close();
+	cout << "time loading ratings:" << t.elapsed() << endl;
 }
 
 AmazonJSONDataLoader::AmazonJSONDataLoader():m_author_inited(false),m_item_inited(false){

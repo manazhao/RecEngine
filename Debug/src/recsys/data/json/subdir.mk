@@ -4,20 +4,20 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/recsys/main.cpp 
+../src/recsys/data/json/csv.cpp 
 
 OBJS += \
-./src/recsys/main.o 
+./src/recsys/data/json/csv.o 
 
 CPP_DEPS += \
-./src/recsys/main.d 
+./src/recsys/data/json/csv.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
-src/recsys/%.o: ../src/recsys/%.cpp
+src/recsys/data/json/%.o: ../src/recsys/data/json/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -I"/home/manazhao/git/RecEngine/src" -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
