@@ -12,10 +12,9 @@
 *.la
 *.a
 
-/Debug
-/Release
 *.log
 *.out
 tmp*
 *.conf
-/Debug
+*.d
+RecEngine
