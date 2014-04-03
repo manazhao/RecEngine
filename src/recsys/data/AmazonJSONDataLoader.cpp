@@ -111,7 +111,7 @@ void AmazonJSONDataLoader::load_item_profile(string const& fileName){
 			Entity tmpFeatEntity("m_" + itemMerchant.Value(),Entity::ENT_FEATURE,JSObjectWrapper().add("t","c"));
 			Entity::entity_ptr tmpEntityPtr = tmpFeatEntity.index_if_not_exist();
 			/// add an EntityInteraction between the item entity and the feature entity
-			EntityInteraction tmpEI(EntityInteraction::ADD_FEATURE,JSObjectWrapper().add("v",1));
+			EntityInteraction tmpEI(EntityInteraction::ADD_FEATURE);
 			tmpEI.set_from_entity(itemEntityPtr);
 			tmpEI.set_to_entity(tmpEntityPtr);
 			tmpEI.index_if_not_exist();
@@ -121,7 +121,7 @@ void AmazonJSONDataLoader::load_item_profile(string const& fileName){
 			string catFeature = "c_" + *iter;
 			Entity tmpEntity(catFeature, Entity::ENT_FEATURE);
 			Entity::entity_ptr tmpEntityPtr = tmpEntity.index_if_not_exist();
-			EntityInteraction tmpEI(EntityInteraction::ADD_FEATURE,JSObjectWrapper().add("v",1));
+			EntityInteraction tmpEI(EntityInteraction::ADD_FEATURE);
 			tmpEI.set_from_entity(itemEntityPtr);
 			tmpEI.set_to_entity(tmpEntityPtr);
 			tmpEI.index_if_not_exist();
@@ -144,13 +144,14 @@ void AmazonJSONDataLoader::load_rating_file(string const& fileName){
 	while(std::getline(fs,line)){
 		stringstream ss;
 		ss << line;
+//		cout << "line:" << line << endl;
 		js::Object ratingObj;
 		js::Reader::Read(ratingObj,ss);
 		js::String authorId = ratingObj["u"];
 		js::String itemId = ratingObj["i"];
 		js::String rating = ratingObj["r"];
 		/// add the rating interaction entity directly
-		EntityInteraction ei(EntityInteraction::RATE_ITEM,JSObjectWrapper().add("v",rating.Value()));
+		EntityInteraction ei(EntityInteraction::RATE_ITEM,lexical_cast<float>(rating.Value()),js::Object());
 		ei.add_from_entity(authorId,Entity::ENT_USER);
 		ei.add_to_entity(itemId,Entity::ENT_ITEM);
 		ei.index_if_not_exist();

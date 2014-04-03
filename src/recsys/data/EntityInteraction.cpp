@@ -162,13 +162,17 @@ EntityInteraction::entity_interact_ptr EntityInteraction::index_if_not_exist() {
 
 	if (m_memory_mode) {
 		if (!fromExist) {
+			if(m_entity_type_interact_map[m_from_entity->m_mapped_id].find(m_type) == m_entity_type_interact_map[m_from_entity->m_mapped_id].end())
+				m_entity_type_interact_map[m_from_entity->m_mapped_id][m_type] = entity_interact_vec_ptr(new entity_interact_vec());
 			m_entity_type_interact_map[m_from_entity->m_mapped_id][m_type]->push_back(entityInteractPtr);
 			m_id_id_map[m_from_entity->m_mapped_id].insert(m_to_entity->m_mapped_id);
 		}
 		/// bidirectional graph
-		entity_interact_vec_ptr toEntVecPtr;
 		if (!toExist) {
+			if(m_entity_type_interact_map[m_to_entity->m_mapped_id].find(m_type) == m_entity_type_interact_map[m_to_entity->m_mapped_id].end())
+				m_entity_type_interact_map[m_to_entity->m_mapped_id][m_type] = entity_interact_vec_ptr(new entity_interact_vec());
 			m_entity_type_interact_map[m_to_entity->m_mapped_id][m_type]->push_back(entityInteractPtr);
+			m_id_id_map[m_to_entity->m_mapped_id].insert(m_from_entity->m_mapped_id);
 		}
 		return entityInteractPtr;
 	} else {

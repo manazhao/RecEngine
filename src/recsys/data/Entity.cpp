@@ -141,6 +141,7 @@ bool Entity::retrieve() {
 			if(m_name_id_map.find(m_comp_key) != m_name_id_map.end()){
 				m_mapped_id = m_name_id_map[m_comp_key];
 				*this = *(m_entity_map[m_mapped_id]);
+				found = true;
 			}
 		}else{
 			if(m_entity_map.find(m_mapped_id) != m_entity_map.end()){

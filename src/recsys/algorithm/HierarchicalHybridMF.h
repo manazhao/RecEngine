@@ -7,8 +7,18 @@
 
 #ifndef HIERARCHICALHYBRIDMF_H_
 #define HIERARCHICALHYBRIDMF_H_
+#include <thrift/protocol/TBinaryProtocol.h>
+#include <thrift/transport/TSocket.h>
+#include <thrift/transport/TTransportUtils.h>
 #include <armadillo>
+#include "recsys/thrift/cpp/HandleData.h"
+
+using namespace std;
+using namespace apache::thrift;
+using namespace apache::thrift::protocol;
+using namespace apache::thrift::transport;
 using namespace arma;
+namespace rt = recsys::thrift;
 
 namespace recsys {
 
@@ -20,18 +30,22 @@ namespace recsys {
  */
 class HierarchicalHybridMF {
 protected:
-	mat m_user_lat_mean;
-	mat m_user_lat_cov;
-	mat m_item_lat_mean;
-	mat m_item_lat_cov;
-	mat m_feat_lat_mean;
-	mat m_feat_lat_cov;
+	/// latent mean of all entities
+	mat m_lat_mean;
+	/// latent covariance
+	mat m_lat_cov;
 	float m_global_bias;
 	/// rating variance
 	float m_rating_var;
 	size_t m_num_users;
 	size_t m_num_items;
 	size_t m_num_features;
+	/// used by thrift client
+	boost::shared_ptr<TTransport> m_socket;
+	boost::shared_ptr<TTransport> m_transport;
+	boost::shared_ptr<TProtocol> m_protocol;
+	rt::HandleDataClient m_client;
+	std::map<int8_t, std::vector<int64_t> > m_type_entity_id_map;
 protected:
 	void _init_from_data_host();
 public:

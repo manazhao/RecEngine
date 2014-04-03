@@ -18,26 +18,24 @@
 namespace recsys { namespace thrift {
 
 typedef struct _Interact__isset {
-  _Interact__isset() : ent_id(false), ent_type(false), int_val(false) {}
+  _Interact__isset() : ent_id(false), ent_val(false) {}
   bool ent_id;
-  bool ent_type;
-  bool int_val;
+  bool ent_val;
 } _Interact__isset;
 
 class Interact {
  public:
 
-  static const char* ascii_fingerprint; // = "BEC7CE3B928AEDD0B9882551A06B6866";
-  static const uint8_t binary_fingerprint[16]; // = {0xBE,0xC7,0xCE,0x3B,0x92,0x8A,0xED,0xD0,0xB9,0x88,0x25,0x51,0xA0,0x6B,0x68,0x66};
+  static const char* ascii_fingerprint; // = "2ED8AD9CE28DF04ABD9E0EB6395553D0";
+  static const uint8_t binary_fingerprint[16]; // = {0x2E,0xD8,0xAD,0x9C,0xE2,0x8D,0xF0,0x4A,0xBD,0x9E,0x0E,0xB6,0x39,0x55,0x53,0xD0};
 
-  Interact() : ent_id(0), ent_type(0), int_val() {
+  Interact() : ent_id(0), ent_val(0) {
   }
 
   virtual ~Interact() throw() {}
 
   int64_t ent_id;
-  int8_t ent_type;
-  std::string int_val;
+  double ent_val;
 
   _Interact__isset __isset;
 
@@ -45,21 +43,15 @@ class Interact {
     ent_id = val;
   }
 
-  void __set_ent_type(const int8_t val) {
-    ent_type = val;
-  }
-
-  void __set_int_val(const std::string& val) {
-    int_val = val;
+  void __set_ent_val(const double val) {
+    ent_val = val;
   }
 
   bool operator == (const Interact & rhs) const
   {
     if (!(ent_id == rhs.ent_id))
       return false;
-    if (!(ent_type == rhs.ent_type))
-      return false;
-    if (!(int_val == rhs.int_val))
+    if (!(ent_val == rhs.ent_val))
       return false;
     return true;
   }

@@ -10,8 +10,8 @@
 
 namespace recsys { namespace thrift {
 
-const char* Interact::ascii_fingerprint = "BEC7CE3B928AEDD0B9882551A06B6866";
-const uint8_t Interact::binary_fingerprint[16] = {0xBE,0xC7,0xCE,0x3B,0x92,0x8A,0xED,0xD0,0xB9,0x88,0x25,0x51,0xA0,0x6B,0x68,0x66};
+const char* Interact::ascii_fingerprint = "2ED8AD9CE28DF04ABD9E0EB6395553D0";
+const uint8_t Interact::binary_fingerprint[16] = {0x2E,0xD8,0xAD,0x9C,0xE2,0x8D,0xF0,0x4A,0xBD,0x9E,0x0E,0xB6,0x39,0x55,0x53,0xD0};
 
 uint32_t Interact::read(::apache::thrift::protocol::TProtocol* iprot) {
 
@@ -41,18 +41,10 @@ uint32_t Interact::read(::apache::thrift::protocol::TProtocol* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
-        if (ftype == ::apache::thrift::protocol::T_BYTE) {
-          xfer += iprot->readByte(this->ent_type);
-          this->__isset.ent_type = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
       case 3:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readBinary(this->int_val);
-          this->__isset.int_val = true;
+        if (ftype == ::apache::thrift::protocol::T_DOUBLE) {
+          xfer += iprot->readDouble(this->ent_val);
+          this->__isset.ent_val = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -77,12 +69,8 @@ uint32_t Interact::write(::apache::thrift::protocol::TProtocol* oprot) const {
   xfer += oprot->writeI64(this->ent_id);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("ent_type", ::apache::thrift::protocol::T_BYTE, 2);
-  xfer += oprot->writeByte(this->ent_type);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("int_val", ::apache::thrift::protocol::T_STRING, 3);
-  xfer += oprot->writeBinary(this->int_val);
+  xfer += oprot->writeFieldBegin("ent_val", ::apache::thrift::protocol::T_DOUBLE, 3);
+  xfer += oprot->writeDouble(this->ent_val);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -93,8 +81,7 @@ uint32_t Interact::write(::apache::thrift::protocol::TProtocol* oprot) const {
 void swap(Interact &a, Interact &b) {
   using ::std::swap;
   swap(a.ent_id, b.ent_id);
-  swap(a.ent_type, b.ent_type);
-  swap(a.int_val, b.int_val);
+  swap(a.ent_val, b.ent_val);
   swap(a.__isset, b.__isset);
 }
 
