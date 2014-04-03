@@ -17,4 +17,5 @@
 tmp*
 *.conf
 *.d
-*.bin
+RecEngine
+DataHostThrift
