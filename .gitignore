@@ -17,5 +17,4 @@
 tmp*
 *.conf
 *.d
-RecEngine
-/Debug
+*.bin

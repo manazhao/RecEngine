@@ -27,9 +27,6 @@ namespace js=json;
 
 namespace recsys {
 
-string json_to_string(js::Object const& jsObj);
-js::Object string_to_json(string const& jsonStr);
-
 struct JSObjectWrapper{
 	js::Object m_obj;
 	template <class T>
@@ -51,17 +48,18 @@ struct JSObjectWrapper{
 
 };
 
-enum FEAT_TYPE {FEAT_CAT,FEAT_REAL};
+string json_to_string(js::Object const& jsObj);
+js::Object string_to_json(string const& jsonStr);
 
+enum FEAT_TYPE {FEAT_CAT,FEAT_REAL};
 typedef shared_ptr<PreparedStatement> prepared_statement_ptr;
 typedef unsigned short ushort;
-
 class EntityInteraction;
-
 class Entity {
 	friend ostream& operator<<(ostream&, EntityInteraction const&);
 	friend ostream& operator<<(ostream&, Entity const&);
 	friend class EntityInteraction;
+	friend class HandleDataHandler;
 public:
 	enum ENTITY_TYPE {
 		ENT_DEFAULT, ENT_USER, ENT_ITEM,ENT_FEATURE
@@ -75,7 +73,6 @@ public:
 		prepared_statement_ptr m_maxIdStmtPtr;
 	};
 public:
-	typedef map<size_t, string> type_name_map;
 	typedef shared_ptr<Entity> entity_ptr;
 	/// retrieve the entity based on the internal id (an integer)
 	typedef map<size_t,entity_ptr> entity_ptr_map;
@@ -89,9 +86,8 @@ public:
 	/// internal id to entity name lookup table
 	typedef map<size_t,string> id_name_map;
 	typedef map<ushort,id_name_map> type_id_name_map;
-protected:
-	static type_name_map m_typeNameMap;
-	static SharedData m_sharedData;
+public:
+	static SharedData m_shared_data;
 	/// store all entities in main memory
 	static type_entity_map m_type_entity_map;
 	/// store the maximum id for a given entity type
@@ -100,7 +96,7 @@ protected:
 	static type_name_id_map m_type_name_id_map;
 	/// internal id to entity name lookup
 	static type_id_name_map m_type_id_name_map;
-protected:
+public:
 	/// whether keep all objects in memory
 	bool m_memory_mode;
 	string m_id;
@@ -123,14 +119,12 @@ public:
 	inline size_t get_mapped_id(){
 		return m_mapped_id;
 	}
-
 	bool retrieve();
 	static void get_mapped_id(string const& name, ushort const& type, bool& exist, size_t& mappedId, bool memoryMode = true);
 	entity_ptr index_if_not_exist();
 	virtual ~Entity() {
 	}
 public:
-	static type_name_map init_type_name_map();
 	static SharedData init_shared_data();
 };
 

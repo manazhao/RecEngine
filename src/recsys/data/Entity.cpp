@@ -16,14 +16,6 @@ using namespace boost;
 
 namespace recsys {
 
-Entity::type_name_map Entity::init_type_name_map() {
-	type_name_map typeNameMap;
-	typeNameMap[ENT_USER] = "user";
-	typeNameMap[ENT_ITEM] = "item";
-	return typeNameMap;
-}
-Entity::type_name_map Entity::m_typeNameMap = Entity::init_type_name_map();
-
 Entity::SharedData Entity::init_shared_data() {
 	static bool inited = false;
 	if (!inited) {
@@ -54,13 +46,13 @@ Entity::SharedData Entity::init_shared_data() {
 						SQL_INST.m_connection->prepareStatement(
 								"SELECT MAX(mapped_id) AS max_id FROM entity WHERE type = ?"));
 		inited = true;
-		Entity::m_sharedData = sharedData;
+		Entity::m_shared_data = sharedData;
 		return sharedData;
 	}
-	return Entity::m_sharedData;
+	return Entity::m_shared_data;
 }
 
-Entity::SharedData Entity::m_sharedData;
+Entity::SharedData Entity::m_shared_data;
 
 Entity::type_entity_map Entity::m_type_entity_map;
 /// store the maximum id for a given entity type
@@ -105,7 +97,7 @@ unsigned int Entity::_get_max_mapped_id(bool &isNull) {
 		}
 	} else {
 		prepared_statement_ptr& maxIdQueryStmtPtr =
-				Entity::m_sharedData.m_maxIdStmtPtr;
+				Entity::m_shared_data.m_maxIdStmtPtr;
 		maxIdQueryStmtPtr->setInt(1, m_type);
 		auto_ptr<ResultSet> rs(maxIdQueryStmtPtr->executeQuery());
 		rs->next();
@@ -121,7 +113,7 @@ bool Entity::retrieve() {
 	if (!m_memory_mode) {
 		string jsonStr;
 		if(byOrigId){
-			prepared_statement_ptr& queryStmtPtr = m_sharedData.m_queryStmtPtr;
+			prepared_statement_ptr& queryStmtPtr = m_shared_data.m_queryStmtPtr;
 			queryStmtPtr->setString(1,m_id);
 			queryStmtPtr->setInt(2,m_type);
 			auto_ptr<ResultSet> rs(queryStmtPtr->executeQuery());
@@ -133,7 +125,7 @@ bool Entity::retrieve() {
 				found = true;
 			}
 		}else{
-			prepared_statement_ptr& queryStmtPtr = m_sharedData.m_queryByIdStmtPtr;
+			prepared_statement_ptr& queryStmtPtr = m_shared_data.m_queryByIdStmtPtr;
 			queryStmtPtr->setInt64(1,m_mapped_id);
 			queryStmtPtr->setInt(2,m_type);
 			auto_ptr<ResultSet> rs(queryStmtPtr->executeQuery());
@@ -152,8 +144,6 @@ bool Entity::retrieve() {
 					!= m_type_name_id_map[m_type].end()) {
 				m_mapped_id = m_type_name_id_map[m_type][m_id];
 				/// retrieve the json string from the entity map
-//				cout << "original:" << *this << endl;
-//				cout << "from map:" <<  *(m_type_entity_map[m_type][m_mapped_id]) << endl;
 				*this = *(m_type_entity_map[m_type][m_mapped_id]);
 				found = true;
 			}
@@ -193,7 +183,7 @@ Entity::entity_ptr Entity::index_if_not_exist() {
 			resultEntityPtr->m_value = bk.m_value;
 		}else{
 			prepared_statement_ptr& updateStmtPtr =
-					Entity::m_sharedData.m_updateStmtPtr;
+					Entity::m_shared_data.m_updateStmtPtr;
 			updateStmtPtr->setString(1, json_to_string(bk.m_value));
 			updateStmtPtr->setInt(2, m_mapped_id);
 			updateStmtPtr->setInt(3, m_type);
@@ -217,7 +207,7 @@ Entity::entity_ptr Entity::index_if_not_exist() {
 			m_type_entity_map[m_type][m_mapped_id] = resultEntityPtr;
 		} else {
 			prepared_statement_ptr& insertStmtPtr =
-					Entity::m_sharedData.m_insertStmtPtr;
+					Entity::m_shared_data.m_insertStmtPtr;
 			insertStmtPtr->setString(1, m_id);
 			insertStmtPtr->setInt(2, m_mapped_id);
 			insertStmtPtr->setInt(3, m_type);

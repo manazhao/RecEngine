@@ -46,14 +46,13 @@ public:
 	typedef shared_ptr<entity_interact_vec> entity_interact_vec_ptr;
 	typedef map<size_t, entity_interact_vec_ptr> entity_interact_map;
 	typedef map<ushort,entity_interact_map> type_entity_interact_map;
-protected:
+public:
 	Entity::entity_ptr m_from_entity;
 	Entity::entity_ptr m_to_entity;
 	ushort m_type;
 	js::Object m_val;
 	bool m_memory_mode;
 	static SharedData m_sharedData;
-protected:
 	static type_entity_interact_map m_type_entity_interact_map;
 protected:
 	Entity::entity_ptr _index_entity(string const& id, ushort type, js::Object const& val);
@@ -68,6 +67,9 @@ public:
 	}
 	void add_from_entity(string const& id, ushort type, js::Object const& val = js::Object());
 	void add_to_entity(string const& id, ushort type, js::Object const& val = js::Object());
+	inline ushort get_type() const{
+		return m_type;
+	}
 	entity_interact_ptr index_if_not_exist();
 	virtual ~EntityInteraction();
 public:

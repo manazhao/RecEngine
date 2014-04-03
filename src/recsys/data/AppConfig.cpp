@@ -41,7 +41,7 @@ void AppConfig::init(int argc, char** argv){
 		}else{
 			cout << "mysql configuration file MUST be specified if the use-db switch is on" << endl;
 			cout << desc << "\n";
-			return ;
+			exit(1);
 		}
 	}
 	AppConfig::ref()._init_helper();
