@@ -32,7 +32,7 @@ void test_entity_interaction(){
 	ei.index_if_not_exist();
 
 	/// now dump the graph
-	EntityInteraction::entity_interact_vec_ptr entInteracts = EntityInteraction::query("zq",Entity::ENT_USER);
+	EntityInteraction::entity_interact_vec_ptr entInteracts = EntityInteraction::query("zq",Entity::ENT_USER,EntityInteraction::ADD_FEATURE);
 	for(size_t i = 0; i < entInteracts->size(); i++){
 		EntityInteraction::entity_interact_ptr& tmpPtr = (*entInteracts)[i];
 		/// print the interactions related to current entity

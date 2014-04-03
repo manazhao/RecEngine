@@ -17,6 +17,7 @@
 #include <recsys/data/json/writer.h>
 #include <cppconn/prepared_statement.h>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 #include "SQL.h"
 
 using namespace std;
@@ -74,45 +75,42 @@ public:
 	};
 public:
 	typedef shared_ptr<Entity> entity_ptr;
+	/// use char_ptr to store all kinds of values, e.g. float, int and etc.
+	typedef shared_ptr<char> char_ptr;
+	typedef size_t mapped_id_type;
+	// map internal id to composite entity name (name + type)
+	typedef map<mapped_id_type,string> id_name_map;
+	typedef map<string,mapped_id_type> name_id_map;
+	/// maximum mapped id
 	/// retrieve the entity based on the internal id (an integer)
-	typedef map<size_t,entity_ptr> entity_ptr_map;
-	/// retrieve the entity map given entity type
-	typedef map<ushort,entity_ptr_map> type_entity_map;
-	/// keep track of the maximum id given entity type
-	typedef map<ushort,size_t> type_max_id_map;
-	/// map entity original name to internal integer index
-	typedef map<string,size_t> name_id_map;
-	typedef map<ushort,name_id_map> type_name_id_map;
-	/// internal id to entity name lookup table
-	typedef map<size_t,string> id_name_map;
-	typedef map<ushort,id_name_map> type_id_name_map;
+	typedef map<mapped_id_type,entity_ptr> entity_ptr_map;
 public:
+	static name_id_map m_name_id_map;
+	static id_name_map m_id_name_map;
 	static SharedData m_shared_data;
-	/// store all entities in main memory
-	static type_entity_map m_type_entity_map;
-	/// store the maximum id for a given entity type
-	static type_max_id_map m_type_max_id_map;
-	/// entity name to internal id lookup table
-	static type_name_id_map m_type_name_id_map;
-	/// internal id to entity name lookup
-	static type_id_name_map m_type_id_name_map;
+	static entity_ptr_map m_entity_map;
+	static mapped_id_type m_max_id;
 public:
 	/// whether keep all objects in memory
 	bool m_memory_mode;
 	string m_id;
-	/// an unsigned integer id used internally.
+	/// a unique id that would be used internally
+	/// all entities (user, item, feature, etc) would be mapped in the same space
 	size_t m_mapped_id;
-	size_t m_type;
+	/// entity type
+	ushort m_type;
+	/// composite key
+	string m_comp_key;
 	/// use a json object to hold all information about the entity
 	/// e.g. attributes(features) about a user or an item
-	js::Object m_value;
+	js::Object m_desc;
 protected:
-	unsigned int _get_max_mapped_id(bool &exist);
 public:
-	Entity(string const& id = "", size_t const& type = ENT_DEFAULT, js::Object const& val = js::Object(), bool memoryMode = true) :m_memory_mode(memoryMode),
-			m_id(id),m_mapped_id(0),m_type(type),m_value(val) {
+	Entity(string const& id, size_t const& type, js::Object const& val = js::Object(), bool memoryMode = true) :m_memory_mode(memoryMode),
+			m_id(id),m_mapped_id(0),m_type(type),m_desc(val) {
 	}
-	Entity(size_t const& id, ushort const& type, js::Object const& val = js::Object(), bool memoryMode = true);
+	Entity(size_t const& id,js::Object const& val = js::Object(), bool memoryMode = true);
+
 	inline string get_id() {
 		return m_id;
 	}
@@ -121,6 +119,19 @@ public:
 	}
 	bool retrieve();
 	static void get_mapped_id(string const& name, ushort const& type, bool& exist, size_t& mappedId, bool memoryMode = true);
+	unsigned int _get_max_mapped_id(bool &exist);
+
+	static string create_composit_key(string const& key, ushort type){
+		stringstream ss;
+		ss << type << "_" << key;
+		return ss.str();
+	}
+	static void break_composite_key(string const& cKey, string& key, ushort& type){
+		vector<string> splits;
+		boost::split(splits,cKey,boost::is_any_of("_"));
+		key = splits[1];
+		type = boost::lexical_cast<ushort>(splits[0]);
+	}
 	entity_ptr index_if_not_exist();
 	virtual ~Entity() {
 	}

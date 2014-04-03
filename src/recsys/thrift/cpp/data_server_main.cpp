@@ -62,28 +62,28 @@ protected:
 
   int64_t get_max_id(const int8_t entType) {
     // Your implementation goes here
-    printf("get_max_id\n");
-    return Entity::m_type_max_id_map[entType];
+//    printf("get_max_id\n");
+//    return Entity::m_type_max_id_map[entType];
   }
 
   void get_interacts(std::map<int8_t, std::vector<Interact> > & _return, const int64_t entId, const int8_t entType) {
     // Your implementation goes here
-    printf("get_interacts\n");
-    EntityInteraction::type_entity_interact_map& interactMap = EntityInteraction::m_type_entity_interact_map;
-    EntityInteraction::entity_interact_vec_ptr& entInteracts = interactMap[entType][entId];
-    if(entInteracts){
-    	for(EntityInteraction::entity_interact_vec::const_iterator iter = entInteracts->begin(); iter != entInteracts->end(); ++iter){
-    		EntityInteraction const& tmpInteract = **iter;
-    		Interact tmpInteract2;
-    		tmpInteract2.ent_type = tmpInteract.m_to_entity->m_type;
-    		tmpInteract2.ent_id = tmpInteract.m_to_entity->m_mapped_id;
-    		if(tmpInteract.m_val.Find("v") != tmpInteract.m_val.End()){
-    			js::String val = tmpInteract.m_val["v"];
-    			tmpInteract2.int_val = val.Value();
-    		}
-    		_return[tmpInteract.m_type].push_back(tmpInteract2);
-    	}
-    }
+//    printf("get_interacts\n");
+//    EntityInteraction::type_entity_interact_map& interactMap = EntityInteraction::m_type_entity_interact_map;
+//    EntityInteraction::entity_interact_vec_ptr& entInteracts = interactMap[entType][entId];
+//    if(entInteracts){
+//    	for(EntityInteraction::entity_interact_vec::const_iterator iter = entInteracts->begin(); iter != entInteracts->end(); ++iter){
+//    		EntityInteraction const& tmpInteract = **iter;
+//    		Interact tmpInteract2;
+//    		tmpInteract2.ent_type = tmpInteract.m_to_entity->m_type;
+//    		tmpInteract2.ent_id = tmpInteract.m_to_entity->m_mapped_id;
+//    		if(tmpInteract.m_desc.Find("v") != tmpInteract.m_desc.End()){
+//    			js::String val = tmpInteract.m_desc["v"];
+//    			tmpInteract2.int_val = val.Value();
+//    		}
+//    		_return[tmpInteract.m_type].push_back(tmpInteract2);
+//    	}
+//    }
   }
 };
 
