@@ -119,7 +119,7 @@ public:
 	}
 	bool retrieve();
 	static void get_mapped_id(string const& name, ushort const& type, bool& exist, size_t& mappedId, bool memoryMode = true);
-	unsigned int _get_max_mapped_id(bool &exist);
+	unsigned int _get_next_mapped_id(bool &exist);
 
 	static string create_composit_key(string const& key, ushort type){
 		stringstream ss;

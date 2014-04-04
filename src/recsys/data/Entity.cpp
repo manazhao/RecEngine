@@ -85,12 +85,13 @@ js::Object string_to_json(string const& jsonStr) {
 	return obj;
 }
 
-unsigned int Entity::_get_max_mapped_id(bool &isNull) {
+unsigned int Entity::_get_next_mapped_id(bool &isNull) {
 	if (m_memory_mode) {
 		if(m_entity_map.empty()){
 			isNull = true;
+			return m_max_id;
 		}
-		return m_max_id;
+		return ++m_max_id;
 	} else {
 		prepared_statement_ptr& maxIdQueryStmtPtr =
 				Entity::m_shared_data.m_maxIdStmtPtr;
@@ -191,10 +192,7 @@ Entity::entity_ptr Entity::index_if_not_exist() {
 		}
 	}else {
 		bool isNull;
-		m_mapped_id = _get_max_mapped_id(isNull);
-		if (!isNull) {
-			m_mapped_id++;
-		}
+		m_mapped_id = _get_next_mapped_id(isNull);
 		resultEntityPtr = entity_ptr(new Entity(*this));
 		if (m_memory_mode) {
 			/// update the name <-> id lookup table

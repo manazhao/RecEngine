@@ -23,15 +23,22 @@ using namespace recsys;
 class HandleDataHandler: virtual public HandleDataIf {
 protected:
 	void _load_amazon_data() {
+//		string authorFile =
+//				"/home/qzhao2/data/amazon-yms/ratings/processed/author_profile.json";
+//		string itemFile =
+//				"/home/qzhao2/data/amazon-yms/ratings/processed/item_profile.json";
+//		string ratingFile =
+//				"/home/qzhao2/data/amazon-yms/ratings/processed/book_rating_filter.json";
 		string authorFile =
-				"/home/qzhao2/data/amazon-yms/ratings/processed/author_profile.json";
+				"/home/manazhao/rating/amazon_book_rating/author_profile.json";
 		string itemFile =
-				"/home/qzhao2/data/amazon-yms/ratings/processed/item_profile.json";
+				"/home/manazhao/rating/amazon_book_rating/item_profile.json";
 		string ratingFile =
-				"/home/qzhao2/data/amazon-yms/ratings/processed/book_rating_filter.json";
+				"/home/manazhao/rating/amazon_book_rating/book_rating_filter.json";
+
 		AmazonJSONDataLoader amazonDataLoader;
-		amazonDataLoader.load_author_profile(authorFile);
-		amazonDataLoader.load_item_profile(itemFile);
+//		amazonDataLoader.load_author_profile(authorFile);
+//		amazonDataLoader.load_item_profile(itemFile);
 		amazonDataLoader.load_rating_file(ratingFile);
 	}
 public:
@@ -65,6 +72,7 @@ public:
 			///  get the mapped id and type
 			Entity::mapped_id_type id = iter->first;
 			int8_t type = iter->second->m_type;
+			cout << "mapped id:" << id << ":" << *(iter->second);
 			_return[type].push_back(id);
 		}
 	}
