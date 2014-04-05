@@ -23,22 +23,22 @@ using namespace recsys;
 class HandleDataHandler: virtual public HandleDataIf {
 protected:
 	void _load_amazon_data() {
-//		string authorFile =
-//				"/home/qzhao2/data/amazon-yms/ratings/processed/author_profile.json";
-//		string itemFile =
-//				"/home/qzhao2/data/amazon-yms/ratings/processed/item_profile.json";
-//		string ratingFile =
-//				"/home/qzhao2/data/amazon-yms/ratings/processed/book_rating_filter.json";
 		string authorFile =
-				"/home/manazhao/rating/amazon_book_rating/author_profile.json";
+				"/home/qzhao2/data/amazon-yms/ratings/processed/author_profile.json";
 		string itemFile =
-				"/home/manazhao/rating/amazon_book_rating/item_profile.json";
+				"/home/qzhao2/data/amazon-yms/ratings/processed/item_profile.json";
 		string ratingFile =
-				"/home/manazhao/rating/amazon_book_rating/book_rating_filter.json";
+				"/home/qzhao2/data/amazon-yms/ratings/processed/book_rating_filter.json";
+//		string authorFile =
+//				"/home/manazhao/rating/amazon_book_rating/author_profile.json";
+//		string itemFile =
+//				"/home/manazhao/rating/amazon_book_rating/item_profile.json";
+//		string ratingFile =
+//				"/home/manazhao/rating/amazon_book_rating/book_rating_filter.json";
 
 		AmazonJSONDataLoader amazonDataLoader;
-//		amazonDataLoader.load_author_profile(authorFile);
-//		amazonDataLoader.load_item_profile(itemFile);
+		amazonDataLoader.load_author_profile(authorFile);
+		amazonDataLoader.load_item_profile(itemFile);
 		amazonDataLoader.load_rating_file(ratingFile);
 	}
 public:
@@ -68,13 +68,15 @@ public:
 	void get_entity_ids(std::map<int8_t, std::vector<int64_t> > & _return) {
 		// Your implementation goes here
 		printf("get_entity_ids\n");
+		boost::timer t;
 		for(Entity::entity_ptr_map::iterator iter = Entity::m_entity_map.begin(); iter != Entity::m_entity_map.end(); ++iter){
 			///  get the mapped id and type
 			Entity::mapped_id_type id = iter->first;
 			int8_t type = iter->second->m_type;
-			cout << "mapped id:" << id << ":" << *(iter->second);
+//			cout << "mapped id:" << id << ":" << *(iter->second);
 			_return[type].push_back(id);
 		}
+		cout << "time elapsed:" << t.elapsed() << endl;
 	}
 
 	void get_entity_interacts(

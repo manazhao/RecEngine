@@ -134,15 +134,14 @@ void AmazonJSONDataLoader::load_item_profile(string const& fileName){
 
 void AmazonJSONDataLoader::load_rating_file(string const& fileName){
 	/// make sure both author profile and item profile are well initialized prior to loading the ratings
-//	assert(m_author_inited && m_item_inited);
+	assert(m_author_inited && m_item_inited);
 	fstream fs(fileName.c_str());
 	assert(fs.good());
 	/// open the file and read
 	string line;
 	cout << "start to loading user-item ratings..." << endl;
 	timer t;
-	size_t numFiles = 0;
-	while(std::getline(fs,line) && numFiles++ < 10000){
+	while(std::getline(fs,line)){
 		stringstream ss;
 		ss << line;
 		js::Object ratingObj;
