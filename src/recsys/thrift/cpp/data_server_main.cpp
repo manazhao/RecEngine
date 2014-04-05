@@ -2,6 +2,7 @@
 // You should copy it to another filename to avoid overwriting it.
 
 #include "HandleData.h"
+#include <boost/timer.hpp>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TSimpleServer.h>
 #include <thrift/transport/TServerSocket.h>
@@ -23,18 +24,18 @@ using namespace recsys;
 class HandleDataHandler: virtual public HandleDataIf {
 protected:
 	void _load_amazon_data() {
-		string authorFile =
-				"/home/qzhao2/data/amazon-yms/ratings/processed/author_profile.json";
-		string itemFile =
-				"/home/qzhao2/data/amazon-yms/ratings/processed/item_profile.json";
-		string ratingFile =
-				"/home/qzhao2/data/amazon-yms/ratings/processed/book_rating_filter.json";
 //		string authorFile =
-//				"/home/manazhao/rating/amazon_book_rating/author_profile.json";
+//				"/home/qzhao2/data/amazon-yms/ratings/processed/author_profile.json";
 //		string itemFile =
-//				"/home/manazhao/rating/amazon_book_rating/item_profile.json";
+//				"/home/qzhao2/data/amazon-yms/ratings/processed/item_profile.json";
 //		string ratingFile =
-//				"/home/manazhao/rating/amazon_book_rating/book_rating_filter.json";
+//				"/home/qzhao2/data/amazon-yms/ratings/processed/book_rating_filter.json";
+		string authorFile =
+				"/home/manazhao/rating/amazon_book_rating/author_profile.json";
+		string itemFile =
+				"/home/manazhao/rating/amazon_book_rating/item_profile.json";
+		string ratingFile =
+				"/home/manazhao/rating/amazon_book_rating/book_rating_filter.json";
 
 		AmazonJSONDataLoader amazonDataLoader;
 		amazonDataLoader.load_author_profile(authorFile);

@@ -8,6 +8,7 @@
 #ifndef OBJECT_H_
 #define OBJECT_H_
 
+#include <boost/unordered_map.hpp>
 #include <string>
 #include <map>
 #include <ostream>
@@ -80,7 +81,7 @@ public:
 	typedef size_t mapped_id_type;
 	// map internal id to composite entity name (name + type)
 	typedef map<mapped_id_type,string> id_name_map;
-	typedef map<string,mapped_id_type> name_id_map;
+	typedef unordered_map<string,mapped_id_type> name_id_map;
 	/// maximum mapped id
 	/// retrieve the entity based on the internal id (an integer)
 	typedef map<mapped_id_type,entity_ptr> entity_ptr_map;
