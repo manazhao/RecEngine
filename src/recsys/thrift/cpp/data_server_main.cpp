@@ -70,7 +70,7 @@ public:
 		// Your implementation goes here
 		printf("get_entity_ids\n");
 		boost::timer t;
-		for(Entity::entity_ptr_map::iterator iter = Entity::m_entity_map.begin(); iter != Entity::m_entity_map.end(); ++iter){
+		for(Entity::entity_ptr_map::iterator iter = Entity::m_entity_ptr_map.begin(); iter != Entity::m_entity_ptr_map.end(); ++iter){
 			///  get the mapped id and type
 			Entity::mapped_id_type id = iter->first;
 			int8_t type = iter->second->m_type;

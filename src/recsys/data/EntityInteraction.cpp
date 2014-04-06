@@ -10,8 +10,8 @@
 
 namespace recsys {
 
-EntityInteraction::entity_interact_index_vec
-		EntityInteraction::m_entity_interact_index_vec;
+EntityInteraction::entity_type_interact_map
+		EntityInteraction::m_entity_type_interact_map;
 
 EntityInteraction::SharedData EntityInteraction::init_shared_data() {
 	static bool inited = false;
@@ -51,7 +51,7 @@ EntityInteraction::SharedData EntityInteraction::init_shared_data() {
 }
 
 EntityInteraction::SharedData EntityInteraction::m_sharedData;
-EntityInteraction::id_set_index_vec EntityInteraction::m_id_set_index_vec;
+EntityInteraction::id_id_map EntityInteraction::m_id_id_map;
 
 EntityInteraction::EntityInteraction(ushort const& type, float val,
 		js::Object const& desc, bool memoryMode) :
@@ -102,9 +102,9 @@ EntityInteraction::entity_interact_vec_ptr EntityInteraction::query(
 		bool isFrom) {
 	entity_interact_vec_ptr resultVecPtr;
 	if (memoryMode) {
-		if(entityId < m_entity_interact_index_vec.size() && m_entity_interact_index_vec[entityId].find(intType)
-				!= m_entity_interact_index_vec[entityId].end())
-			resultVecPtr = m_entity_interact_index_vec[entityId][intType];
+		if(entityId < m_entity_type_interact_map.size() && m_entity_type_interact_map[entityId].find(intType)
+				!= m_entity_type_interact_map[entityId].end())
+			resultVecPtr = m_entity_type_interact_map[entityId][intType];
 	} else {
 		prepared_statement_ptr queryStmtPtr =
 				(isFrom ? m_sharedData.m_queryByFromStmtPtr
@@ -137,7 +137,7 @@ EntityInteraction::entity_interact_vec_ptr EntityInteraction::query(
 bool EntityInteraction::entity_interact_exist(
 		Entity::mapped_id_type const& fromId, Entity::mapped_id_type& toId, bool memoryMode) {
 	if(memoryMode){
-		return fromId < m_id_set_index_vec.size() && m_id_set_index_vec[fromId].find(toId) != m_id_set_index_vec[fromId].end();
+		return fromId < m_id_id_map.size() && m_id_id_map[fromId].find(toId) != m_id_id_map[fromId].end();
 	}else{
 		/// make sql query
 		prepared_statement_ptr& queryStmt = m_sharedData.m_queryStmtPtr;
@@ -160,17 +160,17 @@ EntityInteraction::entity_interact_ptr EntityInteraction::index_if_not_exist() {
 
 	if (m_memory_mode) {
 		if (!fromExist) {
-			if(m_entity_interact_index_vec[m_from_entity->m_mapped_id].find(m_type) == m_entity_interact_index_vec[m_from_entity->m_mapped_id].end())
-				m_entity_interact_index_vec[m_from_entity->m_mapped_id][m_type] = entity_interact_vec_ptr(new entity_interact_vec());
-			m_entity_interact_index_vec[m_from_entity->m_mapped_id][m_type]->push_back(entityInteractPtr);
-			m_id_set_index_vec[m_from_entity->m_mapped_id].insert(m_to_entity->m_mapped_id);
+			if(m_entity_type_interact_map[m_from_entity->m_mapped_id].find(m_type) == m_entity_type_interact_map[m_from_entity->m_mapped_id].end())
+				m_entity_type_interact_map[m_from_entity->m_mapped_id][m_type] = entity_interact_vec_ptr(new entity_interact_vec());
+			m_entity_type_interact_map[m_from_entity->m_mapped_id][m_type]->push_back(entityInteractPtr);
+			m_id_id_map[m_from_entity->m_mapped_id].insert(m_to_entity->m_mapped_id);
 		}
 		/// bidirectional graph
 		if (!toExist) {
-			if(m_entity_interact_index_vec[m_to_entity->m_mapped_id].find(m_type) == m_entity_interact_index_vec[m_to_entity->m_mapped_id].end())
-				m_entity_interact_index_vec[m_to_entity->m_mapped_id][m_type] = entity_interact_vec_ptr(new entity_interact_vec());
-			m_entity_interact_index_vec[m_to_entity->m_mapped_id][m_type]->push_back(entityInteractPtr);
-			m_id_set_index_vec[m_to_entity->m_mapped_id].insert(m_from_entity->m_mapped_id);
+			if(m_entity_type_interact_map[m_to_entity->m_mapped_id].find(m_type) == m_entity_type_interact_map[m_to_entity->m_mapped_id].end())
+				m_entity_type_interact_map[m_to_entity->m_mapped_id][m_type] = entity_interact_vec_ptr(new entity_interact_vec());
+			m_entity_type_interact_map[m_to_entity->m_mapped_id][m_type]->push_back(entityInteractPtr);
+			m_id_id_map[m_to_entity->m_mapped_id].insert(m_from_entity->m_mapped_id);
 		}
 		return entityInteractPtr;
 	} else {

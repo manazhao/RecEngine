@@ -84,12 +84,12 @@ public:
 	typedef map<string,mapped_id_type> name_id_map;
 	/// maximum mapped id
 	/// retrieve the entity based on the internal id (an integer)
-	typedef vector<entity_ptr> entity_index_vec;
+	typedef map<mapped_id_type,entity_ptr> entity_ptr_map;
 public:
 	static name_id_map m_name_id_map;
 	static id_name_map m_id_name_map;
 	static SharedData m_shared_data;
-	static entity_index_vec m_entity_index_vec;
+	static entity_ptr_map m_entity_ptr_map;
 	static mapped_id_type m_max_id;
 public:
 	/// whether keep all objects in memory

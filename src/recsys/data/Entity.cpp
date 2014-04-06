@@ -56,7 +56,7 @@ Entity::SharedData Entity::init_shared_data() {
 Entity::SharedData Entity::m_shared_data;
 Entity::name_id_map Entity::m_name_id_map;
 Entity::id_name_map Entity::m_id_name_map;
-Entity::entity_index_vec Entity::m_entity_index_vec;
+Entity::entity_ptr_map Entity::m_entity_ptr_map;
 Entity::mapped_id_type Entity::m_max_id = 0;
 ///
 
@@ -87,7 +87,7 @@ js::Object string_to_json(string const& jsonStr) {
 
 unsigned int Entity::_get_next_mapped_id() {
 	if (m_memory_mode) {
-		if(m_entity_index_vec.empty()){
+		if(m_entity_ptr_map.empty()){
 			return 0;
 		}
 		return ++m_max_id;
@@ -143,12 +143,12 @@ bool Entity::retrieve() {
 			/// check the existence of the key
 			if(m_name_id_map.find(m_comp_key) != m_name_id_map.end()){
 				m_mapped_id = m_name_id_map[m_comp_key];
-				*this = *(m_entity_index_vec[m_mapped_id]);
+				*this = *(m_entity_ptr_map[m_mapped_id]);
 				found = true;
 			}
 		}else{
-			if(m_mapped_id < m_entity_index_vec.size()){
-				*this = *(m_entity_index_vec[m_mapped_id]);
+			if(m_entity_ptr_map.find(m_mapped_id) != m_entity_ptr_map.end()){
+				*this = *(m_entity_ptr_map[m_mapped_id]);
 				found = true;
 			}
 		}
@@ -179,7 +179,7 @@ Entity::entity_ptr Entity::index_if_not_exist() {
 	Entity bk(*this);
 	if(retrieve()){
 		if(m_memory_mode){
-			resultEntityPtr = m_entity_index_vec[m_mapped_id];
+			resultEntityPtr = m_entity_ptr_map[m_mapped_id];
 			/// replacement
 			resultEntityPtr->m_desc = bk.m_desc;
 		}else{
@@ -199,7 +199,7 @@ Entity::entity_ptr Entity::index_if_not_exist() {
 			/// update the name <-> id lookup table
 			m_name_id_map[m_comp_key] = m_mapped_id;
 			m_id_name_map[m_mapped_id] = m_comp_key;
-			m_entity_index_vec.push_back(resultEntityPtr);
+			m_entity_ptr_map[m_mapped_id]= resultEntityPtr;
 		} else {
 			prepared_statement_ptr& insertStmtPtr =
 					Entity::m_shared_data.m_insertStmtPtr;
