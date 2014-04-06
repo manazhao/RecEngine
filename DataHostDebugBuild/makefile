@@ -11,7 +11,6 @@ RM := rm -rf
 -include subdir.mk
 -include src/recsys/thrift/cpp/subdir.mk
 -include src/recsys/data/subdir.mk
--include src/recsys/algorithm/subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)

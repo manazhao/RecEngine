@@ -19,6 +19,7 @@ class HandleDataIf {
   virtual void add_interaction(std::string& _return, const std::string& interactionJson) = 0;
   virtual void get_recommend_list(std::string& _return, const std::string& userId) = 0;
   virtual void get_entity_ids(std::map<int8_t, std::vector<int64_t> > & _return) = 0;
+  virtual void get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & _return) = 0;
   virtual void get_entity_interacts(std::map<int8_t, std::vector<Interact> > & _return, const int64_t entId) = 0;
 };
 
@@ -59,6 +60,9 @@ class HandleDataNull : virtual public HandleDataIf {
     return;
   }
   void get_entity_ids(std::map<int8_t, std::vector<int64_t> > & /* _return */) {
+    return;
+  }
+  void get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & /* _return */) {
     return;
   }
   void get_entity_interacts(std::map<int8_t, std::vector<Interact> > & /* _return */, const int64_t /* entId */) {
@@ -532,6 +536,112 @@ class HandleData_get_entity_ids_presult {
 
 };
 
+
+class HandleData_get_all_interacts_args {
+ public:
+
+  static const char* ascii_fingerprint; // = "99914B932BD37A50B983C5E7C90AE93B";
+  static const uint8_t binary_fingerprint[16]; // = {0x99,0x91,0x4B,0x93,0x2B,0xD3,0x7A,0x50,0xB9,0x83,0xC5,0xE7,0xC9,0x0A,0xE9,0x3B};
+
+  HandleData_get_all_interacts_args() {
+  }
+
+  virtual ~HandleData_get_all_interacts_args() throw() {}
+
+
+  bool operator == (const HandleData_get_all_interacts_args & /* rhs */) const
+  {
+    return true;
+  }
+  bool operator != (const HandleData_get_all_interacts_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const HandleData_get_all_interacts_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class HandleData_get_all_interacts_pargs {
+ public:
+
+  static const char* ascii_fingerprint; // = "99914B932BD37A50B983C5E7C90AE93B";
+  static const uint8_t binary_fingerprint[16]; // = {0x99,0x91,0x4B,0x93,0x2B,0xD3,0x7A,0x50,0xB9,0x83,0xC5,0xE7,0xC9,0x0A,0xE9,0x3B};
+
+
+  virtual ~HandleData_get_all_interacts_pargs() throw() {}
+
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _HandleData_get_all_interacts_result__isset {
+  _HandleData_get_all_interacts_result__isset() : success(false) {}
+  bool success;
+} _HandleData_get_all_interacts_result__isset;
+
+class HandleData_get_all_interacts_result {
+ public:
+
+  static const char* ascii_fingerprint; // = "20208C94EAAB82EBBF280717EAB03BAD";
+  static const uint8_t binary_fingerprint[16]; // = {0x20,0x20,0x8C,0x94,0xEA,0xAB,0x82,0xEB,0xBF,0x28,0x07,0x17,0xEA,0xB0,0x3B,0xAD};
+
+  HandleData_get_all_interacts_result() {
+  }
+
+  virtual ~HandleData_get_all_interacts_result() throw() {}
+
+  std::vector<std::map<int8_t, std::vector<Interact> > >  success;
+
+  _HandleData_get_all_interacts_result__isset __isset;
+
+  void __set_success(const std::vector<std::map<int8_t, std::vector<Interact> > > & val) {
+    success = val;
+  }
+
+  bool operator == (const HandleData_get_all_interacts_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    return true;
+  }
+  bool operator != (const HandleData_get_all_interacts_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const HandleData_get_all_interacts_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _HandleData_get_all_interacts_presult__isset {
+  _HandleData_get_all_interacts_presult__isset() : success(false) {}
+  bool success;
+} _HandleData_get_all_interacts_presult__isset;
+
+class HandleData_get_all_interacts_presult {
+ public:
+
+  static const char* ascii_fingerprint; // = "20208C94EAAB82EBBF280717EAB03BAD";
+  static const uint8_t binary_fingerprint[16]; // = {0x20,0x20,0x8C,0x94,0xEA,0xAB,0x82,0xEB,0xBF,0x28,0x07,0x17,0xEA,0xB0,0x3B,0xAD};
+
+
+  virtual ~HandleData_get_all_interacts_presult() throw() {}
+
+  std::vector<std::map<int8_t, std::vector<Interact> > > * success;
+
+  _HandleData_get_all_interacts_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
 typedef struct _HandleData_get_entity_interacts_args__isset {
   _HandleData_get_entity_interacts_args__isset() : entId(false) {}
   bool entId;
@@ -689,6 +799,9 @@ class HandleDataClient : virtual public HandleDataIf {
   void get_entity_ids(std::map<int8_t, std::vector<int64_t> > & _return);
   void send_get_entity_ids();
   void recv_get_entity_ids(std::map<int8_t, std::vector<int64_t> > & _return);
+  void get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & _return);
+  void send_get_all_interacts();
+  void recv_get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & _return);
   void get_entity_interacts(std::map<int8_t, std::vector<Interact> > & _return, const int64_t entId);
   void send_get_entity_interacts(const int64_t entId);
   void recv_get_entity_interacts(std::map<int8_t, std::vector<Interact> > & _return);
@@ -711,6 +824,7 @@ class HandleDataProcessor : public ::apache::thrift::TDispatchProcessor {
   void process_add_interaction(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get_recommend_list(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get_entity_ids(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_get_all_interacts(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get_entity_interacts(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
  public:
   HandleDataProcessor(boost::shared_ptr<HandleDataIf> iface) :
@@ -719,6 +833,7 @@ class HandleDataProcessor : public ::apache::thrift::TDispatchProcessor {
     processMap_["add_interaction"] = &HandleDataProcessor::process_add_interaction;
     processMap_["get_recommend_list"] = &HandleDataProcessor::process_get_recommend_list;
     processMap_["get_entity_ids"] = &HandleDataProcessor::process_get_entity_ids;
+    processMap_["get_all_interacts"] = &HandleDataProcessor::process_get_all_interacts;
     processMap_["get_entity_interacts"] = &HandleDataProcessor::process_get_entity_interacts;
   }
 
@@ -785,6 +900,16 @@ class HandleDataMultiface : virtual public HandleDataIf {
       ifaces_[i]->get_entity_ids(_return);
     }
     ifaces_[i]->get_entity_ids(_return);
+    return;
+  }
+
+  void get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & _return) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->get_all_interacts(_return);
+    }
+    ifaces_[i]->get_all_interacts(_return);
     return;
   }
 

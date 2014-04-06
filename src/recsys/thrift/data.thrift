@@ -20,6 +20,7 @@ string add_entity(1:string entityJson),
 string add_interaction(1:string interactionJson),
 string get_recommend_list(1:string userId),
 map<byte,list<i64> > get_entity_ids(),
+list<map<byte,list<Interact> > > get_all_interacts(),
 map<byte,list<Interact> > get_entity_interacts(1:i64 entId),
 }
 
