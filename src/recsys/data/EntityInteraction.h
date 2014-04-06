@@ -47,8 +47,8 @@ public:
 	typedef vector<entity_interact_ptr> entity_interact_vec;
 	typedef shared_ptr<entity_interact_vec> entity_interact_vec_ptr;
 	typedef map<ushort,entity_interact_vec_ptr> type_interact_map;
-	typedef map<Entity::mapped_id_type, map<ushort,entity_interact_vec_ptr> > entity_interact_map;
-	typedef map<Entity::mapped_id_type, set<Entity::mapped_id_type> > id_id_map;
+	typedef vector<map<ushort,entity_interact_vec_ptr> > entity_interact_index_vec;
+	typedef vector<set<Entity::mapped_id_type> > id_set_index_vec;
 public:
 	Entity::entity_ptr m_from_entity;
 	Entity::entity_ptr m_to_entity;
@@ -59,8 +59,8 @@ public:
 	bool m_memory_mode;
 public:
 	static SharedData m_sharedData;
-	static entity_interact_map m_entity_type_interact_map;
-	static id_id_map m_id_id_map;
+	static entity_interact_index_vec m_entity_interact_index_vec;
+	static id_set_index_vec m_id_set_index_vec;
 protected:
 	Entity::entity_ptr _index_entity(string const& id, ushort type, js::Object const& val);
 	entity_interact_vec_ptr _create_vec_if_not_exist(ushort const& entType, size_t const& entId);

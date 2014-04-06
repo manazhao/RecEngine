@@ -56,7 +56,7 @@ Entity::SharedData Entity::init_shared_data() {
 Entity::SharedData Entity::m_shared_data;
 Entity::name_id_map Entity::m_name_id_map;
 Entity::id_name_map Entity::m_id_name_map;
-Entity::entity_ptr_map Entity::m_entity_map;
+Entity::entity_index_vec Entity::m_entity_index_vec;
 Entity::mapped_id_type Entity::m_max_id = 0;
 ///
 
@@ -85,11 +85,10 @@ js::Object string_to_json(string const& jsonStr) {
 	return obj;
 }
 
-unsigned int Entity::_get_next_mapped_id(bool &isNull) {
+unsigned int Entity::_get_next_mapped_id() {
 	if (m_memory_mode) {
-		if(m_entity_map.empty()){
-			isNull = true;
-			return m_max_id;
+		if(m_entity_index_vec.empty()){
+			return 0;
 		}
 		return ++m_max_id;
 	} else {
@@ -97,8 +96,11 @@ unsigned int Entity::_get_next_mapped_id(bool &isNull) {
 				Entity::m_shared_data.m_maxIdStmtPtr;
 		auto_ptr<ResultSet> rs(maxIdQueryStmtPtr->executeQuery());
 		rs->next();
-		isNull = rs->isNull("max_id");
-		return rs->getInt("max_id");
+		if(rs->isNull("max_id")){
+			return 0;
+		}
+		m_max_id =  rs->getInt("max_id");
+		return ++m_max_id;
 	}
 }
 
@@ -141,12 +143,12 @@ bool Entity::retrieve() {
 			/// check the existence of the key
 			if(m_name_id_map.find(m_comp_key) != m_name_id_map.end()){
 				m_mapped_id = m_name_id_map[m_comp_key];
-				*this = *(m_entity_map[m_mapped_id]);
+				*this = *(m_entity_index_vec[m_mapped_id]);
 				found = true;
 			}
 		}else{
-			if(m_entity_map.find(m_mapped_id) != m_entity_map.end()){
-				*this = *(m_entity_map[m_mapped_id]);
+			if(m_mapped_id < m_entity_index_vec.size()){
+				*this = *(m_entity_index_vec[m_mapped_id]);
 				found = true;
 			}
 		}
@@ -177,7 +179,7 @@ Entity::entity_ptr Entity::index_if_not_exist() {
 	Entity bk(*this);
 	if(retrieve()){
 		if(m_memory_mode){
-			resultEntityPtr = m_entity_map[m_mapped_id];
+			resultEntityPtr = m_entity_index_vec[m_mapped_id];
 			/// replacement
 			resultEntityPtr->m_desc = bk.m_desc;
 		}else{
@@ -191,14 +193,13 @@ Entity::entity_ptr Entity::index_if_not_exist() {
 			resultEntityPtr = entity_ptr(new Entity(*this));
 		}
 	}else {
-		bool isNull;
-		m_mapped_id = _get_next_mapped_id(isNull);
+		m_mapped_id = _get_next_mapped_id();
 		resultEntityPtr = entity_ptr(new Entity(*this));
 		if (m_memory_mode) {
 			/// update the name <-> id lookup table
 			m_name_id_map[m_comp_key] = m_mapped_id;
 			m_id_name_map[m_mapped_id] = m_comp_key;
-			m_entity_map[m_mapped_id] = resultEntityPtr;
+			m_entity_index_vec.push_back(resultEntityPtr);
 		} else {
 			prepared_statement_ptr& insertStmtPtr =
 					Entity::m_shared_data.m_insertStmtPtr;

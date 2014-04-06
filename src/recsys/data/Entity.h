@@ -81,15 +81,15 @@ public:
 	typedef size_t mapped_id_type;
 	// map internal id to composite entity name (name + type)
 	typedef map<mapped_id_type,string> id_name_map;
-	typedef unordered_map<string,mapped_id_type> name_id_map;
+	typedef map<string,mapped_id_type> name_id_map;
 	/// maximum mapped id
 	/// retrieve the entity based on the internal id (an integer)
-	typedef map<mapped_id_type,entity_ptr> entity_ptr_map;
+	typedef vector<entity_ptr> entity_index_vec;
 public:
 	static name_id_map m_name_id_map;
 	static id_name_map m_id_name_map;
 	static SharedData m_shared_data;
-	static entity_ptr_map m_entity_map;
+	static entity_index_vec m_entity_index_vec;
 	static mapped_id_type m_max_id;
 public:
 	/// whether keep all objects in memory
@@ -120,7 +120,7 @@ public:
 	}
 	bool retrieve();
 	static void get_mapped_id(string const& name, ushort const& type, bool& exist, size_t& mappedId, bool memoryMode = true);
-	unsigned int _get_next_mapped_id(bool &exist);
+	unsigned int _get_next_mapped_id();
 
 	static string create_composit_key(string const& key, ushort type){
 		stringstream ss;
