@@ -706,6 +706,250 @@ uint32_t HandleData_get_entity_ids_presult::read(::apache::thrift::protocol::TPr
   return xfer;
 }
 
+uint32_t HandleData_get_all_interacts_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    xfer += iprot->skip(ftype);
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t HandleData_get_all_interacts_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("HandleData_get_all_interacts_args");
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t HandleData_get_all_interacts_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("HandleData_get_all_interacts_pargs");
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t HandleData_get_all_interacts_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            this->success.clear();
+            uint32_t _size26;
+            ::apache::thrift::protocol::TType _etype29;
+            xfer += iprot->readListBegin(_etype29, _size26);
+            this->success.resize(_size26);
+            uint32_t _i30;
+            for (_i30 = 0; _i30 < _size26; ++_i30)
+            {
+              {
+                this->success[_i30].clear();
+                uint32_t _size31;
+                ::apache::thrift::protocol::TType _ktype32;
+                ::apache::thrift::protocol::TType _vtype33;
+                xfer += iprot->readMapBegin(_ktype32, _vtype33, _size31);
+                uint32_t _i35;
+                for (_i35 = 0; _i35 < _size31; ++_i35)
+                {
+                  int8_t _key36;
+                  xfer += iprot->readByte(_key36);
+                  std::vector<Interact> & _val37 = this->success[_i30][_key36];
+                  {
+                    _val37.clear();
+                    uint32_t _size38;
+                    ::apache::thrift::protocol::TType _etype41;
+                    xfer += iprot->readListBegin(_etype41, _size38);
+                    _val37.resize(_size38);
+                    uint32_t _i42;
+                    for (_i42 = 0; _i42 < _size38; ++_i42)
+                    {
+                      xfer += _val37[_i42].read(iprot);
+                    }
+                    xfer += iprot->readListEnd();
+                  }
+                }
+                xfer += iprot->readMapEnd();
+              }
+            }
+            xfer += iprot->readListEnd();
+          }
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t HandleData_get_all_interacts_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("HandleData_get_all_interacts_result");
+
+  if (this->__isset.success) {
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_LIST, 0);
+    {
+      xfer += oprot->writeListBegin(::apache::thrift::protocol::T_MAP, static_cast<uint32_t>(this->success.size()));
+      std::vector<std::map<int8_t, std::vector<Interact> > > ::const_iterator _iter43;
+      for (_iter43 = this->success.begin(); _iter43 != this->success.end(); ++_iter43)
+      {
+        {
+          xfer += oprot->writeMapBegin(::apache::thrift::protocol::T_BYTE, ::apache::thrift::protocol::T_LIST, static_cast<uint32_t>((*_iter43).size()));
+          std::map<int8_t, std::vector<Interact> > ::const_iterator _iter44;
+          for (_iter44 = (*_iter43).begin(); _iter44 != (*_iter43).end(); ++_iter44)
+          {
+            xfer += oprot->writeByte(_iter44->first);
+            {
+              xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(_iter44->second.size()));
+              std::vector<Interact> ::const_iterator _iter45;
+              for (_iter45 = _iter44->second.begin(); _iter45 != _iter44->second.end(); ++_iter45)
+              {
+                xfer += (*_iter45).write(oprot);
+              }
+              xfer += oprot->writeListEnd();
+            }
+          }
+          xfer += oprot->writeMapEnd();
+        }
+      }
+      xfer += oprot->writeListEnd();
+    }
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t HandleData_get_all_interacts_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_LIST) {
+          {
+            (*(this->success)).clear();
+            uint32_t _size46;
+            ::apache::thrift::protocol::TType _etype49;
+            xfer += iprot->readListBegin(_etype49, _size46);
+            (*(this->success)).resize(_size46);
+            uint32_t _i50;
+            for (_i50 = 0; _i50 < _size46; ++_i50)
+            {
+              {
+                (*(this->success))[_i50].clear();
+                uint32_t _size51;
+                ::apache::thrift::protocol::TType _ktype52;
+                ::apache::thrift::protocol::TType _vtype53;
+                xfer += iprot->readMapBegin(_ktype52, _vtype53, _size51);
+                uint32_t _i55;
+                for (_i55 = 0; _i55 < _size51; ++_i55)
+                {
+                  int8_t _key56;
+                  xfer += iprot->readByte(_key56);
+                  std::vector<Interact> & _val57 = (*(this->success))[_i50][_key56];
+                  {
+                    _val57.clear();
+                    uint32_t _size58;
+                    ::apache::thrift::protocol::TType _etype61;
+                    xfer += iprot->readListBegin(_etype61, _size58);
+                    _val57.resize(_size58);
+                    uint32_t _i62;
+                    for (_i62 = 0; _i62 < _size58; ++_i62)
+                    {
+                      xfer += _val57[_i62].read(iprot);
+                    }
+                    xfer += iprot->readListEnd();
+                  }
+                }
+                xfer += iprot->readMapEnd();
+              }
+            }
+            xfer += iprot->readListEnd();
+          }
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
 uint32_t HandleData_get_entity_interacts_args::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   uint32_t xfer = 0;
@@ -796,26 +1040,26 @@ uint32_t HandleData_get_entity_interacts_result::read(::apache::thrift::protocol
         if (ftype == ::apache::thrift::protocol::T_MAP) {
           {
             this->success.clear();
-            uint32_t _size26;
-            ::apache::thrift::protocol::TType _ktype27;
-            ::apache::thrift::protocol::TType _vtype28;
-            xfer += iprot->readMapBegin(_ktype27, _vtype28, _size26);
-            uint32_t _i30;
-            for (_i30 = 0; _i30 < _size26; ++_i30)
+            uint32_t _size63;
+            ::apache::thrift::protocol::TType _ktype64;
+            ::apache::thrift::protocol::TType _vtype65;
+            xfer += iprot->readMapBegin(_ktype64, _vtype65, _size63);
+            uint32_t _i67;
+            for (_i67 = 0; _i67 < _size63; ++_i67)
             {
-              int8_t _key31;
-              xfer += iprot->readByte(_key31);
-              std::vector<Interact> & _val32 = this->success[_key31];
+              int8_t _key68;
+              xfer += iprot->readByte(_key68);
+              std::vector<Interact> & _val69 = this->success[_key68];
               {
-                _val32.clear();
-                uint32_t _size33;
-                ::apache::thrift::protocol::TType _etype36;
-                xfer += iprot->readListBegin(_etype36, _size33);
-                _val32.resize(_size33);
-                uint32_t _i37;
-                for (_i37 = 0; _i37 < _size33; ++_i37)
+                _val69.clear();
+                uint32_t _size70;
+                ::apache::thrift::protocol::TType _etype73;
+                xfer += iprot->readListBegin(_etype73, _size70);
+                _val69.resize(_size70);
+                uint32_t _i74;
+                for (_i74 = 0; _i74 < _size70; ++_i74)
                 {
-                  xfer += _val32[_i37].read(iprot);
+                  xfer += _val69[_i74].read(iprot);
                 }
                 xfer += iprot->readListEnd();
               }
@@ -849,16 +1093,16 @@ uint32_t HandleData_get_entity_interacts_result::write(::apache::thrift::protoco
     xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_MAP, 0);
     {
       xfer += oprot->writeMapBegin(::apache::thrift::protocol::T_BYTE, ::apache::thrift::protocol::T_LIST, static_cast<uint32_t>(this->success.size()));
-      std::map<int8_t, std::vector<Interact> > ::const_iterator _iter38;
-      for (_iter38 = this->success.begin(); _iter38 != this->success.end(); ++_iter38)
+      std::map<int8_t, std::vector<Interact> > ::const_iterator _iter75;
+      for (_iter75 = this->success.begin(); _iter75 != this->success.end(); ++_iter75)
       {
-        xfer += oprot->writeByte(_iter38->first);
+        xfer += oprot->writeByte(_iter75->first);
         {
-          xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(_iter38->second.size()));
-          std::vector<Interact> ::const_iterator _iter39;
-          for (_iter39 = _iter38->second.begin(); _iter39 != _iter38->second.end(); ++_iter39)
+          xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(_iter75->second.size()));
+          std::vector<Interact> ::const_iterator _iter76;
+          for (_iter76 = _iter75->second.begin(); _iter76 != _iter75->second.end(); ++_iter76)
           {
-            xfer += (*_iter39).write(oprot);
+            xfer += (*_iter76).write(oprot);
           }
           xfer += oprot->writeListEnd();
         }
@@ -896,26 +1140,26 @@ uint32_t HandleData_get_entity_interacts_presult::read(::apache::thrift::protoco
         if (ftype == ::apache::thrift::protocol::T_MAP) {
           {
             (*(this->success)).clear();
-            uint32_t _size40;
-            ::apache::thrift::protocol::TType _ktype41;
-            ::apache::thrift::protocol::TType _vtype42;
-            xfer += iprot->readMapBegin(_ktype41, _vtype42, _size40);
-            uint32_t _i44;
-            for (_i44 = 0; _i44 < _size40; ++_i44)
+            uint32_t _size77;
+            ::apache::thrift::protocol::TType _ktype78;
+            ::apache::thrift::protocol::TType _vtype79;
+            xfer += iprot->readMapBegin(_ktype78, _vtype79, _size77);
+            uint32_t _i81;
+            for (_i81 = 0; _i81 < _size77; ++_i81)
             {
-              int8_t _key45;
-              xfer += iprot->readByte(_key45);
-              std::vector<Interact> & _val46 = (*(this->success))[_key45];
+              int8_t _key82;
+              xfer += iprot->readByte(_key82);
+              std::vector<Interact> & _val83 = (*(this->success))[_key82];
               {
-                _val46.clear();
-                uint32_t _size47;
-                ::apache::thrift::protocol::TType _etype50;
-                xfer += iprot->readListBegin(_etype50, _size47);
-                _val46.resize(_size47);
-                uint32_t _i51;
-                for (_i51 = 0; _i51 < _size47; ++_i51)
+                _val83.clear();
+                uint32_t _size84;
+                ::apache::thrift::protocol::TType _etype87;
+                xfer += iprot->readListBegin(_etype87, _size84);
+                _val83.resize(_size84);
+                uint32_t _i88;
+                for (_i88 = 0; _i88 < _size84; ++_i88)
                 {
-                  xfer += _val46[_i51].read(iprot);
+                  xfer += _val83[_i88].read(iprot);
                 }
                 xfer += iprot->readListEnd();
               }
@@ -1168,6 +1412,63 @@ void HandleDataClient::recv_get_entity_ids(std::map<int8_t, std::vector<int64_t>
     return;
   }
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_entity_ids failed: unknown result");
+}
+
+void HandleDataClient::get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & _return)
+{
+  send_get_all_interacts();
+  recv_get_all_interacts(_return);
+}
+
+void HandleDataClient::send_get_all_interacts()
+{
+  int32_t cseqid = 0;
+  oprot_->writeMessageBegin("get_all_interacts", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  HandleData_get_all_interacts_pargs args;
+  args.write(oprot_);
+
+  oprot_->writeMessageEnd();
+  oprot_->getTransport()->writeEnd();
+  oprot_->getTransport()->flush();
+}
+
+void HandleDataClient::recv_get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & _return)
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(iprot_);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("get_all_interacts") != 0) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  HandleData_get_all_interacts_presult result;
+  result.success = &_return;
+  result.read(iprot_);
+  iprot_->readMessageEnd();
+  iprot_->getTransport()->readEnd();
+
+  if (result.__isset.success) {
+    // _return pointer has now been filled
+    return;
+  }
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "get_all_interacts failed: unknown result");
 }
 
 void HandleDataClient::get_entity_interacts(std::map<int8_t, std::vector<Interact> > & _return, const int64_t entId)
@@ -1460,6 +1761,60 @@ void HandleDataProcessor::process_get_entity_ids(int32_t seqid, ::apache::thrift
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->postWrite(ctx, "HandleData.get_entity_ids", bytes);
+  }
+}
+
+void HandleDataProcessor::process_get_all_interacts(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("HandleData.get_all_interacts", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "HandleData.get_all_interacts");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "HandleData.get_all_interacts");
+  }
+
+  HandleData_get_all_interacts_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "HandleData.get_all_interacts", bytes);
+  }
+
+  HandleData_get_all_interacts_result result;
+  try {
+    iface_->get_all_interacts(result.success);
+    result.__isset.success = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "HandleData.get_all_interacts");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("get_all_interacts", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "HandleData.get_all_interacts");
+  }
+
+  oprot->writeMessageBegin("get_all_interacts", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "HandleData.get_all_interacts", bytes);
   }
 }
 

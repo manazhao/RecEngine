@@ -13,6 +13,8 @@
 using namespace boost;
 using namespace std;
 
+//#define __DEBUG_LOADING__
+
 namespace recsys {
 
 class AmazonJSONDataLoader {

@@ -10,7 +10,7 @@
 
 namespace recsys {
 
-EntityInteraction::entity_interact_map
+EntityInteraction::entity_type_interact_map
 		EntityInteraction::m_entity_type_interact_map;
 
 EntityInteraction::SharedData EntityInteraction::init_shared_data() {
@@ -102,10 +102,8 @@ EntityInteraction::entity_interact_vec_ptr EntityInteraction::query(
 		bool isFrom) {
 	entity_interact_vec_ptr resultVecPtr;
 	if (memoryMode) {
-		if (m_entity_type_interact_map.find(entityId)
-				!= m_entity_type_interact_map.end()
-				&& m_entity_type_interact_map[entityId].find(intType)
-						!= m_entity_type_interact_map[entityId].end())
+		if(entityId < m_entity_type_interact_map.size() && m_entity_type_interact_map[entityId].find(intType)
+				!= m_entity_type_interact_map[entityId].end())
 			resultVecPtr = m_entity_type_interact_map[entityId][intType];
 	} else {
 		prepared_statement_ptr queryStmtPtr =
@@ -139,7 +137,7 @@ EntityInteraction::entity_interact_vec_ptr EntityInteraction::query(
 bool EntityInteraction::entity_interact_exist(
 		Entity::mapped_id_type const& fromId, Entity::mapped_id_type& toId, bool memoryMode) {
 	if(memoryMode){
-		return m_id_id_map[fromId].find(toId) != m_id_id_map[fromId].end();
+		return fromId < m_id_id_map.size() && m_id_id_map[fromId].find(toId) != m_id_id_map[fromId].end();
 	}else{
 		/// make sql query
 		prepared_statement_ptr& queryStmt = m_sharedData.m_queryStmtPtr;

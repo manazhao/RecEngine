@@ -12,6 +12,7 @@
 #include <thrift/transport/TTransportUtils.h>
 #include <armadillo>
 #include "recsys/thrift/cpp/HandleData.h"
+using namespace ::recsys::thrift;
 
 using namespace std;
 using namespace apache::thrift;
@@ -65,8 +66,13 @@ protected:
 	boost::shared_ptr<TTransport> m_transport;
 	boost::shared_ptr<TProtocol> m_protocol;
 	rt::HandleDataClient m_client;
-	std::map<int8_t, std::vector<int64_t> > m_type_entity_id_map;
+	map<int8_t, vector<int64_t> > m_type_entity_id_map;
+	//// interactions for a given entity, categorized by the interaction type
+	/// use vector instead of map for performance purpose
+	vector<map<int8_t,vector<rt::Interact> > > m_entity_type_interacts;
 protected:
+	void _load_entities();
+	void _load_entity_interacts();
 	void _init_from_data_host();
 public:
 	HierarchicalHybridMF();

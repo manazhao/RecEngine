@@ -21,6 +21,7 @@ using boost::shared_ptr;
 using namespace ::recsys::thrift;
 using namespace recsys;
 
+
 class HandleDataHandler: virtual public HandleDataIf {
 protected:
 	void _load_amazon_data() {
@@ -36,10 +37,11 @@ protected:
 				"/home/manazhao/rating/amazon_book_rating/item_profile.json";
 		string ratingFile =
 				"/home/manazhao/rating/amazon_book_rating/book_rating_filter.json";
-
 		AmazonJSONDataLoader amazonDataLoader;
+#ifndef __DEBUG_LOADING__
 		amazonDataLoader.load_author_profile(authorFile);
 		amazonDataLoader.load_item_profile(itemFile);
+#endif
 		amazonDataLoader.load_rating_file(ratingFile);
 	}
 public:
@@ -70,7 +72,7 @@ public:
 		// Your implementation goes here
 		printf("get_entity_ids\n");
 		boost::timer t;
-		for(Entity::entity_ptr_map::iterator iter = Entity::m_entity_map.begin(); iter != Entity::m_entity_map.end(); ++iter){
+		for(Entity::entity_ptr_map::iterator iter = Entity::m_entity_ptr_map.begin(); iter != Entity::m_entity_ptr_map.end(); ++iter){
 			///  get the mapped id and type
 			Entity::mapped_id_type id = iter->first;
 			int8_t type = iter->second->m_type;
@@ -80,11 +82,24 @@ public:
 		cout << "time elapsed:" << t.elapsed() << endl;
 	}
 
+	void get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & _return) {
+	    // Your implementation goes here
+	    printf("get_all_interacts\n");
+	    _return.assign(Entity::m_max_id,map<int8_t, std::vector<Interact> >());
+	    timer t;
+	    for(size_t i = 0; i < _return.size(); i++){
+	    	map<int8_t, std::vector<Interact> > tmpInteracts;
+	    	get_entity_interacts(tmpInteracts,i);
+	    	_return[i] = tmpInteracts;
+	    }
+	    cout << "time elapsed:" << t.elapsed() << endl;
+	}
+
 	void get_entity_interacts(
 			std::map<int8_t, std::vector<Interact> > & _return,
 			const int64_t entId) {
 		// Your implementation goes here
-		printf("get_entity_interacts\n");
+//		printf("get_entity_interacts\n");
 		EntityInteraction::type_interact_map& entIntMap = EntityInteraction::m_entity_type_interact_map[entId];
 		for(EntityInteraction::type_interact_map::iterator iter = entIntMap.begin(); iter != entIntMap.end();++iter){
 			/// extract the interaction value

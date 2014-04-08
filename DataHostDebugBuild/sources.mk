@@ -26,5 +26,4 @@ SUBDIRS := \
 src/recsys/thrift/cpp \
 src/recsys/data \
 src/recsys/algorithm \
-src/recsys/thrift/gen-cpp \
 
