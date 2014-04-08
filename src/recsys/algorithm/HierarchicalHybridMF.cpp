@@ -35,8 +35,7 @@ void HierarchicalHybridMF::_init_from_data_host() {
 
 }
 
-HierarchicalHybridMF::HierarchicalHybridMF() :
-		m_global_bias(0), m_rating_var(0), m_num_users(0), m_num_items(0), m_num_features(
+HierarchicalHybridMF::HierarchicalHybridMF():m_num_users(0), m_num_items(0), m_num_features(
 				0), m_socket(new TSocket("localhost", 9090)), m_transport(
 				new TBufferedTransport(m_socket)), m_protocol(
 				new TBinaryProtocol(m_transport)), m_client(m_protocol) {

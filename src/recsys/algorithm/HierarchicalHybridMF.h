@@ -30,13 +30,33 @@ namespace recsys {
  */
 class HierarchicalHybridMF {
 protected:
-	/// latent mean of all entities
-	mat m_lat_mean;
-	/// latent covariance
-	mat m_lat_cov;
-	float m_global_bias;
-	/// rating variance
-	float m_rating_var;
+	/// model variables
+	/// global bias
+	float m_rating_bias_mean;
+	float m_rating_bias_var;
+	/// mean and covariance for all entities
+	mat m_entity_mean;
+	mat m_entity_cov;
+	colvec m_user_prior_mean_mean;
+	float m_user_prior_mean_var;
+	float m_user_prior_var_apha;
+	float m_user_prior_var_beta;
+
+	colvec m_item_prior_mean_mean;
+	float m_item_prior_mean_var;
+	float m_item_prior_var_apha;
+	float m_item_prior_var_beta;
+
+	/// Gaussian distribution for mean
+	colvec m_feat_prior_mean_mean;
+	float m_feat_prior_mean_var;
+	/// inverse Gamma distribution for variance
+	float m_feat_prior_var_alpha;
+	float m_feat_prior_var_beta;
+	/// rating variance, inverse Gamma distribution
+	float m_rating_var_alpha;
+	float m_rating_var_beta;
+
 	size_t m_num_users;
 	size_t m_num_items;
 	size_t m_num_features;
