@@ -70,7 +70,16 @@ protected:
 	//// interactions for a given entity, categorized by the interaction type
 	/// use vector instead of map for performance purpose
 	vector<map<int8_t,vector<rt::Interact> > > m_entity_type_interacts;
+	/// traIning and testing datasets
+	vector<map<int8_t,vector<rt::Interact> > > m_train_interacts;
+	map<int8_t,set<int64_t> > m_train_ids;
+	vector<map<int8_t,vector<rt::Interact> > > m_test_interacts;
+	map<int8_t,set<int64_t> > m_test_ids;
+	/// cold start users
+	vector<map<int8_t,vector<rt::Interact> > > m_cs_interacts;
+	map<int8_t,set<int64_t> > m_cs_ids;
 protected:
+	void _generate_datasets();
 	void _load_entities();
 	void _load_entity_interacts();
 	void _init_from_data_host();
