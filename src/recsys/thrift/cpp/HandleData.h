@@ -18,7 +18,7 @@ class HandleDataIf {
   virtual void add_entity(std::string& _return, const std::string& entityJson) = 0;
   virtual void add_interaction(std::string& _return, const std::string& interactionJson) = 0;
   virtual void get_recommend_list(std::string& _return, const std::string& userId) = 0;
-  virtual void get_entity_ids(std::map<int8_t, std::vector<int64_t> > & _return) = 0;
+  virtual void get_entity_ids(std::map<int8_t, std::set<int64_t> > & _return) = 0;
   virtual void get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & _return) = 0;
   virtual void get_entity_interacts(std::map<int8_t, std::vector<Interact> > & _return, const int64_t entId) = 0;
 };
@@ -59,7 +59,7 @@ class HandleDataNull : virtual public HandleDataIf {
   void get_recommend_list(std::string& /* _return */, const std::string& /* userId */) {
     return;
   }
-  void get_entity_ids(std::map<int8_t, std::vector<int64_t> > & /* _return */) {
+  void get_entity_ids(std::map<int8_t, std::set<int64_t> > & /* _return */) {
     return;
   }
   void get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & /* _return */) {
@@ -481,19 +481,19 @@ typedef struct _HandleData_get_entity_ids_result__isset {
 class HandleData_get_entity_ids_result {
  public:
 
-  static const char* ascii_fingerprint; // = "E9DF213DE2659CB92519ED04594C1A26";
-  static const uint8_t binary_fingerprint[16]; // = {0xE9,0xDF,0x21,0x3D,0xE2,0x65,0x9C,0xB9,0x25,0x19,0xED,0x04,0x59,0x4C,0x1A,0x26};
+  static const char* ascii_fingerprint; // = "8EF6C661D3CDE575320A98DED2A2D646";
+  static const uint8_t binary_fingerprint[16]; // = {0x8E,0xF6,0xC6,0x61,0xD3,0xCD,0xE5,0x75,0x32,0x0A,0x98,0xDE,0xD2,0xA2,0xD6,0x46};
 
   HandleData_get_entity_ids_result() {
   }
 
   virtual ~HandleData_get_entity_ids_result() throw() {}
 
-  std::map<int8_t, std::vector<int64_t> >  success;
+  std::map<int8_t, std::set<int64_t> >  success;
 
   _HandleData_get_entity_ids_result__isset __isset;
 
-  void __set_success(const std::map<int8_t, std::vector<int64_t> > & val) {
+  void __set_success(const std::map<int8_t, std::set<int64_t> > & val) {
     success = val;
   }
 
@@ -522,13 +522,13 @@ typedef struct _HandleData_get_entity_ids_presult__isset {
 class HandleData_get_entity_ids_presult {
  public:
 
-  static const char* ascii_fingerprint; // = "E9DF213DE2659CB92519ED04594C1A26";
-  static const uint8_t binary_fingerprint[16]; // = {0xE9,0xDF,0x21,0x3D,0xE2,0x65,0x9C,0xB9,0x25,0x19,0xED,0x04,0x59,0x4C,0x1A,0x26};
+  static const char* ascii_fingerprint; // = "8EF6C661D3CDE575320A98DED2A2D646";
+  static const uint8_t binary_fingerprint[16]; // = {0x8E,0xF6,0xC6,0x61,0xD3,0xCD,0xE5,0x75,0x32,0x0A,0x98,0xDE,0xD2,0xA2,0xD6,0x46};
 
 
   virtual ~HandleData_get_entity_ids_presult() throw() {}
 
-  std::map<int8_t, std::vector<int64_t> > * success;
+  std::map<int8_t, std::set<int64_t> > * success;
 
   _HandleData_get_entity_ids_presult__isset __isset;
 
@@ -796,9 +796,9 @@ class HandleDataClient : virtual public HandleDataIf {
   void get_recommend_list(std::string& _return, const std::string& userId);
   void send_get_recommend_list(const std::string& userId);
   void recv_get_recommend_list(std::string& _return);
-  void get_entity_ids(std::map<int8_t, std::vector<int64_t> > & _return);
+  void get_entity_ids(std::map<int8_t, std::set<int64_t> > & _return);
   void send_get_entity_ids();
-  void recv_get_entity_ids(std::map<int8_t, std::vector<int64_t> > & _return);
+  void recv_get_entity_ids(std::map<int8_t, std::set<int64_t> > & _return);
   void get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & _return);
   void send_get_all_interacts();
   void recv_get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & _return);
@@ -893,7 +893,7 @@ class HandleDataMultiface : virtual public HandleDataIf {
     return;
   }
 
-  void get_entity_ids(std::map<int8_t, std::vector<int64_t> > & _return) {
+  void get_entity_ids(std::map<int8_t, std::set<int64_t> > & _return) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {

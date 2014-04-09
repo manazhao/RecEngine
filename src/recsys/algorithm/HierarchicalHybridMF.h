@@ -12,6 +12,8 @@
 #include <thrift/transport/TTransportUtils.h>
 #include <armadillo>
 #include "recsys/thrift/cpp/HandleData.h"
+#include "recsys/algorithm/Dataset.h"
+
 using namespace ::recsys::thrift;
 
 using namespace std;
@@ -66,18 +68,14 @@ protected:
 	boost::shared_ptr<TTransport> m_transport;
 	boost::shared_ptr<TProtocol> m_protocol;
 	rt::HandleDataClient m_client;
-	map<int8_t, vector<int64_t> > m_type_entity_id_map;
-	//// interactions for a given entity, categorized by the interaction type
-	/// use vector instead of map for performance purpose
-	vector<map<int8_t,vector<rt::Interact> > > m_entity_type_interacts;
-	/// traIning and testing datasets
-	vector<map<int8_t,vector<rt::Interact> > > m_train_interacts;
-	map<int8_t,set<int64_t> > m_train_ids;
-	vector<map<int8_t,vector<rt::Interact> > > m_test_interacts;
-	map<int8_t,set<int64_t> > m_test_ids;
-	/// cold start users
-	vector<map<int8_t,vector<rt::Interact> > > m_cs_interacts;
-	map<int8_t,set<int64_t> > m_cs_ids;
+	/// hold all data from the datahost
+	Dataset m_dataset;
+	/// training data set
+	Dataset m_train_dataset;
+	/// testing dataset
+	Dataset m_test_dataset;
+	/// coldstart testing dataset
+	Dataset m_cs_dataset;
 protected:
 	void _generate_datasets();
 	void _load_entities();

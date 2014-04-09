@@ -68,7 +68,7 @@ public:
 		printf("get_recommend_list\n");
 	}
 
-	void get_entity_ids(std::map<int8_t, std::vector<int64_t> > & _return) {
+	void get_entity_ids(std::map<int8_t, std::set<int64_t> > & _return) {
 		// Your implementation goes here
 		printf("get_entity_ids\n");
 		boost::timer t;
@@ -76,8 +76,7 @@ public:
 			///  get the mapped id and type
 			Entity::mapped_id_type id = iter->first;
 			int8_t type = iter->second->m_type;
-//			cout << "mapped id:" << id << ":" << *(iter->second);
-			_return[type].push_back(id);
+			_return[type].insert(id);
 		}
 		cout << "time elapsed:" << t.elapsed() << endl;
 	}
