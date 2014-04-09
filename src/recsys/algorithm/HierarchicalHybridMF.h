@@ -12,7 +12,7 @@
 #include <thrift/transport/TTransportUtils.h>
 #include <armadillo>
 #include "recsys/thrift/cpp/HandleData.h"
-#include "recsys/algorithm/Dataset.h"
+#include "recsys/data/DatasetExt.h"
 
 using namespace ::recsys::thrift;
 
@@ -35,9 +35,6 @@ class HierarchicalHybridMF {
 protected:
 	void _prepare_datasets();
 	void _prepare_model_variables();
-	void _load_entities();
-	void _load_entity_interacts();
-	void _load_data_thrift();
 	void _init();
 public:
 	HierarchicalHybridMF();
@@ -79,13 +76,13 @@ protected:
 	boost::shared_ptr<TProtocol> m_protocol;
 	rt::HandleDataClient m_client;
 	/// hold all data from the datahost
-	Dataset m_dataset;
+	DatasetExt m_dataset;
 	/// training data set
-	Dataset m_train_dataset;
+	DatasetExt m_train_dataset;
 	/// testing dataset
-	Dataset m_test_dataset;
+	DatasetExt m_test_dataset;
 	/// coldstart testing dataset
-	Dataset m_cs_dataset;
+	DatasetExt m_cs_dataset;
 };
 
 } /* namespace recsys */

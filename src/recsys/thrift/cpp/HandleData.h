@@ -18,9 +18,7 @@ class HandleDataIf {
   virtual void add_entity(std::string& _return, const std::string& entityJson) = 0;
   virtual void add_interaction(std::string& _return, const std::string& interactionJson) = 0;
   virtual void get_recommend_list(std::string& _return, const std::string& userId) = 0;
-  virtual void get_entity_ids(std::map<int8_t, std::set<int64_t> > & _return) = 0;
-  virtual void get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & _return) = 0;
-  virtual void get_entity_interacts(std::map<int8_t, std::vector<Interact> > & _return, const int64_t entId) = 0;
+  virtual void get_dataset(Dataset& _return, const DSType::type dsType) = 0;
 };
 
 class HandleDataIfFactory {
@@ -59,13 +57,7 @@ class HandleDataNull : virtual public HandleDataIf {
   void get_recommend_list(std::string& /* _return */, const std::string& /* userId */) {
     return;
   }
-  void get_entity_ids(std::map<int8_t, std::set<int64_t> > & /* _return */) {
-    return;
-  }
-  void get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & /* _return */) {
-    return;
-  }
-  void get_entity_interacts(std::map<int8_t, std::vector<Interact> > & /* _return */, const int64_t /* entId */) {
+  void get_dataset(Dataset& /* _return */, const DSType::type /* dsType */) {
     return;
   }
 };
@@ -430,28 +422,41 @@ class HandleData_get_recommend_list_presult {
 
 };
 
+typedef struct _HandleData_get_dataset_args__isset {
+  _HandleData_get_dataset_args__isset() : dsType(false) {}
+  bool dsType;
+} _HandleData_get_dataset_args__isset;
 
-class HandleData_get_entity_ids_args {
+class HandleData_get_dataset_args {
  public:
 
-  static const char* ascii_fingerprint; // = "99914B932BD37A50B983C5E7C90AE93B";
-  static const uint8_t binary_fingerprint[16]; // = {0x99,0x91,0x4B,0x93,0x2B,0xD3,0x7A,0x50,0xB9,0x83,0xC5,0xE7,0xC9,0x0A,0xE9,0x3B};
+  static const char* ascii_fingerprint; // = "8BBB3D0C3B370CB38F2D1340BB79F0AA";
+  static const uint8_t binary_fingerprint[16]; // = {0x8B,0xBB,0x3D,0x0C,0x3B,0x37,0x0C,0xB3,0x8F,0x2D,0x13,0x40,0xBB,0x79,0xF0,0xAA};
 
-  HandleData_get_entity_ids_args() {
+  HandleData_get_dataset_args() : dsType((DSType::type)0) {
   }
 
-  virtual ~HandleData_get_entity_ids_args() throw() {}
+  virtual ~HandleData_get_dataset_args() throw() {}
 
+  DSType::type dsType;
 
-  bool operator == (const HandleData_get_entity_ids_args & /* rhs */) const
+  _HandleData_get_dataset_args__isset __isset;
+
+  void __set_dsType(const DSType::type val) {
+    dsType = val;
+  }
+
+  bool operator == (const HandleData_get_dataset_args & rhs) const
   {
+    if (!(dsType == rhs.dsType))
+      return false;
     return true;
   }
-  bool operator != (const HandleData_get_entity_ids_args &rhs) const {
+  bool operator != (const HandleData_get_dataset_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const HandleData_get_entity_ids_args & ) const;
+  bool operator < (const HandleData_get_dataset_args & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
@@ -459,304 +464,79 @@ class HandleData_get_entity_ids_args {
 };
 
 
-class HandleData_get_entity_ids_pargs {
+class HandleData_get_dataset_pargs {
  public:
 
-  static const char* ascii_fingerprint; // = "99914B932BD37A50B983C5E7C90AE93B";
-  static const uint8_t binary_fingerprint[16]; // = {0x99,0x91,0x4B,0x93,0x2B,0xD3,0x7A,0x50,0xB9,0x83,0xC5,0xE7,0xC9,0x0A,0xE9,0x3B};
+  static const char* ascii_fingerprint; // = "8BBB3D0C3B370CB38F2D1340BB79F0AA";
+  static const uint8_t binary_fingerprint[16]; // = {0x8B,0xBB,0x3D,0x0C,0x3B,0x37,0x0C,0xB3,0x8F,0x2D,0x13,0x40,0xBB,0x79,0xF0,0xAA};
 
 
-  virtual ~HandleData_get_entity_ids_pargs() throw() {}
+  virtual ~HandleData_get_dataset_pargs() throw() {}
 
+  const DSType::type* dsType;
 
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
 };
 
-typedef struct _HandleData_get_entity_ids_result__isset {
-  _HandleData_get_entity_ids_result__isset() : success(false) {}
+typedef struct _HandleData_get_dataset_result__isset {
+  _HandleData_get_dataset_result__isset() : success(false) {}
   bool success;
-} _HandleData_get_entity_ids_result__isset;
+} _HandleData_get_dataset_result__isset;
 
-class HandleData_get_entity_ids_result {
+class HandleData_get_dataset_result {
  public:
 
-  static const char* ascii_fingerprint; // = "8EF6C661D3CDE575320A98DED2A2D646";
-  static const uint8_t binary_fingerprint[16]; // = {0x8E,0xF6,0xC6,0x61,0xD3,0xCD,0xE5,0x75,0x32,0x0A,0x98,0xDE,0xD2,0xA2,0xD6,0x46};
+  static const char* ascii_fingerprint; // = "13C6067932A06B0CB2398349A6F23B82";
+  static const uint8_t binary_fingerprint[16]; // = {0x13,0xC6,0x06,0x79,0x32,0xA0,0x6B,0x0C,0xB2,0x39,0x83,0x49,0xA6,0xF2,0x3B,0x82};
 
-  HandleData_get_entity_ids_result() {
+  HandleData_get_dataset_result() {
   }
 
-  virtual ~HandleData_get_entity_ids_result() throw() {}
+  virtual ~HandleData_get_dataset_result() throw() {}
 
-  std::map<int8_t, std::set<int64_t> >  success;
+  Dataset success;
 
-  _HandleData_get_entity_ids_result__isset __isset;
+  _HandleData_get_dataset_result__isset __isset;
 
-  void __set_success(const std::map<int8_t, std::set<int64_t> > & val) {
+  void __set_success(const Dataset& val) {
     success = val;
   }
 
-  bool operator == (const HandleData_get_entity_ids_result & rhs) const
+  bool operator == (const HandleData_get_dataset_result & rhs) const
   {
     if (!(success == rhs.success))
       return false;
     return true;
   }
-  bool operator != (const HandleData_get_entity_ids_result &rhs) const {
+  bool operator != (const HandleData_get_dataset_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const HandleData_get_entity_ids_result & ) const;
+  bool operator < (const HandleData_get_dataset_result & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
 };
 
-typedef struct _HandleData_get_entity_ids_presult__isset {
-  _HandleData_get_entity_ids_presult__isset() : success(false) {}
+typedef struct _HandleData_get_dataset_presult__isset {
+  _HandleData_get_dataset_presult__isset() : success(false) {}
   bool success;
-} _HandleData_get_entity_ids_presult__isset;
+} _HandleData_get_dataset_presult__isset;
 
-class HandleData_get_entity_ids_presult {
+class HandleData_get_dataset_presult {
  public:
 
-  static const char* ascii_fingerprint; // = "8EF6C661D3CDE575320A98DED2A2D646";
-  static const uint8_t binary_fingerprint[16]; // = {0x8E,0xF6,0xC6,0x61,0xD3,0xCD,0xE5,0x75,0x32,0x0A,0x98,0xDE,0xD2,0xA2,0xD6,0x46};
+  static const char* ascii_fingerprint; // = "13C6067932A06B0CB2398349A6F23B82";
+  static const uint8_t binary_fingerprint[16]; // = {0x13,0xC6,0x06,0x79,0x32,0xA0,0x6B,0x0C,0xB2,0x39,0x83,0x49,0xA6,0xF2,0x3B,0x82};
 
 
-  virtual ~HandleData_get_entity_ids_presult() throw() {}
+  virtual ~HandleData_get_dataset_presult() throw() {}
 
-  std::map<int8_t, std::set<int64_t> > * success;
+  Dataset* success;
 
-  _HandleData_get_entity_ids_presult__isset __isset;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-
-};
-
-
-class HandleData_get_all_interacts_args {
- public:
-
-  static const char* ascii_fingerprint; // = "99914B932BD37A50B983C5E7C90AE93B";
-  static const uint8_t binary_fingerprint[16]; // = {0x99,0x91,0x4B,0x93,0x2B,0xD3,0x7A,0x50,0xB9,0x83,0xC5,0xE7,0xC9,0x0A,0xE9,0x3B};
-
-  HandleData_get_all_interacts_args() {
-  }
-
-  virtual ~HandleData_get_all_interacts_args() throw() {}
-
-
-  bool operator == (const HandleData_get_all_interacts_args & /* rhs */) const
-  {
-    return true;
-  }
-  bool operator != (const HandleData_get_all_interacts_args &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const HandleData_get_all_interacts_args & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-
-class HandleData_get_all_interacts_pargs {
- public:
-
-  static const char* ascii_fingerprint; // = "99914B932BD37A50B983C5E7C90AE93B";
-  static const uint8_t binary_fingerprint[16]; // = {0x99,0x91,0x4B,0x93,0x2B,0xD3,0x7A,0x50,0xB9,0x83,0xC5,0xE7,0xC9,0x0A,0xE9,0x3B};
-
-
-  virtual ~HandleData_get_all_interacts_pargs() throw() {}
-
-
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-typedef struct _HandleData_get_all_interacts_result__isset {
-  _HandleData_get_all_interacts_result__isset() : success(false) {}
-  bool success;
-} _HandleData_get_all_interacts_result__isset;
-
-class HandleData_get_all_interacts_result {
- public:
-
-  static const char* ascii_fingerprint; // = "20208C94EAAB82EBBF280717EAB03BAD";
-  static const uint8_t binary_fingerprint[16]; // = {0x20,0x20,0x8C,0x94,0xEA,0xAB,0x82,0xEB,0xBF,0x28,0x07,0x17,0xEA,0xB0,0x3B,0xAD};
-
-  HandleData_get_all_interacts_result() {
-  }
-
-  virtual ~HandleData_get_all_interacts_result() throw() {}
-
-  std::vector<std::map<int8_t, std::vector<Interact> > >  success;
-
-  _HandleData_get_all_interacts_result__isset __isset;
-
-  void __set_success(const std::vector<std::map<int8_t, std::vector<Interact> > > & val) {
-    success = val;
-  }
-
-  bool operator == (const HandleData_get_all_interacts_result & rhs) const
-  {
-    if (!(success == rhs.success))
-      return false;
-    return true;
-  }
-  bool operator != (const HandleData_get_all_interacts_result &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const HandleData_get_all_interacts_result & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-typedef struct _HandleData_get_all_interacts_presult__isset {
-  _HandleData_get_all_interacts_presult__isset() : success(false) {}
-  bool success;
-} _HandleData_get_all_interacts_presult__isset;
-
-class HandleData_get_all_interacts_presult {
- public:
-
-  static const char* ascii_fingerprint; // = "20208C94EAAB82EBBF280717EAB03BAD";
-  static const uint8_t binary_fingerprint[16]; // = {0x20,0x20,0x8C,0x94,0xEA,0xAB,0x82,0xEB,0xBF,0x28,0x07,0x17,0xEA,0xB0,0x3B,0xAD};
-
-
-  virtual ~HandleData_get_all_interacts_presult() throw() {}
-
-  std::vector<std::map<int8_t, std::vector<Interact> > > * success;
-
-  _HandleData_get_all_interacts_presult__isset __isset;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-
-};
-
-typedef struct _HandleData_get_entity_interacts_args__isset {
-  _HandleData_get_entity_interacts_args__isset() : entId(false) {}
-  bool entId;
-} _HandleData_get_entity_interacts_args__isset;
-
-class HandleData_get_entity_interacts_args {
- public:
-
-  static const char* ascii_fingerprint; // = "56A59CE7FFAF82BCA8A19FAACDE4FB75";
-  static const uint8_t binary_fingerprint[16]; // = {0x56,0xA5,0x9C,0xE7,0xFF,0xAF,0x82,0xBC,0xA8,0xA1,0x9F,0xAA,0xCD,0xE4,0xFB,0x75};
-
-  HandleData_get_entity_interacts_args() : entId(0) {
-  }
-
-  virtual ~HandleData_get_entity_interacts_args() throw() {}
-
-  int64_t entId;
-
-  _HandleData_get_entity_interacts_args__isset __isset;
-
-  void __set_entId(const int64_t val) {
-    entId = val;
-  }
-
-  bool operator == (const HandleData_get_entity_interacts_args & rhs) const
-  {
-    if (!(entId == rhs.entId))
-      return false;
-    return true;
-  }
-  bool operator != (const HandleData_get_entity_interacts_args &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const HandleData_get_entity_interacts_args & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-
-class HandleData_get_entity_interacts_pargs {
- public:
-
-  static const char* ascii_fingerprint; // = "56A59CE7FFAF82BCA8A19FAACDE4FB75";
-  static const uint8_t binary_fingerprint[16]; // = {0x56,0xA5,0x9C,0xE7,0xFF,0xAF,0x82,0xBC,0xA8,0xA1,0x9F,0xAA,0xCD,0xE4,0xFB,0x75};
-
-
-  virtual ~HandleData_get_entity_interacts_pargs() throw() {}
-
-  const int64_t* entId;
-
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-typedef struct _HandleData_get_entity_interacts_result__isset {
-  _HandleData_get_entity_interacts_result__isset() : success(false) {}
-  bool success;
-} _HandleData_get_entity_interacts_result__isset;
-
-class HandleData_get_entity_interacts_result {
- public:
-
-  static const char* ascii_fingerprint; // = "E648F115D32F7E7B7E3257AC876CAB29";
-  static const uint8_t binary_fingerprint[16]; // = {0xE6,0x48,0xF1,0x15,0xD3,0x2F,0x7E,0x7B,0x7E,0x32,0x57,0xAC,0x87,0x6C,0xAB,0x29};
-
-  HandleData_get_entity_interacts_result() {
-  }
-
-  virtual ~HandleData_get_entity_interacts_result() throw() {}
-
-  std::map<int8_t, std::vector<Interact> >  success;
-
-  _HandleData_get_entity_interacts_result__isset __isset;
-
-  void __set_success(const std::map<int8_t, std::vector<Interact> > & val) {
-    success = val;
-  }
-
-  bool operator == (const HandleData_get_entity_interacts_result & rhs) const
-  {
-    if (!(success == rhs.success))
-      return false;
-    return true;
-  }
-  bool operator != (const HandleData_get_entity_interacts_result &rhs) const {
-    return !(*this == rhs);
-  }
-
-  bool operator < (const HandleData_get_entity_interacts_result & ) const;
-
-  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
-  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
-
-};
-
-typedef struct _HandleData_get_entity_interacts_presult__isset {
-  _HandleData_get_entity_interacts_presult__isset() : success(false) {}
-  bool success;
-} _HandleData_get_entity_interacts_presult__isset;
-
-class HandleData_get_entity_interacts_presult {
- public:
-
-  static const char* ascii_fingerprint; // = "E648F115D32F7E7B7E3257AC876CAB29";
-  static const uint8_t binary_fingerprint[16]; // = {0xE6,0x48,0xF1,0x15,0xD3,0x2F,0x7E,0x7B,0x7E,0x32,0x57,0xAC,0x87,0x6C,0xAB,0x29};
-
-
-  virtual ~HandleData_get_entity_interacts_presult() throw() {}
-
-  std::map<int8_t, std::vector<Interact> > * success;
-
-  _HandleData_get_entity_interacts_presult__isset __isset;
+  _HandleData_get_dataset_presult__isset __isset;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
@@ -796,15 +576,9 @@ class HandleDataClient : virtual public HandleDataIf {
   void get_recommend_list(std::string& _return, const std::string& userId);
   void send_get_recommend_list(const std::string& userId);
   void recv_get_recommend_list(std::string& _return);
-  void get_entity_ids(std::map<int8_t, std::set<int64_t> > & _return);
-  void send_get_entity_ids();
-  void recv_get_entity_ids(std::map<int8_t, std::set<int64_t> > & _return);
-  void get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & _return);
-  void send_get_all_interacts();
-  void recv_get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & _return);
-  void get_entity_interacts(std::map<int8_t, std::vector<Interact> > & _return, const int64_t entId);
-  void send_get_entity_interacts(const int64_t entId);
-  void recv_get_entity_interacts(std::map<int8_t, std::vector<Interact> > & _return);
+  void get_dataset(Dataset& _return, const DSType::type dsType);
+  void send_get_dataset(const DSType::type dsType);
+  void recv_get_dataset(Dataset& _return);
  protected:
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> piprot_;
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> poprot_;
@@ -823,18 +597,14 @@ class HandleDataProcessor : public ::apache::thrift::TDispatchProcessor {
   void process_add_entity(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_add_interaction(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get_recommend_list(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_get_entity_ids(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_get_all_interacts(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_get_entity_interacts(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_get_dataset(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
  public:
   HandleDataProcessor(boost::shared_ptr<HandleDataIf> iface) :
     iface_(iface) {
     processMap_["add_entity"] = &HandleDataProcessor::process_add_entity;
     processMap_["add_interaction"] = &HandleDataProcessor::process_add_interaction;
     processMap_["get_recommend_list"] = &HandleDataProcessor::process_get_recommend_list;
-    processMap_["get_entity_ids"] = &HandleDataProcessor::process_get_entity_ids;
-    processMap_["get_all_interacts"] = &HandleDataProcessor::process_get_all_interacts;
-    processMap_["get_entity_interacts"] = &HandleDataProcessor::process_get_entity_interacts;
+    processMap_["get_dataset"] = &HandleDataProcessor::process_get_dataset;
   }
 
   virtual ~HandleDataProcessor() {}
@@ -893,33 +663,13 @@ class HandleDataMultiface : virtual public HandleDataIf {
     return;
   }
 
-  void get_entity_ids(std::map<int8_t, std::set<int64_t> > & _return) {
+  void get_dataset(Dataset& _return, const DSType::type dsType) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->get_entity_ids(_return);
+      ifaces_[i]->get_dataset(_return, dsType);
     }
-    ifaces_[i]->get_entity_ids(_return);
-    return;
-  }
-
-  void get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & _return) {
-    size_t sz = ifaces_.size();
-    size_t i = 0;
-    for (; i < (sz - 1); ++i) {
-      ifaces_[i]->get_all_interacts(_return);
-    }
-    ifaces_[i]->get_all_interacts(_return);
-    return;
-  }
-
-  void get_entity_interacts(std::map<int8_t, std::vector<Interact> > & _return, const int64_t entId) {
-    size_t sz = ifaces_.size();
-    size_t i = 0;
-    for (; i < (sz - 1); ++i) {
-      ifaces_[i]->get_entity_interacts(_return, entId);
-    }
-    ifaces_[i]->get_entity_interacts(_return, entId);
+    ifaces_[i]->get_dataset(_return, dsType);
     return;
   }
 

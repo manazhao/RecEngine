@@ -7,6 +7,7 @@ CPP_SRCS += \
 ../src/recsys/data/AmazonJSONDataLoader.cpp \
 ../src/recsys/data/AmazonJSONDataLoader_test.cpp \
 ../src/recsys/data/AppConfig.cpp \
+../src/recsys/data/DatasetExt.cpp \
 ../src/recsys/data/Entity.cpp \
 ../src/recsys/data/EntityInteraction.cpp \
 ../src/recsys/data/EntityInteraction_test.cpp \
@@ -25,6 +26,7 @@ OBJS += \
 ./src/recsys/data/AmazonJSONDataLoader.o \
 ./src/recsys/data/AmazonJSONDataLoader_test.o \
 ./src/recsys/data/AppConfig.o \
+./src/recsys/data/DatasetExt.o \
 ./src/recsys/data/Entity.o \
 ./src/recsys/data/EntityInteraction.o \
 ./src/recsys/data/EntityInteraction_test.o \
@@ -43,6 +45,7 @@ CPP_DEPS += \
 ./src/recsys/data/AmazonJSONDataLoader.d \
 ./src/recsys/data/AmazonJSONDataLoader_test.d \
 ./src/recsys/data/AppConfig.d \
+./src/recsys/data/DatasetExt.d \
 ./src/recsys/data/Entity.d \
 ./src/recsys/data/EntityInteraction.d \
 ./src/recsys/data/EntityInteraction_test.d \

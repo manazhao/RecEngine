@@ -2,7 +2,10 @@
 // You should copy it to another filename to avoid overwriting it.
 
 #include "HandleData.h"
+#include "recsys/data/DatasetExt.h"
+#include <boost/shared_ptr.hpp>
 #include <boost/timer.hpp>
+#include <boost/program_options.hpp>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TSimpleServer.h>
 #include <thrift/transport/TServerSocket.h>
@@ -20,36 +23,29 @@ using namespace ::apache::thrift::server;
 using boost::shared_ptr;
 using namespace ::recsys::thrift;
 using namespace recsys;
-
+using namespace boost;
+namespace po = boost::program_options;
 
 class HandleDataHandler: virtual public HandleDataIf {
 protected:
-	void _load_amazon_data() {
-//		string authorFile =
-//				"/home/qzhao2/data/amazon-yms/ratings/processed/author_profile.json";
-//		string itemFile =
-//				"/home/qzhao2/data/amazon-yms/ratings/processed/item_profile.json";
-//		string ratingFile =
-//				"/home/qzhao2/data/amazon-yms/ratings/processed/book_rating_filter.json";
-		string authorFile =
-				"/home/manazhao/rating/amazon_book_rating/author_profile.json";
-		string itemFile =
-				"/home/manazhao/rating/amazon_book_rating/item_profile.json";
-		string ratingFile =
-				"/home/manazhao/rating/amazon_book_rating/book_rating_filter.json";
-		AmazonJSONDataLoader amazonDataLoader;
-#ifndef __DEBUG_LOADING__
-		amazonDataLoader.load_author_profile(authorFile);
-		amazonDataLoader.load_item_profile(itemFile);
-#endif
-		amazonDataLoader.load_rating_file(ratingFile);
-	}
+	AmazonJSONDataLoader m_amazon_data_loader;
 public:
-	HandleDataHandler() {
+	HandleDataHandler(string const& authorFile, string const& itemFile,
+			string const& ratingFile) :
+			m_amazon_data_loader(authorFile, itemFile, ratingFile) {
 		// Your initialization goes here
-		cout << "loading Amazon book rating data..." << endl;
-		_load_amazon_data();
-		cout << "loading finished, ready to take request..." << endl;
+		cout
+				<< "############### loading Amazon book rating data ###############"
+				<< endl;
+#ifndef __DEBUG_LOADING__
+		m_amazon_data_loader.load_author_profile();
+		m_amazon_data_loader.load_item_profile();
+#endif
+		m_amazon_data_loader.load_rating_file();
+		m_amazon_data_loader.prepare_datasets();
+		cout
+				<< ">>>>>>>>>>>>>>> All done, ready to take request >>>>>>>>>>>>>>>"
+				<< endl;
 	}
 
 	void add_entity(std::string& _return, const std::string& entityJson) {
@@ -68,60 +64,48 @@ public:
 		printf("get_recommend_list\n");
 	}
 
-	void get_entity_ids(std::map<int8_t, std::set<int64_t> > & _return) {
+	void get_dataset(Dataset& _return, const DSType::type dsType) {
 		// Your implementation goes here
-		printf("get_entity_ids\n");
-		boost::timer t;
-		for(Entity::entity_ptr_map::iterator iter = Entity::m_entity_ptr_map.begin(); iter != Entity::m_entity_ptr_map.end(); ++iter){
-			///  get the mapped id and type
-			Entity::mapped_id_type id = iter->first;
-			int8_t type = iter->second->m_type;
-			_return[type].insert(id);
-		}
-		cout << "time elapsed:" << t.elapsed() << endl;
+		printf("get_dataset\n");
+		_return = m_amazon_data_loader.get_data_set(dsType);
 	}
 
-	void get_all_interacts(std::vector<std::map<int8_t, std::vector<Interact> > > & _return) {
-	    // Your implementation goes here
-	    printf("get_all_interacts\n");
-	    _return.assign(Entity::m_max_id,map<int8_t, std::vector<Interact> >());
-	    timer t;
-	    for(size_t i = 0; i < _return.size(); i++){
-	    	map<int8_t, std::vector<Interact> > tmpInteracts;
-	    	get_entity_interacts(tmpInteracts,i);
-	    	_return[i] = tmpInteracts;
-	    }
-	    cout << "time elapsed:" << t.elapsed() << endl;
-	}
-
-	void get_entity_interacts(
-			std::map<int8_t, std::vector<Interact> > & _return,
-			const int64_t entId) {
-		// Your implementation goes here
-//		printf("get_entity_interacts\n");
-		EntityInteraction::type_interact_map& entIntMap = EntityInteraction::m_entity_type_interact_map[entId];
-		for(EntityInteraction::type_interact_map::iterator iter = entIntMap.begin(); iter != entIntMap.end();++iter){
-			/// extract the interaction value
-			int8_t intType = iter->first;
-			EntityInteraction::entity_interact_vec_ptr& interactVecPtr = iter->second;
-			if(interactVecPtr){
-				for(EntityInteraction::entity_interact_vec::iterator iter1 = interactVecPtr->begin(); iter1 < interactVecPtr->end(); ++iter1){
-					EntityInteraction& tmpInteract = **iter1;
-					Interact resultInteract;
-					Entity::mapped_id_type fromId = tmpInteract.m_from_entity->m_mapped_id;
-					Entity::mapped_id_type toId = tmpInteract.m_to_entity->m_mapped_id;
-					resultInteract.ent_id = (fromId == entId ? toId : fromId);
-					resultInteract.ent_val = tmpInteract.m_val;
-					_return[intType].push_back(resultInteract);
-				}
-			}
-		}
-	}
 };
 
+void parse_input_files(int argc, char** argv, string & authorFile,
+		string & itemFile, string & ratingFile) {
+	try {
+		po::options_description desc(
+				"Load Amazon data into main memory and share with other applications through thrift interface");
+		desc.add_options()("help", "help message on use this application")(
+				"author-file,a", po::value<string>(&authorFile)->required(),
+				"amazon author file")("item-file,i",
+				po::value<string>(&itemFile)->required(), "amazon item file")(
+				"rating-file,r", po::value<string>(&ratingFile)->required(),
+				"amazon rating file");
+		po::variables_map vm;
+		po::store(po::parse_command_line(argc, argv, desc), vm);
+		if (vm.count("help")) {
+			cout << desc << "\n";
+			exit(1);
+		}
+		/// check all required options are provided
+		vm.notify();
+	} catch (std::exception& e) {
+		cerr << "Error:" << e.what() << endl;
+		exit(1);
+	}
+
+}
+
 int main(int argc, char **argv) {
+	string amazonAuthorFile, amazonItemFile, amazonRatingFile;
+	parse_input_files(argc, argv, amazonAuthorFile, amazonItemFile,
+			amazonRatingFile);
 	int port = 9090;
-	shared_ptr<HandleDataHandler> handler(new HandleDataHandler());
+	shared_ptr<HandleDataHandler> handler(
+			new HandleDataHandler(amazonAuthorFile, amazonItemFile,
+					amazonRatingFile));
 	shared_ptr<TProcessor> processor(new HandleDataProcessor(handler));
 	shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
 	shared_ptr<TTransportFactory> transportFactory(

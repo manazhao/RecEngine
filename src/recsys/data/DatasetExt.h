@@ -15,30 +15,23 @@
 #include <recsys/data/EntityInteraction.h>
 #include "recsys/thrift/cpp/HandleData.h"
 using namespace ::recsys::thrift;
+namespace rt=::recsys::thrift;
 
 using namespace std;
 namespace recsys {
 
-class Dataset {
+class DatasetExt : public rt::Dataset{
 protected:
 	void _filter_entity_interaction_helper(int8_t const& type,
 			int64_t const& from_ent_id, Interact const& interact);
 public:
-	Dataset(int64_t const& maxId = 0);
+	DatasetExt(int64_t const& numEntities = 0);
 	void add_entity(int8_t const& type, int64_t const& id);
 	inline bool entity_exist(int64_t const& id) {
-		return m_ent_ids.find(id) != m_ent_ids.end();
+		return ent_ids.find(id) != ent_ids.end();
 	}
-	void filter_interaction(
+	void filter_entity_interactions(
 			vector<map<int8_t, vector<Interact> > > const& entTypeInteractions);
-	~Dataset() {
-
-	}
-public:
-	/// entity id list for each type of entity
-	map<int8_t, set<int64_t> > m_type_ent_ids;
-	set<int64_t> m_ent_ids;
-	vector<map<int8_t, vector<Interact> > > m_ent_type_interacts;
 };
 
 }

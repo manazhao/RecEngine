@@ -21,3 +21,4 @@ RecEngine
 DataHostThrift
 /DataHostDebugBuild
 /RecAlgorithmReleaseBuild
+/DataHostReleaseBuild

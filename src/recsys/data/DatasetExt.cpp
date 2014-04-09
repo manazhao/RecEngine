@@ -5,24 +5,24 @@
  *      Author: manazhao
  */
 
-#include "Dataset.h"
+#include "DatasetExt.h"
 
 namespace recsys {
 
-Dataset::Dataset(int64_t const& maxId) :
-	m_ent_type_interacts(maxId) {
+DatasetExt::DatasetExt(int64_t const& numEntities){
+	ent_type_interacts.resize(numEntities);
 }
 
-void Dataset::add_entity(int8_t const& type, int64_t const& id) {
-	m_type_ent_ids[type].insert(id);
-	m_ent_ids.insert(id);
+void DatasetExt::add_entity(int8_t const& type, int64_t const& id) {
+	type_ent_ids[type].insert(id);
+	ent_ids.insert(id);
 }
 
-void Dataset::filter_interaction(
+void DatasetExt::filter_entity_interactions(
 		vector<map<int8_t, vector<Interact> > > const& entTypeInteractions) {
 	/// only keep those interactions the both entities of which are in the entity id set
-	for (set<int64_t>::iterator iter = m_ent_ids.begin(); iter
-			!= m_ent_ids.end(); ++iter) {
+	for (set<int64_t>::iterator iter = ent_ids.begin(); iter
+			!= ent_ids.end(); ++iter) {
 		/// get the interactions
 		int64_t fromEntId = *iter;
 		map<int8_t, vector<Interact> > const& tmpTypeInteracts =
@@ -39,11 +39,11 @@ void Dataset::filter_interaction(
 	}
 }
 
-void Dataset::_filter_entity_interaction_helper(int8_t const& type,
+void DatasetExt::_filter_entity_interaction_helper(int8_t const& type,
 		int64_t const& from_ent_id, Interact const& interact) {
 	/// check the existence of interaction
 	if (entity_exist(from_ent_id) && entity_exist(interact.ent_id)) {
-		m_ent_type_interacts[from_ent_id][type].push_back(interact);
+		ent_type_interacts[from_ent_id][type].push_back(interact);
 	}
 }
 

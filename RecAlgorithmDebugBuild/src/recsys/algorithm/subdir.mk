@@ -4,7 +4,6 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/recsys/algorithm/Dataset.cpp \
 ../src/recsys/algorithm/FeatureObject.cpp \
 ../src/recsys/algorithm/Feedback.cpp \
 ../src/recsys/algorithm/HierarchicalHybridMF.cpp \
@@ -18,7 +17,6 @@ CPP_SRCS += \
 ../src/recsys/algorithm/main.cpp 
 
 OBJS += \
-./src/recsys/algorithm/Dataset.o \
 ./src/recsys/algorithm/FeatureObject.o \
 ./src/recsys/algorithm/Feedback.o \
 ./src/recsys/algorithm/HierarchicalHybridMF.o \
@@ -32,7 +30,6 @@ OBJS += \
 ./src/recsys/algorithm/main.o 
 
 CPP_DEPS += \
-./src/recsys/algorithm/Dataset.d \
 ./src/recsys/algorithm/FeatureObject.d \
 ./src/recsys/algorithm/Feedback.d \
 ./src/recsys/algorithm/HierarchicalHybridMF.d \
@@ -50,7 +47,7 @@ CPP_DEPS += \
 src/recsys/algorithm/%.o: ../src/recsys/algorithm/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -I"/home/manazhao/git/RecEngine/src" -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -I"/home/qzhao2/git/RecEngine/src" -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

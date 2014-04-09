@@ -17,6 +17,17 @@
 
 namespace recsys { namespace thrift {
 
+struct DSType {
+  enum type {
+    DS_ALL = 0,
+    DS_TRAIN = 1,
+    DS_TEST = 2,
+    DS_CS = 3
+  };
+};
+
+extern const std::map<int, const char*> _DSType_VALUES_TO_NAMES;
+
 typedef struct _Interact__isset {
   _Interact__isset() : ent_id(false), ent_val(false) {}
   bool ent_id;
@@ -67,6 +78,65 @@ class Interact {
 };
 
 void swap(Interact &a, Interact &b);
+
+typedef struct _Dataset__isset {
+  _Dataset__isset() : type_ent_ids(false), ent_ids(false), ent_type_interacts(false) {}
+  bool type_ent_ids;
+  bool ent_ids;
+  bool ent_type_interacts;
+} _Dataset__isset;
+
+class Dataset {
+ public:
+
+  static const char* ascii_fingerprint; // = "FB6671B65EB56CC7DB3CAA10D6B3EFB5";
+  static const uint8_t binary_fingerprint[16]; // = {0xFB,0x66,0x71,0xB6,0x5E,0xB5,0x6C,0xC7,0xDB,0x3C,0xAA,0x10,0xD6,0xB3,0xEF,0xB5};
+
+  Dataset() {
+  }
+
+  virtual ~Dataset() throw() {}
+
+  std::map<int8_t, std::set<int64_t> >  type_ent_ids;
+  std::set<int64_t>  ent_ids;
+  std::vector<std::map<int8_t, std::vector<Interact> > >  ent_type_interacts;
+
+  _Dataset__isset __isset;
+
+  void __set_type_ent_ids(const std::map<int8_t, std::set<int64_t> > & val) {
+    type_ent_ids = val;
+  }
+
+  void __set_ent_ids(const std::set<int64_t> & val) {
+    ent_ids = val;
+  }
+
+  void __set_ent_type_interacts(const std::vector<std::map<int8_t, std::vector<Interact> > > & val) {
+    ent_type_interacts = val;
+  }
+
+  bool operator == (const Dataset & rhs) const
+  {
+    if (!(type_ent_ids == rhs.type_ent_ids))
+      return false;
+    if (!(ent_ids == rhs.ent_ids))
+      return false;
+    if (!(ent_type_interacts == rhs.ent_type_interacts))
+      return false;
+    return true;
+  }
+  bool operator != (const Dataset &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Dataset & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+void swap(Dataset &a, Dataset &b);
 
 }} // namespace
 

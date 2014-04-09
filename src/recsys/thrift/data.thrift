@@ -14,13 +14,23 @@ struct Interact{
 3: double ent_val
 }
 
+enum DSType{
+DS_ALL, /// all data
+DS_TRAIN, /// for modeling training
+DS_TEST, /// for model testing
+DS_CS /// for coldstart evaluation
+}
+
+struct Dataset{
+1: map<byte,set<i64> > type_ent_ids,
+2: set<i64> ent_ids,
+3: list<map<byte,list<Interact>>> ent_type_interacts
+}
 
 service HandleData{
 string add_entity(1:string entityJson),
 string add_interaction(1:string interactionJson),
 string get_recommend_list(1:string userId),
-map<byte,set<i64> > get_entity_ids(),
-list<map<byte,list<Interact> > > get_all_interacts(),
-map<byte,list<Interact> > get_entity_interacts(1:i64 entId),
+Dataset get_dataset(1:DSType dsType),
 }
 
