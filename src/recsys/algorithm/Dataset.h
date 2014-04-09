@@ -20,21 +20,25 @@ using namespace std;
 namespace recsys {
 
 class Dataset {
+protected:
+	void _filter_entity_interaction_helper(int8_t const& type,
+			int64_t const& from_ent_id, Interact const& interact);
+public:
+	Dataset(int64_t const& maxId = 0);
+	void add_entity(int8_t const& type, int64_t const& id);
+	inline bool entity_exist(int64_t const& id) {
+		return m_ent_ids.find(id) != m_ent_ids.end();
+	}
+	void filter_interaction(
+			vector<map<int8_t, vector<Interact> > > const& entTypeInteractions);
+	~Dataset() {
+
+	}
 public:
 	/// entity id list for each type of entity
 	map<int8_t, set<int64_t> > m_type_ent_ids;
-	///
+	set<int64_t> m_ent_ids;
 	vector<map<int8_t, vector<Interact> > > m_ent_type_interacts;
-	vector<set<int64_t> > m_id_id_map;
-public:
-	Dataset(int64_t const& maxId = 0);
-	void add_entity(ushort const& type, int64_t const& id);
-	void add_entity_interaction(ushort const& type, int64_t const& from_ent_id,
-			Interact const& interact);
-	void build_interaction_lookup();
-	~Dataset(){
-
-	}
 };
 
 }

@@ -53,13 +53,13 @@ EntityInteraction::SharedData EntityInteraction::init_shared_data() {
 EntityInteraction::SharedData EntityInteraction::m_sharedData;
 EntityInteraction::id_id_map EntityInteraction::m_id_id_map;
 
-EntityInteraction::EntityInteraction(ushort const& type, float val,
+EntityInteraction::EntityInteraction(int8_t const& type, float val,
 		js::Object const& desc, bool memoryMode) :
 	m_type(type), m_val(val), m_desc(desc),
 			m_memory_mode(memoryMode) {
 }
 
-EntityInteraction::EntityInteraction(ushort const& type,
+EntityInteraction::EntityInteraction(int8_t const& type,
 		js::Object const& desc, bool memoryMode) :
 	m_type(type), m_val(0), m_desc(desc),
 			m_memory_mode(memoryMode) {
@@ -67,26 +67,26 @@ EntityInteraction::EntityInteraction(ushort const& type,
 
 
 Entity::entity_ptr EntityInteraction::_index_entity(string const& id,
-		ushort type, js::Object const& val) {
+		int8_t type, js::Object const& val) {
 	Entity entity(id, type, val, m_memory_mode);
 	Entity::entity_ptr entityPtr = entity.index_if_not_exist();
 	return entityPtr;
 }
 
-void EntityInteraction::add_from_entity(string const& id, ushort type,
+void EntityInteraction::add_from_entity(string const& id, int8_t type,
 		js::Object const& val) {
 	/// index the entity by its internal id
 	m_from_entity = _index_entity(id, type, val);
 }
 
-void EntityInteraction::add_to_entity(string const& id, ushort type,
+void EntityInteraction::add_to_entity(string const& id, int8_t type,
 		js::Object const& val) {
 	m_to_entity = _index_entity(id, type, val);
 }
 
 EntityInteraction::entity_interact_vec_ptr EntityInteraction::query(
-		string const& entityName, ushort const& entityType,
-		ushort const& intType, bool memoryMode, bool isFrom) {
+		string const& entityName, int8_t const& entityType,
+		int8_t const& intType, bool memoryMode, bool isFrom) {
 	// get the mapped id given the entityName and entityType
 	entity_interact_vec_ptr resultVecPtr;
 	Entity entity(entityName, entityType, js::Object(), memoryMode);
@@ -98,7 +98,7 @@ EntityInteraction::entity_interact_vec_ptr EntityInteraction::query(
 }
 
 EntityInteraction::entity_interact_vec_ptr EntityInteraction::query(
-		size_t const& entityId, ushort const& intType, bool memoryMode,
+		size_t const& entityId, int8_t const& intType, bool memoryMode,
 		bool isFrom) {
 	entity_interact_vec_ptr resultVecPtr;
 	if (memoryMode) {
@@ -114,7 +114,7 @@ EntityInteraction::entity_interact_vec_ptr EntityInteraction::query(
 		auto_ptr<ResultSet> rs(queryStmtPtr->executeQuery());
 		resultVecPtr.reset(new entity_interact_vec());
 		while (rs->next()) {
-			ushort type = rs->getInt("type");
+			int8_t type = rs->getInt("type");
 			float val = rs->getDouble("value");
 			string desc = rs->getString("desc");
 			entity_interact_ptr tmpPtr(

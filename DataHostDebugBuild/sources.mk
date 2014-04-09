@@ -25,5 +25,4 @@ C_UPPER_DEPS :=
 SUBDIRS := \
 src/recsys/thrift/cpp \
 src/recsys/data \
-src/recsys/algorithm \
 

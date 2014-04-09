@@ -10,34 +10,39 @@
 namespace recsys {
 
 Dataset::Dataset(int64_t const& maxId) :
-	m_ent_type_interacts(maxId),
-			m_id_id_map(maxId, set<int64_t> ()) {
+	m_ent_type_interacts(maxId) {
 }
 
-void Dataset::add_entity(ushort const& type, int64_t const& id) {
+void Dataset::add_entity(int8_t const& type, int64_t const& id) {
 	m_type_ent_ids[type].insert(id);
+	m_ent_ids.insert(id);
 }
 
-void Dataset::build_interaction_lookup(){
-	m_id_id_map.clear();
-	m_id_id_map.resize(m_ent_type_interacts.size());
-	for(size_t i = 0; i < m_ent_type_interacts.size(); i++){
-		map<int8_t,vector<Interact> >& typeInteracts = m_ent_type_interacts[i];
-		for(map<int8_t, vector<Interact> >::iterator iter = typeInteracts.begin(); iter != typeInteracts.end(); ++iter){
-			for(vector<Interact>::iterator iter2 = iter->second.begin(); iter2 < iter->second.end(); ++iter2){
-				m_id_id_map[i].insert(iter2->ent_id);
+void Dataset::filter_interaction(
+		vector<map<int8_t, vector<Interact> > > const& entTypeInteractions) {
+	/// only keep those interactions the both entities of which are in the entity id set
+	for (set<int64_t>::iterator iter = m_ent_ids.begin(); iter
+			!= m_ent_ids.end(); ++iter) {
+		/// get the interactions
+		int64_t fromEntId = *iter;
+		map<int8_t, vector<Interact> > const& tmpTypeInteracts =
+				entTypeInteractions[*iter];
+		for (map<int8_t, vector<Interact> >::const_iterator iter1 =
+				tmpTypeInteracts.begin(); iter1 != tmpTypeInteracts.end(); ++iter1) {
+			int8_t intType = iter1->first;
+			for (vector<Interact>::const_iterator iter2 = iter1->second.begin(); iter2
+					< iter1->second.end(); ++iter2) {
+				_filter_entity_interaction_helper(intType, fromEntId,
+						*iter2);
 			}
 		}
 	}
 }
 
-void Dataset::add_entity_interaction(ushort const& type, int64_t const& from_ent_id,
-		Interact const& interact) {
+void Dataset::_filter_entity_interaction_helper(int8_t const& type,
+		int64_t const& from_ent_id, Interact const& interact) {
 	/// check the existence of interaction
-	if (m_id_id_map[from_ent_id].find(interact.ent_id)
-			!= m_id_id_map[from_ent_id].end()) {
-		m_id_id_map[from_ent_id].insert(interact.ent_id);
-		/// add the entity interaction
+	if (entity_exist(from_ent_id) && entity_exist(interact.ent_id)) {
 		m_ent_type_interacts[from_ent_id][type].push_back(interact);
 	}
 }

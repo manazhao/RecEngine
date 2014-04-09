@@ -156,7 +156,7 @@ bool Entity::retrieve() {
 	return found;
 }
 
-void Entity::get_mapped_id(string const& name, ushort const& type, bool& exist, size_t& mappedId, bool memoryMode){
+void Entity::get_mapped_id(string const& name, int8_t const& type, bool& exist, size_t& mappedId, bool memoryMode){
 	if(memoryMode){
 		/// get the composite key
 		string cKey = create_composit_key(name,type);

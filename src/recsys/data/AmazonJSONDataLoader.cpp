@@ -61,7 +61,7 @@ void AmazonJSONDataLoader::load_author_profile(string const& fileName){
 		if(authorObj.Find("age") != authorObj.End()){
 			js::String age = authorObj["age"];
 			float ageF = lexical_cast<float>(age.Value());
-			ushort ageI = (ushort)ageF / 5;
+			int8_t ageI = (int8_t)ageF / 5;
 			Entity tmpEntity("ag_" + lexical_cast<string>(ageI), Entity::ENT_FEATURE);
 			Entity::entity_ptr tmpEntityPtr = tmpEntity.index_if_not_exist();
 			EntityInteraction tmpEI(EntityInteraction::ADD_FEATURE,JSObjectWrapper().add("v",1));

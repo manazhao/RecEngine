@@ -33,6 +33,16 @@ namespace recsys {
  */
 class HierarchicalHybridMF {
 protected:
+	void _prepare_datasets();
+	void _prepare_model_variables();
+	void _load_entities();
+	void _load_entity_interacts();
+	void _load_data_thrift();
+	void _init();
+public:
+	HierarchicalHybridMF();
+	virtual ~HierarchicalHybridMF();
+protected:
 	/// model variables
 	/// global bias
 	float m_rating_bias_mean;
@@ -76,14 +86,6 @@ protected:
 	Dataset m_test_dataset;
 	/// coldstart testing dataset
 	Dataset m_cs_dataset;
-protected:
-	void _generate_datasets();
-	void _load_entities();
-	void _load_entity_interacts();
-	void _init_from_data_host();
-public:
-	HierarchicalHybridMF();
-	virtual ~HierarchicalHybridMF();
 };
 
 } /* namespace recsys */

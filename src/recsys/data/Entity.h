@@ -55,7 +55,6 @@ js::Object string_to_json(string const& jsonStr);
 
 enum FEAT_TYPE {FEAT_CAT,FEAT_REAL};
 typedef shared_ptr<PreparedStatement> prepared_statement_ptr;
-typedef unsigned short ushort;
 class EntityInteraction;
 class Entity {
 	friend ostream& operator<<(ostream&, EntityInteraction const&);
@@ -99,7 +98,7 @@ public:
 	/// all entities (user, item, feature, etc) would be mapped in the same space
 	size_t m_mapped_id;
 	/// entity type
-	ushort m_type;
+	int8_t m_type;
 	/// composite key
 	string m_comp_key;
 	/// use a json object to hold all information about the entity
@@ -119,19 +118,19 @@ public:
 		return m_mapped_id;
 	}
 	bool retrieve();
-	static void get_mapped_id(string const& name, ushort const& type, bool& exist, size_t& mappedId, bool memoryMode = true);
+	static void get_mapped_id(string const& name, int8_t const& type, bool& exist, size_t& mappedId, bool memoryMode = true);
 	unsigned int _get_next_mapped_id();
 
-	static string create_composit_key(string const& key, ushort type){
+	static string create_composit_key(string const& key, int8_t type){
 		stringstream ss;
 		ss << type << "_" << key;
 		return ss.str();
 	}
-	static void break_composite_key(string const& cKey, string& key, ushort& type){
+	static void break_composite_key(string const& cKey, string& key, int8_t& type){
 		vector<string> splits;
 		boost::split(splits,cKey,boost::is_any_of("_"));
 		key = splits[1];
-		type = boost::lexical_cast<ushort>(splits[0]);
+		type = boost::lexical_cast<int8_t>(splits[0]);
 	}
 	entity_ptr index_if_not_exist();
 	virtual ~Entity() {
