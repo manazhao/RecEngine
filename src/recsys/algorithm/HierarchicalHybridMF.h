@@ -57,10 +57,10 @@ protected:
 	DiagMVGaussian m_feature_prior_mean;
 	/// user prior covariance matrix
 	MVInverseGamma m_user_prior_cov;
-	/// item prior covariance matrix
-	MVInverseGamma m_item_prior_cov;
-	///feature prior covariance matrix
-	MVInverseGamma m_feature_prior_cov;
+//	/// item prior covariance matrix
+//	MVInverseGamma m_item_prior_cov;
+//	///feature prior covariance matrix
+//	MVInverseGamma m_feature_prior_cov;
 	/// rating variance
 	InverseGamma m_rating_var;
 	/// assume bias prior is diffuse

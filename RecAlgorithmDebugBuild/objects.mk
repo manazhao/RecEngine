@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -larmadillo -lboost_program_options -lthrift -lthriftz -lmysqlcppconn -lboost_system -lboost_filesystem
+LIBS := -lBayesianNetwork -larmadillo -lboost_program_options -lthrift -lthriftz -lmysqlcppconn -lboost_system -lboost_filesystem
 

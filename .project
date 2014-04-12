@@ -3,6 +3,7 @@
 	<name>RecEngine</name>
 	<comment></comment>
 	<projects>
+		<project>BayesianNetwork</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -30,7 +31,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
-					<value>${workspace_loc:/RecEngine}/Debug</value>
+					<value>${workspace_loc:/RecEngine}/Release</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.cleanBuildTarget</key>

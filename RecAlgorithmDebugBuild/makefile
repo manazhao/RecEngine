@@ -42,11 +42,14 @@ endif
 # All Target
 all: RecEngine
 
+dependents:
+	-cd /home/manazhao/git/BayesianNetwork/LibDebug && $(MAKE) clean all
+
 # Tool invocations
-RecEngine: $(OBJS) $(USER_OBJS)
+RecEngine: $(OBJS) $(USER_OBJS) /home/manazhao/git/BayesianNetwork/LibDebug/libBayesianNetwork.a
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++  -o "RecEngine" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L"/home/manazhao/git/BayesianNetwork/LibDebug" -o "RecEngine" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -57,5 +60,6 @@ clean:
 
 .PHONY: all clean dependents
 .SECONDARY:
+/home/manazhao/git/BayesianNetwork/LibDebug/libBayesianNetwork.a:
 
 -include ../makefile.targets
