@@ -13,9 +13,12 @@
 #include <armadillo>
 #include "recsys/thrift/cpp/HandleData.h"
 #include "recsys/data/DatasetExt.h"
+#include "vb/prob/Gaussian.h"
+#include "vb/prob/InverseGamma.h"
+#include "vb/prob/MVInverseGamma.h"
 
 using namespace ::recsys::thrift;
-
+using namespace prob;
 using namespace std;
 using namespace apache::thrift;
 using namespace apache::thrift::protocol;
@@ -41,31 +44,27 @@ public:
 	virtual ~HierarchicalHybridMF();
 protected:
 	/// model variables
-	/// global bias
-	float m_rating_bias_mean;
-	float m_rating_bias_var;
-	/// mean and covariance for all entities
-	mat m_entity_mean;
-	mat m_entity_cov;
-	colvec m_user_prior_mean_mean;
-	float m_user_prior_mean_var;
-	float m_user_prior_var_apha;
-	float m_user_prior_var_beta;
+	/// we use hierarchical Bayesian model and represent each variable
+	/// as random variables defined in BN project
 
-	colvec m_item_prior_mean_mean;
-	float m_item_prior_mean_var;
-	float m_item_prior_var_apha;
-	float m_item_prior_var_beta;
-
-	/// Gaussian distribution for mean
-	colvec m_feat_prior_mean_mean;
-	float m_feat_prior_mean_var;
-	/// inverse Gamma distribution for variance
-	float m_feat_prior_var_alpha;
-	float m_feat_prior_var_beta;
-	/// rating variance, inverse Gamma distribution
-	float m_rating_var_alpha;
-	float m_rating_var_beta;
+	/// user, item and feature latent variables
+	vector<DiagMVGaussian> m_entity;
+	/// user prior mean
+	DiagMVGaussian m_user_prior_mean;
+	/// item prior mean
+	DiagMVGaussian m_item_prior_mean;
+	/// feature prior mean
+	DiagMVGaussian m_feature_prior_mean;
+	/// user prior covariance matrix
+	MVInverseGamma m_user_prior_cov;
+	/// item prior covariance matrix
+	MVInverseGamma m_item_prior_cov;
+	///feature prior covariance matrix
+	MVInverseGamma m_feature_prior_cov;
+	/// rating variance
+	InverseGamma m_rating_var;
+	/// assume bias prior is diffuse
+	Gaussian m_bias;
 
 	size_t m_num_users;
 	size_t m_num_items;
