@@ -39,8 +39,18 @@ protected:
 	void _prepare_datasets();
 	void _prepare_model_variables();
 	void _init();
+	void _update_user_prior();
+	void _update_item_prior();
+	void _update_feature_prior();
+	void _update_rating_var();
+	void _update_bias();
+	void _update_user(int64_t const& entityId, map<int8_t,vector<Interact> > const& typeInteracts);
+	void _update_item(int64_t const& entityId, map<int8_t,vector<Interact> > const& typeInteracts);
+	void _update_feature(int64_t const& entityId, map<int8_t,vector<Interact> > const& typeInteracts);
+	void _update_entity_diff();
 public:
 	HierarchicalHybridMF();
+	void train_model();
 	virtual ~HierarchicalHybridMF();
 protected:
 	/// model variables
@@ -49,23 +59,21 @@ protected:
 
 	/// user, item and feature latent variables
 	vector<DiagMVGaussian> m_entity;
-	/// user prior mean
+	/// user prior
 	DiagMVGaussian m_user_prior_mean;
-	/// item prior mean
-	DiagMVGaussian m_item_prior_mean;
-	/// feature prior mean
-	DiagMVGaussian m_feature_prior_mean;
-	/// user prior covariance matrix
 	MVInverseGamma m_user_prior_cov;
-//	/// item prior covariance matrix
-//	MVInverseGamma m_item_prior_cov;
-//	///feature prior covariance matrix
-//	MVInverseGamma m_feature_prior_cov;
+	/// item prior
+	MVInverseGamma m_item_prior_cov;
+	DiagMVGaussian m_item_prior_mean;
+	/// feature prior
+	DiagMVGaussian m_feature_prior_mean;
+	MVInverseGamma m_feature_prior_cov;
 	/// rating variance
 	InverseGamma m_rating_var;
 	/// assume bias prior is diffuse
 	Gaussian m_bias;
-
+	///
+	map<int64_t,vec> m_feat_sum;
 	size_t m_num_users;
 	size_t m_num_items;
 	size_t m_num_features;
@@ -82,6 +90,9 @@ protected:
 	DatasetExt m_test_dataset;
 	/// coldstart testing dataset
 	DatasetExt m_cs_dataset;
+	/// model parameters
+	/// latent vector dimensionality
+	size_t m_lat_dim;
 };
 
 } /* namespace recsys */
