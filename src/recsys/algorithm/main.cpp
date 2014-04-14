@@ -24,6 +24,7 @@ int main(int argc, char** argv) {
 #endif
 #ifdef __HYBRID_MODEL__
 	HierarchicalHybridMF model;
+	model.train_model();
 #endif
 	return 0;
 }
