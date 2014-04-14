@@ -36,6 +36,8 @@ namespace recsys {
  */
 class HierarchicalHybridMF {
 protected:
+	void _lat_ip_moments(DiagMVGaussian & lat1, DiagMVGaussian & lat2, float & firstMoment, float & secondMoment);
+	void _rating_biase_moments(float rating, float & firstMoment, float& secondMoment);
 	void _prepare_datasets();
 	void _prepare_model_variables();
 	void _init();
@@ -44,10 +46,10 @@ protected:
 	void _update_feature_prior();
 	void _update_rating_var();
 	void _update_bias();
-	void _update_user(int64_t const& entityId, map<int8_t,vector<Interact> > const& typeInteracts);
-	void _update_item(int64_t const& entityId, map<int8_t,vector<Interact> > const& typeInteracts);
-	void _update_feature(int64_t const& entityId, map<int8_t,vector<Interact> > const& typeInteracts);
-	void _update_entity_diff();
+	void _update_user_or_item(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
+	void _update_item(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
+	void _update_feature(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
+	void _update_entity_feature_moments();
 public:
 	HierarchicalHybridMF();
 	void train_model();
@@ -73,7 +75,9 @@ protected:
 	/// assume bias prior is diffuse
 	Gaussian m_bias;
 	///
-	map<int64_t,vec> m_feat_sum;
+	map<int64_t,vec> m_feat_mean_sum;
+	map<int64_t,vec> m_feat_cov_sum;
+	map<int64_t,size_t> m_feat_cnt_map;
 	size_t m_num_users;
 	size_t m_num_items;
 	size_t m_num_features;

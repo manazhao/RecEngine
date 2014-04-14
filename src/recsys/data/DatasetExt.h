@@ -21,6 +21,8 @@ using namespace std;
 namespace recsys {
 
 class DatasetExt : public rt::Dataset{
+public:
+	map<int64_t,int8_t> m_id_type_map;
 protected:
 	void _filter_entity_interaction_helper(int8_t const& type,
 			int64_t const& from_ent_id, Interact const& interact);
@@ -30,6 +32,10 @@ public:
 	inline bool entity_exist(int64_t const& id) {
 		return ent_ids.find(id) != ent_ids.end();
 	}
+	virtual ~DatasetExt() throw(){
+
+	}
+
 	void filter_entity_interactions(
 			vector<map<int8_t, vector<Interact> > > const& entTypeInteractions);
 };

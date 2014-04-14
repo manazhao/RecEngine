@@ -16,6 +16,7 @@ DatasetExt::DatasetExt(int64_t const& numEntities){
 void DatasetExt::add_entity(int8_t const& type, int64_t const& id) {
 	type_ent_ids[type].insert(id);
 	ent_ids.insert(id);
+	m_id_type_map[id] = type;
 }
 
 void DatasetExt::filter_entity_interactions(
