@@ -32,12 +32,10 @@ public:
 	inline bool entity_exist(int64_t const& id) {
 		return ent_ids.find(id) != ent_ids.end();
 	}
-	virtual ~DatasetExt() throw(){
-
-	}
-
+	void prepare_id_type_map();
 	void filter_entity_interactions(
 			vector<map<int8_t, vector<Interact> > > const& entTypeInteractions);
+	virtual ~DatasetExt() throw() {}
 };
 
 }

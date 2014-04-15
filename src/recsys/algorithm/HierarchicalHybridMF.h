@@ -46,12 +46,13 @@ protected:
 	void _update_feature_prior();
 	void _update_rating_var();
 	void _update_bias();
-	void _update_user_or_item(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
+	void _update_user_or_item(int64_t const& entityId, int8_t entityType, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_item(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_feature(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_entity_feature_moments();
 public:
 	HierarchicalHybridMF();
+	float train_rmse();
 	void train_model();
 	virtual ~HierarchicalHybridMF();
 protected:
@@ -97,6 +98,7 @@ protected:
 	/// model parameters
 	/// latent vector dimensionality
 	size_t m_lat_dim;
+	size_t m_iter;
 };
 
 } /* namespace recsys */

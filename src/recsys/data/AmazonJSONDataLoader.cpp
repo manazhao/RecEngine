@@ -52,7 +52,7 @@ void AmazonJSONDataLoader::prepare_datasets() {
 		///  get the mapped id and type
 		Entity::mapped_id_type id = iter->first;
 		int8_t type = iter->second->m_type;
-		allDataset.type_ent_ids[type].insert(id);
+		allDataset.add_entity(type,id);
 	}
 	allDataset.ent_type_interacts.assign(Entity::m_entity_ptr_map.size(),
 			map<int8_t, std::vector<Interact> >());

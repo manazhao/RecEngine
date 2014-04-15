@@ -19,6 +19,15 @@ void DatasetExt::add_entity(int8_t const& type, int64_t const& id) {
 	m_id_type_map[id] = type;
 }
 
+
+void DatasetExt::prepare_id_type_map(){
+	for(map<int8_t,set<int64_t> >::iterator iter = type_ent_ids.begin(); iter != type_ent_ids.end(); ++iter){
+		for(set<int64_t>::iterator iter1 = iter->second.begin(); iter1 != iter->second.end(); ++iter1){
+			m_id_type_map[*iter1] = iter->first;
+		}
+	}
+}
+
 void DatasetExt::filter_entity_interactions(
 		vector<map<int8_t, vector<Interact> > > const& entTypeInteractions) {
 	/// only keep those interactions the both entities of which are in the entity id set

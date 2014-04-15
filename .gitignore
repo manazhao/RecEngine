@@ -20,3 +20,5 @@ tmp*
 RecEngine
 DataHostThrift
 /RecAlgorithmReleaseBuild
+/DataHostReleaseBuild
+/DataHostDebugBuild
