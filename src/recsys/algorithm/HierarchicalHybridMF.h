@@ -37,7 +37,7 @@ namespace recsys {
 class HierarchicalHybridMF {
 protected:
 	void _lat_ip_moments(DiagMVGaussian & lat1, DiagMVGaussian & lat2, float & firstMoment, float & secondMoment);
-	void _rating_biase_moments(float rating, float & firstMoment, float& secondMoment);
+	void _rating_bias_moments(float rating, float & firstMoment, float& secondMoment);
 	void _prepare_datasets();
 	void _prepare_model_variables();
 	void _init();
@@ -46,6 +46,7 @@ protected:
 	void _update_feature_prior();
 	void _update_rating_var();
 	void _update_bias();
+	float _get_mean_rating();
 	void _update_user_or_item(int64_t const& entityId, int8_t entityType, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_item(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_feature(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);

@@ -28,12 +28,12 @@ void HierarchicalHybridMF::_prepare_model_variables() {
 	m_entity.reserve(m_dataset.ent_type_interacts.size());
 	for (size_t i = 0; i < m_dataset.ent_type_interacts.size(); i++) {
 		m_entity.push_back(
-				DiagMVGaussian(vec(m_lat_dim, arma::fill::randn),
+				DiagMVGaussian(vec(m_lat_dim, arma::fill::zeros),
 						vec(m_lat_dim, arma::fill::ones)));
 	}
 	/// initialize prior variables
 	m_user_prior_mean = DiagMVGaussian(vec(m_lat_dim, fill::zeros),
-			vec(m_lat_dim, fill::ones));
+			vec(m_lat_dim, fill::ones) * 100);
 	m_user_prior_cov = MVInverseGamma(vec(m_lat_dim, fill::ones) * 3,
 			vec(m_lat_dim, fill::ones) * 3);
 	m_item_prior_mean = m_user_prior_mean;
@@ -43,7 +43,9 @@ void HierarchicalHybridMF::_prepare_model_variables() {
 	/// rating variance, big variance
 	m_rating_var = InverseGamma(3, 3);
 	/// initialize bias as standard Gaussian
-	m_bias = Gaussian(0, 1);
+	float meanRating = _get_mean_rating();
+	cout << "mean rating:" << meanRating << endl;
+	m_bias = Gaussian(meanRating, 1);
 	cout << ">>>>>>>>>>>>>> Time elapsed:" << t.elapsed() << " >>>>>>>>>>>>>>"
 			<< endl;
 
@@ -78,12 +80,6 @@ void HierarchicalHybridMF::_update_user_or_item(int64_t const& entityId, int8_t 
 		updateMessage.m_vec.rows(0, m_lat_dim - 1) += update1;
 		/// second moment of item latent variable
 		updateMessage.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) += update2;
-		if(isnan(updateMessage.m_vec(0)) || isnan(updateMessage.m_vec(m_lat_dim)))
-		{
-			itemLatMean.print("item lat mean:");
-			itemLatCov.print("item lat cov:");
-		}
-		/// apply the update
 	}
 	m_entity[entityId] += updateMessage;
 
@@ -111,11 +107,13 @@ void HierarchicalHybridMF::_update_user_or_item(int64_t const& entityId, int8_t 
 		updateMessage.m_vec.rows(0, m_lat_dim - 1) *= 1 / sqrt(numFeats);
 	}
 	updateMessage.m_vec.rows(0, m_lat_dim - 1) += upMean.m_vec;
+	updateMessage.m_vec.rows(0, m_lat_dim - 1) %= upCovSuff2.m_vec;
 	updateMessage.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) = (-0.5
 			* upCovSuff2.m_vec);
 
 	/// apply the update
 	m_entity[entityId] += updateMessage;
+	cout << m_entity[entityId] << endl;
 
 }
 
@@ -190,18 +188,16 @@ void HierarchicalHybridMF::_update_user_prior() {
 		int64_t userId = *iter;
 		DiagMVGaussian & userLat = m_entity[userId];
 		size_t numFeats = m_feat_cnt_map[userId];
+		vec tmpUpdate = userLat.moment(1);
 		if (numFeats > 0) {
-			updateMessage.m_vec.rows(0, m_lat_dim - 1) += (userLat.moment(1)
-					- 1 / sqrt(numFeats) * m_feat_mean_sum[userId]);
+			tmpUpdate -= (1 / sqrt(numFeats) * m_feat_mean_sum[userId]);
 		}
+		updateMessage.m_vec.rows(0, m_lat_dim - 1) += tmpUpdate;
 	}
 	updateMessage.m_vec.rows(0, m_lat_dim - 1) %= upCovSuff2.m_vec;
 	updateMessage.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) = (-0.5 * numUsers
 			* upCovSuff2.m_vec);
-	m_user_prior_mean += updateMessage;
-	if(isnan(m_user_prior_mean.m_cov(0))){
-		cout << m_user_prior_mean << endl;
-	}
+	m_user_prior_mean = updateMessage;
 	/// update the diagonal covariance matrix, each entry of which is InverseGamma distribution
 	m_user_prior_cov.reset();
 	/// aggregate over the users
@@ -228,14 +224,11 @@ void HierarchicalHybridMF::_update_user_prior() {
 		vec userFeatCovSum1 = userPriorCov;
 		if (numFeats > 0)
 			userFeatCovSum1 += (1 / (float) numFeats * userFeatCovSum
-					+ 2 * 1 / sqrt(numFeats) * userPriorMean % userFeatMeanSum);
+					+ 2 / sqrt(numFeats) * userPriorMean % userFeatMeanSum);
 		covNatParam.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) += (userLatCov
 				+ userFeatCovSum1 - 2 * userLatMean % userFeatMeanSum1);
 	}
-	if(isnan(m_user_prior_cov.m_alpha_vec(0)) || isnan(m_user_prior_cov.m_beta_vec(0))){
-		cout << m_user_prior_cov << endl;
-	}
-	m_user_prior_cov += covNatParam;
+	m_user_prior_cov = covNatParam;
 }
 
 void HierarchicalHybridMF::_update_item_prior() {
@@ -251,16 +244,16 @@ void HierarchicalHybridMF::_update_item_prior() {
 		int64_t itemId = *iter;
 		DiagMVGaussian & itemLat = m_entity[itemId];
 		size_t numFeats = m_feat_cnt_map[itemId];
-		updateMessage.m_vec.rows(0, m_lat_dim - 1) += (itemLat.moment(1)
-				- 1 / sqrt(numFeats) * m_feat_mean_sum[itemId]);
+		vec tmpUpdate = itemLat.moment(1);
+		if(numFeats){
+			tmpUpdate -= (1 / sqrt(numFeats) * m_feat_mean_sum[itemId]);
+		}
+		updateMessage.m_vec.rows(0, m_lat_dim - 1) += tmpUpdate;
 	}
 	updateMessage.m_vec.rows(0, m_lat_dim - 1) %= upCovSuff2.m_vec;
 	updateMessage.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) = (-0.5 * numItems
 			* upCovSuff2.m_vec);
 	m_item_prior_mean = updateMessage;
-	if(isnan(m_item_prior_mean.m_mean(0)) || isnan(m_item_prior_mean.m_cov(0))){
-		cout << m_item_prior_mean << endl;
-	}
 	/// update the diagonal covariance matrix, each entry of which is InverseGamma distribution
 	m_item_prior_cov.reset();
 	/// aggregate over the users
@@ -292,11 +285,6 @@ void HierarchicalHybridMF::_update_item_prior() {
 		covNatParam.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) += (itemLatCov
 				+ itemFeatCovSum1 - 2 * itemLatMean % itemFeatMeanSum1);
 	}
-
-	if(isnan(m_item_prior_cov.m_alpha(0)) || isnan(m_item_prior_cov.m_beta(0))){
-		cout << m_item_prior_cov << endl;
-	}
-
 	m_item_prior_cov = covNatParam;
 }
 
@@ -304,56 +292,58 @@ void HierarchicalHybridMF::_update_feature_prior() {
 	/// update the mean and covariance sequentially
 	set<int64_t> & featIds = m_train_dataset.type_ent_ids[Entity::ENT_FEATURE];
 	size_t numFeats = featIds.size();
-	NatParamVec updateMessage(2 * m_lat_dim, true);
-	vec fpCovSuff2 = m_feature_prior_cov.suff_mean(2);
-	updateMessage.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) = (-0.5 * numFeats
-			* fpCovSuff2);
-	for (set<int64_t>::iterator iter = featIds.begin(); iter != featIds.end();
-			++iter) {
-		int64_t featId = *iter;
-		DiagMVGaussian & featLat = m_entity[featId];
-		vec featLatMean = featLat.moment(1);
-		updateMessage.m_vec.rows(0, m_lat_dim - 1) +=
-				(fpCovSuff2 % featLatMean);
+	if(numFeats > 0){
+		NatParamVec updateMessage(2 * m_lat_dim, true);
+		vec fpCovSuff2 = m_feature_prior_cov.suff_mean(2);
+		updateMessage.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) = (-0.5 * numFeats
+				* fpCovSuff2);
+		for (set<int64_t>::iterator iter = featIds.begin(); iter != featIds.end();
+				++iter) {
+			int64_t featId = *iter;
+			DiagMVGaussian & featLat = m_entity[featId];
+			vec featLatMean = featLat.moment(1);
+			updateMessage.m_vec.rows(0, m_lat_dim - 1) +=
+					(fpCovSuff2 % featLatMean);
+		}
+		m_feature_prior_mean = updateMessage;
+		/// update the covariance
+		/// reset the updateMessage
+		updateMessage.m_vec.fill(0);
+		vec tmpVec(m_lat_dim);
+		tmpVec.fill(-0.5);
+		updateMessage.m_vec.rows(0, m_lat_dim - 1) = tmpVec * numFeats;
+		vec featPriorMean = m_feature_prior_mean.moment(1);
+		vec featPriorCov = m_feature_prior_mean.moment(2);
+		for (set<int64_t>::iterator iter = featIds.begin(); iter != featIds.end();
+				++iter) {
+			int64_t featId = *iter;
+			DiagMVGaussian& featLat = m_entity[featId];
+			vec featLatMean = featLat.moment(1);
+			vec featLatCov = featLat.moment(2);
+			updateMessage.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) +=
+					(-0.5
+							* (featLatCov + featPriorCov
+									- 2 * featLatMean % featPriorMean));
+		}
+		m_feature_prior_cov = updateMessage;
 	}
-	m_feature_prior_mean = updateMessage;
-	/// update the covariance
-	/// reset the updateMessage
-	updateMessage.m_vec.fill(0);
-	vec tmpVec(m_lat_dim);
-	tmpVec.fill(-0.5);
-	updateMessage.m_vec.rows(0, m_lat_dim - 1) = tmpVec * numFeats;
-	vec featPriorMean = m_feature_prior_mean.moment(1);
-	vec featPriorCov = m_feature_prior_mean.moment(2);
-	for (set<int64_t>::iterator iter = featIds.begin(); iter != featIds.end();
-			++iter) {
-		int64_t featId = *iter;
-		DiagMVGaussian& featLat = m_entity[featId];
-		vec featLatMean = featLat.moment(1);
-		vec featLatCov = featLat.moment(2);
-		updateMessage.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) +=
-				(-0.5
-						* (featLatCov + featPriorCov
-								- 2 * featLatMean % featPriorMean));
-	}
-	m_feature_prior_cov = updateMessage;
 }
 
 void HierarchicalHybridMF::_lat_ip_moments(DiagMVGaussian & lat1,
 		DiagMVGaussian & lat2, float & firstMoment, float & secondMoment) {
 	/// calculate the first and second moment of the result of inner product of two Multivariate Gaussian variables (diagonal covariance matrix)
 	vec lat1M1 = lat1.moment(1);
-	vec lat1M2 = lat1.moment(2);
+	vec lat1Cov = lat1.moment(2) - lat1M1 % lat1M1;
 	vec lat2M1 = lat2.moment(1);
-	vec lat2M2 = lat2.moment(2);
+	vec lat2Cov = lat2.moment(2) - lat2M1 % lat2M1;
 
 	firstMoment = accu(lat1M1 % lat2M1);
 	secondMoment = accu(
-			arma::pow(lat1M1 % lat2M1, 2) + lat1M2 % lat2M2
-					+ lat1M1 % lat2M2 % lat1M1 + lat2M1 % lat1M2 % lat2M1);
+			arma::pow(lat1M1 % lat2M1, 2) + lat1Cov % lat2Cov
+					+ lat1M1 % lat2Cov % lat1M1 + lat2M1 % lat1Cov % lat2M1);
 }
 
-void HierarchicalHybridMF::_rating_biase_moments(float rating,
+void HierarchicalHybridMF::_rating_bias_moments(float rating,
 		float & firstMoment, float& secondMoment) {
 	float bias1stMoment = m_bias.moment(1);
 	float bias2ndMoment = m_bias.moment(2);
@@ -365,6 +355,7 @@ void HierarchicalHybridMF::_update_rating_var() {
 	/// update the rating variance
 	/// go through all ratings
 	NatParamVec updateMessage((size_t) 2, true);
+	updateMessage.m_vec.fill(0);
 	set<int64_t> & userIds = m_train_dataset.type_ent_ids[Entity::ENT_USER];
 	for (set<int64_t>::const_iterator iter = userIds.begin();
 			iter != userIds.end(); ++iter) {
@@ -380,13 +371,9 @@ void HierarchicalHybridMF::_update_rating_var() {
 			double rating = iter1->ent_val;
 			updateMessage.m_vec[0] += (-0.5);
 			float rating1stMoment, rating2ndMoment;
-			_rating_biase_moments(rating, rating1stMoment, rating2ndMoment);
+			_rating_bias_moments(rating, rating1stMoment, rating2ndMoment);
 			float ip1stMoment, ip2ndMoment;
 			_lat_ip_moments(userLat, itemLat, ip1stMoment, ip2ndMoment);
-			if(isnan(ip1stMoment) || isnan(ip2ndMoment)){
-				cout << userLat << endl;
-				cout << itemLat << endl;
-			}
 			updateMessage.m_vec[1] += (-0.5
 					* (rating2ndMoment - 2 * rating1stMoment * ip1stMoment
 							+ ip2ndMoment));
@@ -396,9 +383,30 @@ void HierarchicalHybridMF::_update_rating_var() {
 	cout << "rating var:" << m_rating_var << endl;
 }
 
+float HierarchicalHybridMF::_get_mean_rating(){
+	float avgRating = 0;
+	set<int64_t> & userIds = m_train_dataset.type_ent_ids[Entity::ENT_USER];
+	size_t numRatings = 0;
+	for (set<int64_t>::iterator iter = userIds.begin(); iter != userIds.end();
+			++iter) {
+		int64_t userId = *iter;
+		vector<Interact> const& ratings =
+				m_train_dataset.ent_type_interacts[userId][EntityInteraction::RATE_ITEM];
+		for (vector<Interact>::const_iterator iter1 = ratings.begin();
+				iter1 < ratings.end(); ++iter1) {
+			int64_t itemId = iter1->ent_id;
+			double rating = iter1->ent_val;
+			avgRating += rating;
+			numRatings++;
+		}
+	}
+	return avgRating/numRatings;
+}
+
 void HierarchicalHybridMF::_update_bias() {
 	float rvSuff2 = (float)m_rating_var.suff_mean(2);
 	NatParamVec updateMessage((size_t) 2, true);
+	updateMessage.m_vec.fill(0);
 	set<int64_t> & userIds = m_train_dataset.type_ent_ids[Entity::ENT_USER];
 	size_t numRatings = 0;
 	for (set<int64_t>::iterator iter = userIds.begin(); iter != userIds.end();
@@ -421,6 +429,7 @@ void HierarchicalHybridMF::_update_bias() {
 	updateMessage.m_vec[0] *= (rvSuff2);
 	updateMessage.m_vec[1] = -0.5 * numRatings * rvSuff2;
 	m_bias = updateMessage;
+	cout << "bias :" << m_bias << endl;
 }
 
 float HierarchicalHybridMF::train_rmse() {
@@ -506,7 +515,7 @@ void HierarchicalHybridMF::train_model() {
 		_update_user_prior();
 		cout << ">>>>> time elapsed:" << t.elapsed() << endl;
 		t.restart();
-		cout << ">>>>> update user prior >>>>>" << endl;
+		cout << ">>>>> update item prior >>>>>" << endl;
 		_update_item_prior();
 		cout << ">>>>> time elapsed:" << t.elapsed() << endl;
 		t.restart();
@@ -514,12 +523,12 @@ void HierarchicalHybridMF::train_model() {
 		_update_feature_prior();
 		cout << ">>>>> time elapsed:" << t.elapsed() << endl;
 		t.restart();
-		cout << ">>>>> update rating variance >>>>>" << endl;
-		_update_rating_var();
-		cout << ">>>>> time elapsed:" << t.elapsed() << endl;
-		t.restart();
 		cout << ">>>>> update global bias >>>>>" << endl;
 		_update_bias();
+		cout << ">>>>> time elapsed:" << t.elapsed() << endl;
+		t.restart();
+		cout << ">>>>> update rating variance >>>>>" << endl;
+		_update_rating_var();
 		cout << ">>>>> time elapsed:" << t.elapsed() << endl;
 		///
 		float rmse = train_rmse();
@@ -557,7 +566,7 @@ HierarchicalHybridMF::HierarchicalHybridMF() :
 				new TSocket("localhost", 9090)), m_transport(
 				new TBufferedTransport(m_socket)), m_protocol(
 				new TBinaryProtocol(m_transport)), m_client(m_protocol), m_lat_dim(
-				5),m_iter(0) {
+				10),m_iter(0) {
 	_init();
 }
 
