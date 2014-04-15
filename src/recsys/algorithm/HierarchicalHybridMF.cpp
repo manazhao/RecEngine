@@ -75,17 +75,9 @@ void HierarchicalHybridMF::_update_user_or_item(int64_t const& entityId, int8_t 
 				* itemLatMean);
 		vec update2 = (-0.5
 				* rvsuff2 * itemLatCov);
-//		if(m_iter == 2){
-//			cout << "before:" <<  updateMessage << endl;
-//		}
 		updateMessage.m_vec.rows(0, m_lat_dim - 1) += update1;
 		/// second moment of item latent variable
 		updateMessage.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) += update2;
-//		if(m_iter == 2){
-//			update1.print("update1:");
-//			update2.print("update2:");
-//			cout << updateMessage << endl;
-//		}
 		if(isnan(updateMessage.m_vec(0)) || isnan(updateMessage.m_vec(m_lat_dim)))
 		{
 			itemLatMean.print("item lat mean:");
@@ -207,6 +199,9 @@ void HierarchicalHybridMF::_update_user_prior() {
 	updateMessage.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) = (-0.5 * numUsers
 			* upCovSuff2.m_vec);
 	m_user_prior_mean += updateMessage;
+	if(isnan(m_user_prior_mean.m_cov(0))){
+		cout << m_user_prior_mean << endl;
+	}
 	/// update the diagonal covariance matrix, each entry of which is InverseGamma distribution
 	m_user_prior_cov.reset();
 	/// aggregate over the users
@@ -237,6 +232,9 @@ void HierarchicalHybridMF::_update_user_prior() {
 		covNatParam.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) += (userLatCov
 				+ userFeatCovSum1 - 2 * userLatMean % userFeatMeanSum1);
 	}
+	if(isnan(m_user_prior_cov.m_alpha_vec(0)) || isnan(m_user_prior_cov.m_beta_vec(0))){
+		cout << m_user_prior_cov << endl;
+	}
 	m_user_prior_cov += covNatParam;
 }
 
@@ -260,6 +258,9 @@ void HierarchicalHybridMF::_update_item_prior() {
 	updateMessage.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) = (-0.5 * numItems
 			* upCovSuff2.m_vec);
 	m_item_prior_mean = updateMessage;
+	if(isnan(m_item_prior_mean.m_mean(0)) || isnan(m_item_prior_mean.m_cov(0))){
+		cout << m_item_prior_mean << endl;
+	}
 	/// update the diagonal covariance matrix, each entry of which is InverseGamma distribution
 	m_item_prior_cov.reset();
 	/// aggregate over the users
@@ -291,6 +292,11 @@ void HierarchicalHybridMF::_update_item_prior() {
 		covNatParam.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) += (itemLatCov
 				+ itemFeatCovSum1 - 2 * itemLatMean % itemFeatMeanSum1);
 	}
+
+	if(isnan(m_item_prior_cov.m_alpha(0)) || isnan(m_item_prior_cov.m_beta(0))){
+		cout << m_item_prior_cov << endl;
+	}
+
 	m_item_prior_cov = covNatParam;
 }
 
@@ -380,7 +386,6 @@ void HierarchicalHybridMF::_update_rating_var() {
 			if(isnan(ip1stMoment) || isnan(ip2ndMoment)){
 				cout << userLat << endl;
 				cout << itemLat << endl;
-				getchar();
 			}
 			updateMessage.m_vec[1] += (-0.5
 					* (rating2ndMoment - 2 * rating1stMoment * ip1stMoment
