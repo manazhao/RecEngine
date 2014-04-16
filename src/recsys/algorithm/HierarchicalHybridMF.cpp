@@ -81,6 +81,7 @@ void HierarchicalHybridMF::_update_user_or_item(int64_t const& entityId, int8_t 
 		/// second moment of item latent variable
 		updateMessage.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) += update2;
 	}
+	cout << updateMessage << endl;
 	m_entity[entityId] += updateMessage;
 
 	/// reset the message
