@@ -376,6 +376,9 @@ void HierarchicalHybridMF::_update_rating_var() {
 	}
 	updateMessage.m_vec[0] = (-0.5) * numUsers;
 	updateMessage.m_vec[1] *= (-0.5);
+//	updateMessage.m_is_canonical = false;
+//	updateMessage.m_vec[0] = 10;
+//	updateMessage.m_vec[1] = 2;
 	m_rating_var = updateMessage;
 	cout << "rating var:" << m_rating_var << endl;
 }

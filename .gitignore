@@ -23,4 +23,5 @@ RecAlgorithmReleaseBuild/
 RecAlgorithmDebugBuild/
 DataHostReleaseBuild/
 DataHostDebugBuild/
-
+*.mk
+makefile
