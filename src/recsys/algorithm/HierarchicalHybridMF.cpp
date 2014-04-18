@@ -95,18 +95,18 @@ void HierarchicalHybridMF::_update_user_or_item(int64_t const& entityId, int8_t 
 	NatParamVec upMean = (
 			entityType == Entity::ENT_USER ?
 					m_user_prior_mean.moment(1) : m_item_prior_mean.moment(1));
-	size_t numFeats = featureInteracts.size();
-	for (vector<Interact>::iterator iter = featureInteracts.begin();
-			iter < featureInteracts.end(); ++iter) {
-		int64_t featId = iter->ent_id;
-		DiagMVGaussian & featLat = m_entity[featId];
-		updateMessage.m_vec.rows(0, m_lat_dim - 1) += featLat.moment(1).m_vec;
-	}
-	if (numFeats > 0) {
-		updateMessage.m_vec.rows(0, m_lat_dim - 1) *= 1 / sqrt(numFeats);
-	}
-	updateMessage.m_vec.rows(0, m_lat_dim - 1) += upMean.m_vec;
-	updateMessage.m_vec.rows(0, m_lat_dim - 1) %= upCovSuff2.m_vec;
+//	size_t numFeats = featureInteracts.size();
+//	for (vector<Interact>::iterator iter = featureInteracts.begin();
+//			iter < featureInteracts.end(); ++iter) {
+//		int64_t featId = iter->ent_id;
+//		DiagMVGaussian & featLat = m_entity[featId];
+//		updateMessage.m_vec.rows(0, m_lat_dim - 1) += featLat.moment(1).m_vec;
+//	}
+//	if (numFeats > 0) {
+//		updateMessage.m_vec.rows(0, m_lat_dim - 1) *= 1 / sqrt(numFeats);
+//	}
+//	updateMessage.m_vec.rows(0, m_lat_dim - 1) += upMean.m_vec;
+//	updateMessage.m_vec.rows(0, m_lat_dim - 1) %= upCovSuff2.m_vec;
 	updateMessage.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) += (-0.5
 			* upCovSuff2.m_vec);
 	/// apply the update
@@ -174,27 +174,27 @@ void HierarchicalHybridMF::_update_feature(int64_t const& featId,
 
 void HierarchicalHybridMF::_update_user_prior() {
 	/// update the mean of the prior
-	m_user_prior_mean.reset();
-	NatParamVec updateMessage(2 * m_lat_dim, true);
-	updateMessage.m_vec.fill(0);
+//	m_user_prior_mean.reset();
+//	NatParamVec updateMessage(2 * m_lat_dim, true);
+//	updateMessage.m_vec.fill(0);
 	set<int64_t> & userIds = m_train_dataset.type_ent_ids[Entity::ENT_USER];
 	size_t numUsers = userIds.size();
-	NatParamVec upCovSuff2 = m_user_prior_cov.suff_mean(2);
-	for (set<int64_t>::iterator iter = userIds.begin(); iter != userIds.end();
-			++iter) {
-		int64_t userId = *iter;
-		DiagMVGaussian & userLat = m_entity[userId];
-		size_t numFeats = m_feat_cnt_map[userId];
-		vec tmpUpdate = userLat.moment(1);
-		if (numFeats > 0) {
-			tmpUpdate -= (1 / sqrt(numFeats) * m_feat_mean_sum[userId]);
-		}
-		updateMessage.m_vec.rows(0, m_lat_dim - 1) += tmpUpdate;
-	}
-	updateMessage.m_vec.rows(0, m_lat_dim - 1) %= upCovSuff2.m_vec;
-	updateMessage.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) += (-0.5 * numUsers
-			* upCovSuff2.m_vec);
-	m_user_prior_mean = updateMessage;
+//	NatParamVec upCovSuff2 = m_user_prior_cov.suff_mean(2);
+//	for (set<int64_t>::iterator iter = userIds.begin(); iter != userIds.end();
+//			++iter) {
+//		int64_t userId = *iter;
+//		DiagMVGaussian & userLat = m_entity[userId];
+//		size_t numFeats = m_feat_cnt_map[userId];
+//		vec tmpUpdate = userLat.moment(1);
+//		if (numFeats > 0) {
+//			tmpUpdate -= (1 / sqrt(numFeats) * m_feat_mean_sum[userId]);
+//		}
+//		updateMessage.m_vec.rows(0, m_lat_dim - 1) += tmpUpdate;
+//	}
+//	updateMessage.m_vec.rows(0, m_lat_dim - 1) %= upCovSuff2.m_vec;
+//	updateMessage.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) += (-0.5 * numUsers
+//			* upCovSuff2.m_vec);
+//	m_user_prior_mean = updateMessage;
 	/// update the diagonal covariance matrix, each entry of which is InverseGamma distribution
 	m_user_prior_cov.reset();
 	/// aggregate over the users
@@ -208,21 +208,12 @@ void HierarchicalHybridMF::_update_user_prior() {
 		int64_t userId = *iter;
 		size_t numFeats = m_feat_cnt_map[userId];
 		DiagMVGaussian & userLat = m_entity[userId];
-		vec userLatMean = userLat.moment(1);
 		vec userLatCov = userLat.moment(2);
-		vec & userFeatMeanSum = m_feat_mean_sum[userId];
-		vec & userFeatCovSum = m_feat_cov_sum[userId];
-		vec userFeatMeanSum1 = userPriorMean;
-		if (numFeats > 0) {
-			userFeatMeanSum1 += 1 / sqrt(numFeats) * userFeatMeanSum;
-		}
-		/// considering the covariance
 		vec userFeatCovSum1 = userPriorCov;
-		if (numFeats > 0)
-			userFeatCovSum1 += (1 / (float) numFeats * userFeatCovSum
-					+ 2 / sqrt(numFeats) * userPriorMean % userFeatMeanSum);
-		covNatParam.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) += (userLatCov
-				+ userFeatCovSum1 - 2 * userLatMean % userFeatMeanSum1);
+//		if (numFeats > 0)
+//			userFeatCovSum1 += (1 / (float) numFeats * userFeatCovSum
+//					+ 2 / sqrt(numFeats) * userPriorMean % userFeatMeanSum);
+		covNatParam.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) += (userLatCov);
 	}
 	covNatParam.m_vec.rows(m_lat_dim, 2 * m_lat_dim - 1) *= (-0.5);
 	m_user_prior_cov = covNatParam;
