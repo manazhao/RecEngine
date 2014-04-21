@@ -84,8 +84,9 @@ void HierarchicalHybridMF::_update_user_or_item(int64_t const& entityId, int8_t 
 			entityType == Entity::ENT_USER ?
 					m_user_prior_cov.suff_mean(2) :
 					m_item_prior_cov.suff_mean(2));
-//	message[0] = (vec)(upCovSuff2.m_vec % m_user_prior_mean.moment(1).m_vec);
-	message[0].reset();
+	vec entityLatMean = (entityType == Entity::ENT_USER ? m_user_prior_mean.moment(1).m_vec : m_item_prior_mean.moment(1).m_vec);
+	message[0] = (vec)(upCovSuff2.m_vec % entityLatMean);
+//	message[0].reset();
 	message[1] = (vec)(-0.5 * upCovSuff2.m_vec);
 	m_entity[entityId] += message;
 }
@@ -207,7 +208,6 @@ void HierarchicalHybridMF::_update_item_prior_mean(){
 //		itemPriorUpdateMessage[1] += (covSuff2);
 	}
 	itemPriorUpdateMessage[1] = vec(-0.5 * numItems * covSuff2);
-	itemPriorUpdateMessage[1].m_vec *= (-0.5);
 	m_item_prior_mean  = itemPriorUpdateMessage;
 }
 
