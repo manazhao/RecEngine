@@ -59,7 +59,7 @@ protected:
 	void _update_feature(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_entity_feature_moments();
 public:
-	HierarchicalHybridMF();
+	HierarchicalHybridMF(size_t const& latDim = 10, bool diagGaussian = true);
 	float train_rmse();
 	void train_model();
 	virtual ~HierarchicalHybridMF();
@@ -106,6 +106,7 @@ protected:
 	/// model parameters
 	/// latent vector dimensionality
 	size_t m_lat_dim;
+	bool m_diag_gaussian;
 	size_t m_iter;
 };
 

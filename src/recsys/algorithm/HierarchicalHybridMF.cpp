@@ -28,11 +28,11 @@ void HierarchicalHybridMF::_prepare_model_variables() {
 	/// initialize entity latent variables
 	m_entity.reserve(m_dataset.ent_type_interacts.size());
 	for (size_t i = 0; i < m_dataset.ent_type_interacts.size(); i++) {
-		m_entity.push_back(DiagMVGaussian(vec(m_lat_dim, arma::fill::randn),vec(m_lat_dim, arma::fill::ones),false,false));
+		m_entity.push_back(DiagMVGaussian(vec(m_lat_dim, arma::fill::randn),vec(m_lat_dim, arma::fill::ones),false,true));
 	}
 	/// initialize prior variables
 	m_user_prior_mean = DiagMVGaussian(vec(m_lat_dim, fill::zeros),
-			(vec(m_lat_dim, fill::ones)),false,false);
+			(vec(m_lat_dim, fill::ones)),false,true);
 	m_user_prior_cov = MVInverseGamma(vec(m_lat_dim, fill::ones) * 3,
 			vec(m_lat_dim, fill::ones) * 3);
 	m_item_prior_mean = m_user_prior_mean;
@@ -80,13 +80,12 @@ void HierarchicalHybridMF::_update_user_or_item(int64_t const& entityId, int8_t 
 	}
 	m_entity[entityId] = message;
 	/// reset the message
-	DistParam upCovSuff2 = (
+	prob::DistParam upCovSuff2 = (
 			entityType == Entity::ENT_USER ?
 					m_user_prior_cov.suff_mean(2) :
 					m_item_prior_cov.suff_mean(2));
 	vec entityLatMean = (entityType == Entity::ENT_USER ? m_user_prior_mean.moment(1).m_vec : m_item_prior_mean.moment(1).m_vec);
 	message[0] = (vec)(upCovSuff2.m_vec % entityLatMean);
-//	message[0].reset();
 	message[1] = (vec)(-0.5 * upCovSuff2.m_vec);
 	m_entity[entityId] += message;
 }
@@ -419,9 +418,9 @@ float HierarchicalHybridMF::train_rmse() {
 
 void HierarchicalHybridMF::train_model() {
 	/// train Bayesian model on the training dataset
-	const size_t maxIter = 20;
-	set<int64_t> const& userIds = m_dataset.type_ent_ids[Entity::ENT_USER];
-	set<int64_t> const& itemIds = m_dataset.type_ent_ids[Entity::ENT_ITEM];
+	const size_t maxIter = 5;
+	set<int64_t> const& userIds = m_train_dataset.type_ent_ids[Entity::ENT_USER];
+	set<int64_t> const& itemIds = m_train_dataset.type_ent_ids[Entity::ENT_ITEM];
 	set<int64_t> const& featureIds =
 			m_train_dataset.type_ent_ids[Entity::ENT_FEATURE];
 	vector<map<int8_t, vector<Interact> > >& type_interacts =
@@ -508,7 +507,6 @@ void HierarchicalHybridMF::_prepare_datasets() {
 		m_client.get_dataset(m_test_dataset, rt::DSType::DS_TEST);
 		m_client.get_dataset(m_cs_dataset, rt::DSType::DS_CS);
 		m_dataset.prepare_id_type_map();
-		m_train_dataset = m_dataset;
 		m_train_dataset.prepare_id_type_map();
 		m_test_dataset.prepare_id_type_map();
 		m_cs_dataset.prepare_id_type_map();
@@ -520,12 +518,12 @@ void HierarchicalHybridMF::_prepare_datasets() {
 	}
 }
 
-HierarchicalHybridMF::HierarchicalHybridMF() :
+HierarchicalHybridMF::HierarchicalHybridMF(size_t const& latDim, bool diagGaussian) :
 		m_num_users(0), m_num_items(0), m_num_features(0), m_socket(
 				new TSocket("localhost", 9090)), m_transport(
 				new TBufferedTransport(m_socket)), m_protocol(
 				new TBinaryProtocol(m_transport)), m_client(m_protocol), m_lat_dim(
-				20),m_iter(0) {
+				latDim),m_diag_gaussian(diagGaussian),m_iter(0) {
 	_init();
 }
 
