@@ -14,6 +14,8 @@
 #include "recsys/thrift/cpp/HandleData.h"
 #include "recsys/data/DatasetExt.h"
 #include "vb/prob/Gaussian.h"
+#include "vb/prob/MVGaussian.h"
+#include "vb/prob/DiagMVGaussian.h"
 #include "vb/prob/InverseGamma.h"
 #include "vb/prob/MVInverseGamma.h"
 

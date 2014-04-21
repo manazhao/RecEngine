@@ -28,6 +28,20 @@ void DatasetExt::prepare_id_type_map(){
 	}
 }
 
+void DatasetExt::verify_interaction(){
+	/// check whether the user id and item id are different
+	/// very basic checking
+	set<int64_t>& userIds = type_ent_ids[Entity::ENT_USER];
+	for(set<int64_t>::iterator iter = userIds.begin(); iter != userIds.end(); ++iter){
+		int64_t userId = *iter;
+		vector<Interact> &interacts = ent_type_interacts[userId][EntityInteraction::RATE_ITEM];
+		for(vector<Interact>::iterator iter1 = interacts.begin(); iter1 < interacts.end(); ++iter1){
+			int64_t endId = iter1->ent_id;
+			assert(userId != endId);
+		}
+	}
+}
+
 void DatasetExt::filter_entity_interactions(
 		vector<map<int8_t, vector<Interact> > > const& entTypeInteractions) {
 	/// only keep those interactions the both entities of which are in the entity id set
