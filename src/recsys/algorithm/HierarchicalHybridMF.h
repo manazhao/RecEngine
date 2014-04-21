@@ -43,6 +43,11 @@ protected:
 	void _prepare_datasets();
 	void _prepare_model_variables();
 	void _init();
+	void _update_user_prior_mean();
+	void _update_user_prior_cov();
+	void _update_item_prior_mean();
+	void _update_item_prior_cov();
+
 	void _update_user_prior();
 	void _update_item_prior();
 	void _update_feature_prior();
