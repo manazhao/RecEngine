@@ -33,6 +33,7 @@ public:
 		return ent_ids.find(id) != ent_ids.end();
 	}
 	void prepare_id_type_map();
+	void verify_interaction();
 	void filter_entity_interactions(
 			vector<map<int8_t, vector<Interact> > > const& entTypeInteractions);
 	virtual ~DatasetExt() throw() {}

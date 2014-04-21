@@ -14,6 +14,8 @@
 #include "recsys/thrift/cpp/HandleData.h"
 #include "recsys/data/DatasetExt.h"
 #include "vb/prob/Gaussian.h"
+#include "vb/prob/MVGaussian.h"
+#include "vb/prob/DiagMVGaussian.h"
 #include "vb/prob/InverseGamma.h"
 #include "vb/prob/MVInverseGamma.h"
 
@@ -41,6 +43,11 @@ protected:
 	void _prepare_datasets();
 	void _prepare_model_variables();
 	void _init();
+	void _update_user_prior_mean();
+	void _update_user_prior_cov();
+	void _update_item_prior_mean();
+	void _update_item_prior_cov();
+
 	void _update_user_prior();
 	void _update_item_prior();
 	void _update_feature_prior();
