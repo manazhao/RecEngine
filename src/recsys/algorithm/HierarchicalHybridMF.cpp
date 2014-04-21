@@ -113,6 +113,14 @@ void HierarchicalHybridMF::_update_entity_feature_moments() {
 	}
 }
 
+void HierarchicalHybridMF::_dump_interact_array(vector<Interact> const& vec){
+	for(size_t i = 0; i < vec.size(); i++){
+		Interact const& tmpInteract = vec[i];
+		cout << tmpInteract.ent_id << ",";
+	}
+	cout << endl;
+}
+
 void HierarchicalHybridMF::_update_feature(int64_t const& featId,
 		map<int8_t, vector<Interact> > & typeInteracts) {
 	vector<Interact> const& interacts =
@@ -416,6 +424,53 @@ float HierarchicalHybridMF::train_rmse() {
 	return rmse;
 }
 
+
+float HierarchicalHybridMF::test_rmse() {
+	/// evaluate the RMSE over the training dataset
+	float rmse = 0;
+	size_t numRatings = 0;
+	set<int64_t>& testUserIds = m_test_dataset.type_ent_ids[Entity::ENT_USER];
+	set<int64_t>& testItemIds = m_test_dataset.type_ent_ids[Entity::ENT_ITEM];
+	/// initialize cold-start entities as the prior
+	for(set<int64_t>::iterator iter = testUserIds.begin(); iter != testUserIds.end(); ++iter){
+		if(m_train_dataset.ent_ids.find(*iter) == m_train_dataset.ent_ids.end()){
+			/// caution: the covariance is yet setup properly
+			m_entity[*iter] = m_user_prior_mean;
+		}
+	}
+	for(set<int64_t>::iterator iter = testItemIds.begin(); iter != testItemIds.end(); ++iter){
+		if(m_train_dataset.ent_ids.find(*iter) == m_train_dataset.ent_ids.end()){
+			/// caution: the covariance is yet setup properly
+			m_entity[*iter] = m_item_prior_mean;
+		}
+	}
+
+	for (set<int64_t>::iterator iter = testUserIds.begin(); iter != testUserIds.end();
+			++iter) {
+		DiagMVGaussian& userLat = m_entity[*iter];
+		vector<Interact>& ratingInteracts =
+				m_test_dataset.ent_type_interacts[*iter][EntityInteraction::RATE_ITEM];
+//		vector<Interact>& ratingInteracts1 =
+//				m_train_dataset.ent_type_interacts[*iter][EntityInteraction::RATE_ITEM];
+//		_dump_interact_array(ratingInteracts);
+//		_dump_interact_array(ratingInteracts1);
+		for (vector<Interact>::iterator iter1 = ratingInteracts.begin();
+				iter1 < ratingInteracts.end(); ++iter1) {
+			float ratingVal = iter1->ent_val;
+			int64_t itemId = iter1->ent_id;
+			DiagMVGaussian& itemLat = m_entity[itemId];
+			float predRating = accu(
+					itemLat.moment(1).m_vec % userLat.moment(1).m_vec)
+					+ (float) m_bias.moment(1);
+			float diff = predRating - ratingVal;
+			rmse += (diff * diff);
+			numRatings++;
+		}
+	}
+	rmse = sqrt(rmse / numRatings);
+	return rmse;
+}
+
 void HierarchicalHybridMF::train_model() {
 	/// train Bayesian model on the training dataset
 	const size_t maxIter = 5;
@@ -489,7 +544,10 @@ void HierarchicalHybridMF::train_model() {
 		cout << ">>>>> time elapsed:" << t.elapsed() << endl;
 		///
 		float rmse = train_rmse();
-		cout << ">>>>>>>>>>>>>>>>> rmse:" << rmse << endl;
+		float testRmse = test_rmse();
+		cout << ">>>>>>>>>>>>>>>>> train rmse:" << rmse << endl;
+		cout << ">>>>>>>>>>>>>>>>> test rmse:" << testRmse << endl;
+
 		cout << ">>>>>>>>>>>>>>>>> time for single iteration:"
 				<< iterTimer.elapsed() << endl;
 	}
@@ -510,6 +568,10 @@ void HierarchicalHybridMF::_prepare_datasets() {
 		m_train_dataset.prepare_id_type_map();
 		m_test_dataset.prepare_id_type_map();
 		m_cs_dataset.prepare_id_type_map();
+		cout << m_dataset << endl;
+		cout << m_train_dataset << endl;
+		cout << m_test_dataset << endl;
+		cout << m_cs_dataset << endl;
 		cout << ">>>>>>>>>>>>>> Time elapsed:" << t.elapsed()
 				<< " >>>>>>>>>>>>>>" << endl;
 		m_transport->close();

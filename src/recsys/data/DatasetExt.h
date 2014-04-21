@@ -11,6 +11,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <iostream>
 #include <recsys/data/Entity.h>
 #include <recsys/data/EntityInteraction.h>
 #include "recsys/thrift/cpp/HandleData.h"
@@ -21,6 +22,7 @@ using namespace std;
 namespace recsys {
 
 class DatasetExt : public rt::Dataset{
+	friend ostream& operator << (ostream& oss, DatasetExt const&);
 public:
 	map<int64_t,int8_t> m_id_type_map;
 protected:
@@ -38,7 +40,7 @@ public:
 			vector<map<int8_t, vector<Interact> > > const& entTypeInteractions);
 	virtual ~DatasetExt() throw() {}
 };
-
+ ostream& operator << (ostream& oss, DatasetExt const& rhs);
 }
 
 #endif /* DATASET_H_ */

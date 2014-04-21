@@ -71,4 +71,12 @@ void DatasetExt::_filter_entity_interaction_helper(int8_t const& type,
 	}
 }
 
+ostream& operator<< (ostream& oss, DatasetExt const& rhs){
+	DatasetExt& rhs1 = const_cast<DatasetExt&>(rhs);
+	oss << "# of users:" << rhs1.type_ent_ids[Entity::ENT_USER].size() << endl;
+	oss << "# of items:" << rhs1.type_ent_ids[Entity::ENT_ITEM].size() << endl;
+	oss << "# of features:" << rhs1.type_ent_ids[Entity::ENT_FEATURE].size() << endl;
+	return oss;
+}
+
 }
