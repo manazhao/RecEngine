@@ -163,14 +163,6 @@ void HierarchicalHybridMF::_update_entity_feature_moments() {
 	}
 }
 
-void HierarchicalHybridMF::_dump_interact_array(vector<Interact> const& vec) {
-	for (size_t i = 0; i < vec.size(); i++) {
-		Interact const& tmpInteract = vec[i];
-		cout << tmpInteract.ent_id << ",";
-	}
-	cout << endl;
-}
-
 void HierarchicalHybridMF::_update_feature(int64_t const& featId, map<int8_t,
 		vector<Interact> > & typeInteracts) {
 	vector<Interact> const& interacts =

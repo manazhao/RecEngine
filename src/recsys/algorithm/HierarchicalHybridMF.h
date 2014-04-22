@@ -82,7 +82,6 @@ protected:
 	void _update_item(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_feature(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_entity_feature_moments();
-	void _dump_interact_array(vector<Interact> const& vec);
 public:
 	HierarchicalHybridMF(ModelParams const& modelParam);
 	float dataset_rmse(DatasetExt& dataset);
