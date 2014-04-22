@@ -19,31 +19,10 @@
 # of items:3498
 # of features:0
 
->>>>>>>>>>>>>> Time elapsed:0.42 >>>>>>>>>>>>>>
+>>>>>>>>>>>>>> Time elapsed:0.47 >>>>>>>>>>>>>>
 ------------ Model Parameters ------------
-latent dimension:20, number of iterations:20,is diagonal:1,use feature:1
+latent dimension:20, number of iterations:50,is diagonal:1,use feature:1
 
 
 ----------- Variational Bayesian Message Inference -----------
-iteration:1,time:4.59,train rmse:1.04437,test rmse:1.09255,cs rmse:1.09566
-iteration:2,time:4.53,train rmse:0.964991,test rmse:0.98547,cs rmse:1.05762
-iteration:3,time:4.54,train rmse:0.898714,test rmse:0.925512,cs rmse:1.01914
-iteration:4,time:4.53,train rmse:0.862572,test rmse:0.899429,cs rmse:0.994759
-iteration:5,time:4.53,train rmse:0.844525,test rmse:0.888002,cs rmse:0.984037
-iteration:6,time:4.53,train rmse:0.83562,test rmse:0.882279,cs rmse:0.979904
-iteration:7,time:4.53,train rmse:0.830554,test rmse:0.878853,cs rmse:0.978168
-iteration:8,time:4.54,train rmse:0.827094,test rmse:0.876447,cs rmse:0.97738
-iteration:9,time:4.54,train rmse:0.824331,test rmse:0.874555,cs rmse:0.977008
-iteration:10,time:4.54,train rmse:0.821918,test rmse:0.872965,cs rmse:0.976863
-iteration:11,time:4.54,train rmse:0.819709,test rmse:0.871568,cs rmse:0.976813
-iteration:12,time:4.53,train rmse:0.817687,test rmse:0.870343,cs rmse:0.976797
-iteration:13,time:4.55,train rmse:0.815886,test rmse:0.86931,cs rmse:0.976864
-iteration:14,time:4.53,train rmse:0.814337,test rmse:0.868459,cs rmse:0.97691
-iteration:15,time:4.54,train rmse:0.813035,test rmse:0.867796,cs rmse:0.977018
-iteration:16,time:4.56,train rmse:0.811982,test rmse:0.867279,cs rmse:0.977096
-iteration:17,time:4.56,train rmse:0.811104,test rmse:0.866887,cs rmse:0.977152
-iteration:18,time:4.57,train rmse:0.810395,test rmse:0.866589,cs rmse:0.977203
-iteration:19,time:4.58,train rmse:0.809803,test rmse:0.86635,cs rmse:0.977252
-iteration:20,time:4.5,train rmse:0.809296,test rmse:0.866157,cs rmse:0.977305
------------ Done! -----------
-
+iteration:1,time:4.6,train rmse:1.04437,test rmse:1.09255,cs rmse:1.09566
