@@ -8,6 +8,7 @@ CPP_SRCS += \
 ../src/recsys/data/AmazonJSONDataLoader_test.cpp \
 ../src/recsys/data/AppConfig.cpp \
 ../src/recsys/data/DatasetExt.cpp \
+../src/recsys/data/DatasetManager.cpp \
 ../src/recsys/data/Entity.cpp \
 ../src/recsys/data/EntityInteraction.cpp \
 ../src/recsys/data/EntityInteraction_test.cpp \
@@ -27,6 +28,7 @@ OBJS += \
 ./src/recsys/data/AmazonJSONDataLoader_test.o \
 ./src/recsys/data/AppConfig.o \
 ./src/recsys/data/DatasetExt.o \
+./src/recsys/data/DatasetManager.o \
 ./src/recsys/data/Entity.o \
 ./src/recsys/data/EntityInteraction.o \
 ./src/recsys/data/EntityInteraction_test.o \
@@ -46,6 +48,7 @@ CPP_DEPS += \
 ./src/recsys/data/AmazonJSONDataLoader_test.d \
 ./src/recsys/data/AppConfig.d \
 ./src/recsys/data/DatasetExt.d \
+./src/recsys/data/DatasetManager.d \
 ./src/recsys/data/Entity.d \
 ./src/recsys/data/EntityInteraction.d \
 ./src/recsys/data/EntityInteraction_test.d \
@@ -65,7 +68,7 @@ CPP_DEPS += \
 src/recsys/data/%.o: ../src/recsys/data/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -I"/home/manazhao/git/BayesianNetwork" -I"/home/manazhao/git/BayesianNetwork/src" -I"/home/manazhao/git/RecEngine/src" -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -I"/home/qzhao2/git/BayesianNetwork" -I"/home/qzhao2/git/BayesianNetwork/src" -I"/home/qzhao2/git/RecEngine/src" -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

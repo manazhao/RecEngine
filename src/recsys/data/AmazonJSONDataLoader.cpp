@@ -6,7 +6,6 @@
  */
 
 #include <boost/algorithm/string.hpp>
-#include "EntityInteraction.h"
 #include <recsys/data/AmazonJSONDataLoader.h>
 #include <fstream>
 #include <set>
@@ -43,142 +42,9 @@ AmazonJSONDataLoader::str_set_ptr AmazonJSONDataLoader::_get_item_cat_nodes(
 
 void AmazonJSONDataLoader::prepare_datasets() {
 	// Your implementation goes here
-	printf("############### prepare datasets ###############\n");
-	boost::timer t;
-	DatasetExt& allDataset = m_all_datasets[rt::DSType::DS_ALL];
-	for (Entity::entity_ptr_map::iterator iter =
-			Entity::m_entity_ptr_map.begin();
-			iter != Entity::m_entity_ptr_map.end(); ++iter) {
-		///  get the mapped id and type
-		Entity::mapped_id_type id = iter->first;
-		int8_t type = iter->second->m_type;
-		allDataset.add_entity(type,id);
-	}
-	allDataset.ent_type_interacts.assign(Entity::m_entity_ptr_map.size(),
-			map<int8_t, std::vector<Interact> >());
-	for (size_t i = 0; i < allDataset.ent_type_interacts.size(); i++) {
-		map<int8_t, std::vector<Interact> > tmpInteracts;
-		_get_entity_interacts(tmpInteracts, i);
-		allDataset.ent_type_interacts[i] = tmpInteracts;
-	}
-
-	std::set<int64_t> userIdSet = allDataset.type_ent_ids[Entity::ENT_USER];
-	vector<int64_t> userIds;
-	userIds.assign(userIdSet.begin(), userIdSet.end());
-	std::random_shuffle(userIds.begin(), userIds.end());
-	const float csRatio = 0.2;
-	const float trainRatio = 0.8;
-	/// shuffle the array
-	size_t csUserEndId = (size_t) (userIds.size() * csRatio);
-	/// reserve space for training dataset
-	DatasetExt& trainDataset = m_all_datasets[rt::DSType::DS_TRAIN];
-	DatasetExt& testDataset = m_all_datasets[rt::DSType::DS_TEST];
-	DatasetExt& csDataset = m_all_datasets[rt::DSType::DS_CS];
-	trainDataset = DatasetExt(allDataset.ent_type_interacts.size());
-	testDataset = DatasetExt(allDataset.ent_type_interacts.size());
-	csDataset = DatasetExt(allDataset.ent_type_interacts.size());
-	for (size_t userIdx = 0; userIdx < userIds.size(); userIdx++) {
-		/// user -> item and user -> feature interactions
-		int64_t userId = userIds[userIdx];
-		map<int8_t, vector<rt::Interact> >& userInteracts =
-				allDataset.ent_type_interacts[userId];
-		if (userIdx < csUserEndId) {
-			csDataset.add_entity(Entity::ENT_USER, userId);
-		} else {
-			trainDataset.add_entity(Entity::ENT_USER, userId);
-			testDataset.add_entity(Entity::ENT_USER, userId);
-		}
-		for (map<int8_t, vector<rt::Interact> >::iterator iter =
-				userInteracts.begin(); iter != userInteracts.end(); ++iter) {
-			int8_t type = iter->first;
-			vector<rt::Interact>& tmpInteracts = iter->second;
-			vector<size_t> tmpIdxVec(tmpInteracts.size());
-			for (size_t j = 0; j < tmpInteracts.size(); j++) {
-				tmpIdxVec[j] = j;
-			}
-			if (type == EntityInteraction::RATE_ITEM
-					&& userIdx >= csUserEndId) {
-				random_shuffle(tmpIdxVec.begin(), tmpIdxVec.end());
-			}
-			size_t endTrainIdx = 0;
-			if (type == EntityInteraction::RATE_ITEM) {
-				endTrainIdx = (size_t) (tmpInteracts.size() * trainRatio);
-			}
-			for (size_t intIdx = 0; intIdx < tmpIdxVec.size(); intIdx++) {
-				// add the destination entity id
-				Interact& tmpInteract = tmpInteracts[tmpIdxVec[intIdx]];
-				Entity::ENTITY_TYPE endEntType = Entity::ENT_DEFAULT;
-				switch (type) {
-				case EntityInteraction::RATE_ITEM:
-					endEntType = Entity::ENT_ITEM;
-					break;
-				case EntityInteraction::ADD_FEATURE:
-					endEntType = Entity::ENT_FEATURE;
-					break;
-				}
-				if (userIdx < csUserEndId) {
-					csDataset.add_entity(endEntType, tmpInteract.ent_id);
-				} else {
-					/// for coldstart dataset, add directly
-					/// add user id and feature id to both training and testing dataset
-					trainDataset.add_entity(Entity::ENT_USER, userId);
-					testDataset.add_entity(Entity::ENT_USER, userId);
-					if (type == EntityInteraction::ADD_FEATURE) {
-						testDataset.add_entity(endEntType,
-								tmpInteract.ent_id);
-						trainDataset.add_entity(endEntType,
-								tmpInteract.ent_id);
-					}
-					if (type == EntityInteraction::RATE_ITEM) {
-						if (intIdx < endTrainIdx)
-							trainDataset.add_entity(endEntType,
-									tmpInteract.ent_id);
-						else
-							testDataset.add_entity(endEntType,
-									tmpInteract.ent_id);
-					}
-				}
-			}
-		}
-	}
-	csDataset.filter_entity_interactions(allDataset.ent_type_interacts);
-	trainDataset.filter_entity_interactions(allDataset.ent_type_interacts);
-	testDataset.filter_entity_interactions(allDataset.ent_type_interacts);
-
-	cout << ">>>>>>>>>>>> time elapsed:" << t.elapsed() << " >>>>>>>>>>>>" <<  endl;
+	m_dataset_manager.generate_datasets();
 }
 
-
-void AmazonJSONDataLoader::_get_entity_interacts(
-		std::map<int8_t, std::vector<Interact> > & _return,
-		const int64_t entId) {
-	// Your implementation goes here
-//		printf("get_entity_interacts\n");
-	EntityInteraction::type_interact_map& entIntMap =
-			EntityInteraction::m_entity_type_interact_map[entId];
-	for (EntityInteraction::type_interact_map::iterator iter =
-			entIntMap.begin(); iter != entIntMap.end(); ++iter) {
-		/// extract the interaction value
-		int8_t intType = iter->first;
-		EntityInteraction::entity_interact_vec_ptr& interactVecPtr =
-				iter->second;
-		if (interactVecPtr) {
-			for (EntityInteraction::entity_interact_vec::iterator iter1 =
-					interactVecPtr->begin(); iter1 < interactVecPtr->end();
-					++iter1) {
-				EntityInteraction& tmpInteract = **iter1;
-				Interact resultInteract;
-				Entity::mapped_id_type fromId =
-						tmpInteract.m_from_entity->m_mapped_id;
-				Entity::mapped_id_type toId =
-						tmpInteract.m_to_entity->m_mapped_id;
-				resultInteract.ent_id = (fromId == entId ? toId : fromId);
-				resultInteract.ent_val = tmpInteract.m_val;
-				_return[intType].push_back(resultInteract);
-			}
-		}
-	}
-}
 void AmazonJSONDataLoader::load_author_profile() {
 /// check the file existence
 	fstream fs(m_author_file.c_str());
@@ -317,8 +183,7 @@ void AmazonJSONDataLoader::load_rating_file() {
 AmazonJSONDataLoader::AmazonJSONDataLoader(string const& authorFile,
 		string const& itemFile, string const& ratingFile) :
 		m_author_file(authorFile), m_item_file(itemFile), m_rating_file(
-				ratingFile), m_author_inited(false), m_item_inited(false), m_all_datasets(
-				4) {
+				ratingFile), m_author_inited(false), m_item_inited(false) {
 // TODO Auto-generated constructor stub
 
 }

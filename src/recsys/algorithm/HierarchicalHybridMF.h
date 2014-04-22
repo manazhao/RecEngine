@@ -47,7 +47,6 @@ protected:
 	void _update_user_prior_cov();
 	void _update_item_prior_mean();
 	void _update_item_prior_cov();
-
 	void _update_user_prior();
 	void _update_item_prior();
 	void _update_feature_prior();
@@ -58,9 +57,11 @@ protected:
 	void _update_item(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_feature(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_entity_feature_moments();
+	void _dump_interact_array(vector<Interact> const& vec);
 public:
-	HierarchicalHybridMF();
+	HierarchicalHybridMF(size_t const& latDim = 10, bool diagGaussian = true);
 	float train_rmse();
+	float test_rmse();
 	void train_model();
 	virtual ~HierarchicalHybridMF();
 protected:
@@ -106,6 +107,7 @@ protected:
 	/// model parameters
 	/// latent vector dimensionality
 	size_t m_lat_dim;
+	bool m_diag_gaussian;
 	size_t m_iter;
 };
 
