@@ -1,0 +1,49 @@
+############## retrieve datasets from data host  ##############
+---------- dataset ----------
+# of users:6040
+# of items:3706
+# of features:0
+
+---------- train dataset ----------
+# of users:4530
+# of items:3642
+# of features:0
+
+---------- test dataset ----------
+# of users:4530
+# of items:3462
+# of features:0
+
+---------- coldstart dataset ----------
+# of users:1510
+# of items:3498
+# of features:0
+
+>>>>>>>>>>>>>> Time elapsed:0.47 >>>>>>>>>>>>>>
+------------ Model Parameters ------------
+latent dimension:10, number of iterations:20,is diagonal:1,use feature:1
+
+
+----------- Variational Bayesian Message Inference -----------
+iteration:1,time:2.4,train rmse:1.06984,test rmse:1.09989,cs rmse:1.09504
+iteration:2,time:2.37,train rmse:0.96265,test rmse:0.980187,cs rmse:1.04908
+iteration:3,time:2.38,train rmse:0.888349,test rmse:0.916191,cs rmse:1.00958
+iteration:4,time:2.37,train rmse:0.850872,test rmse:0.892192,cs rmse:0.99048
+iteration:5,time:2.37,train rmse:0.834268,test rmse:0.883579,cs rmse:0.983931
+iteration:6,time:2.37,train rmse:0.826599,test rmse:0.87982,cs rmse:0.981838
+iteration:7,time:2.37,train rmse:0.82203,test rmse:0.877563,cs rmse:0.981146
+iteration:8,time:2.37,train rmse:0.818729,test rmse:0.875907,cs rmse:0.980958
+iteration:9,time:2.38,train rmse:0.816177,test rmse:0.874618,cs rmse:0.980962
+iteration:10,time:2.37,train rmse:0.814147,test rmse:0.873588,cs rmse:0.981054
+iteration:11,time:2.38,train rmse:0.812517,test rmse:0.872766,cs rmse:0.981218
+iteration:12,time:2.39,train rmse:0.811179,test rmse:0.872093,cs rmse:0.981345
+iteration:13,time:2.38,train rmse:0.810092,test rmse:0.871545,cs rmse:0.981455
+iteration:14,time:2.38,train rmse:0.809188,test rmse:0.87109,cs rmse:0.981527
+iteration:15,time:2.38,train rmse:0.808422,test rmse:0.87068,cs rmse:0.981586
+iteration:16,time:2.38,train rmse:0.807769,test rmse:0.870326,cs rmse:0.981618
+iteration:17,time:2.37,train rmse:0.807199,test rmse:0.869996,cs rmse:0.981611
+iteration:18,time:2.36,train rmse:0.806694,test rmse:0.8697,cs rmse:0.981558
+iteration:19,time:2.37,train rmse:0.806229,test rmse:0.869405,cs rmse:0.981447
+iteration:20,time:2.37,train rmse:0.805777,test rmse:0.869129,cs rmse:0.981337
+----------- Done! -----------
+

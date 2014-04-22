@@ -25,11 +25,9 @@ int main(int argc, char** argv) {
 	test_entity_interaction();
 #endif
 #ifdef __HYBRID_MODEL__
-	assert(argc == 3);
-	size_t latDim = lexical_cast<size_t>(string(argv[1]));
-	bool useDiagGaussian = lexical_cast<bool>(string(argv[2]));
-	HierarchicalHybridMF model(latDim,useDiagGaussian);
-	model.train_model();
+	HierarchicalHybridMF::ModelParams modelParam(argc,argv);
+	HierarchicalHybridMF model(modelParam);
+	model.infer();
 #endif
 	return 0;
 }

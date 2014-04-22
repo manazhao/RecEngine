@@ -37,6 +37,31 @@ namespace recsys {
  * in a rushing style.
  */
 class HierarchicalHybridMF {
+public:
+	struct ModelParams{
+		/// the dimensionality of the latent vector
+		size_t m_lat_dim;
+		/// maximum number of iterations
+		size_t m_max_iter;
+		/// whether use diagonal multivariate Gaussian
+		bool m_diag_cov;
+		// whether use feature
+		bool m_use_feature;
+		ModelParams(size_t const& latDim = 10, size_t const& maxIter = 10, bool diagCov = true, bool useFeature = true);
+		ModelParams(int argc, char** argv);
+	};
+	struct RunTimeLog{
+		/// iteration index
+		size_t m_iter;
+		/// training rmse
+		float m_train_rmse;
+		/// testing rmse
+		float m_test_rmse;
+		/// coldstart dataset rmse
+		float m_cs_rmse;
+		/// iteration time
+		float m_iter_time;
+	};
 protected:
 	void _lat_ip_moments(DiagMVGaussian & lat1, DiagMVGaussian & lat2, float & firstMoment, float & secondMoment);
 	void _rating_bias_moments(float rating, float & firstMoment, float& secondMoment);
@@ -59,10 +84,12 @@ protected:
 	void _update_entity_feature_moments();
 	void _dump_interact_array(vector<Interact> const& vec);
 public:
-	HierarchicalHybridMF(size_t const& latDim = 10, bool diagGaussian = true);
+	HierarchicalHybridMF(ModelParams const& modelParam);
+	float dataset_rmse(DatasetExt& dataset);
 	float train_rmse();
 	float test_rmse();
-	void train_model();
+	float cs_rmse();
+	void infer();
 	virtual ~HierarchicalHybridMF();
 protected:
 	/// model variables
@@ -104,12 +131,12 @@ protected:
 	DatasetExt m_test_dataset;
 	/// coldstart testing dataset
 	DatasetExt m_cs_dataset;
-	/// model parameters
-	/// latent vector dimensionality
-	size_t m_lat_dim;
-	bool m_diag_gaussian;
-	size_t m_iter;
+	ModelParams m_model_param;
 };
+
+ostream& operator << (ostream& oss, HierarchicalHybridMF::ModelParams const& rhs);
+ostream& operator << (ostream& oss, HierarchicalHybridMF::RunTimeLog const& rhs);
+
 
 } /* namespace recsys */
 
