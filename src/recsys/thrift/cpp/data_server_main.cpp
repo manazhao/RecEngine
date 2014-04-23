@@ -37,10 +37,8 @@ public:
 		cout
 				<< "############### loading Amazon book rating data ###############"
 				<< endl;
-#ifndef __DEBUG_LOADING__
 		m_amazon_data_loader.load_author_profile();
 		m_amazon_data_loader.load_item_profile();
-#endif
 		m_amazon_data_loader.load_rating_file();
 		m_amazon_data_loader.prepare_datasets();
 		cout

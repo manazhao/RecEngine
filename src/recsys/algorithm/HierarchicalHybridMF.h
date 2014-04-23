@@ -67,19 +67,25 @@ protected:
 	void _rating_bias_moments(float rating, float & firstMoment, float& secondMoment);
 	void _prepare_datasets();
 	void _prepare_model_variables();
+	void _init_entity_feature_moment_cache();
 	void _init();
 	void _update_user_prior_mean();
 	void _update_user_prior_cov();
 	void _update_item_prior_mean();
 	void _update_item_prior_cov();
+	void _update_feature_prior_mean();
+	void _update_feature_prior_cov();
 	void _update_user_prior();
 	void _update_item_prior();
 	void _update_feature_prior();
 	void _update_rating_var();
 	void _update_bias();
 	float _get_mean_rating();
-	void _update_user_or_item(int64_t const& entityId, int8_t entityType, map<int8_t,vector<Interact> > & typeInteracts);
-	void _update_item(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
+	void _update_entity_from_prior(int64_t const& entityId, int8_t entityType);
+	void _update_feature_from_prior(int64_t const& entityId);
+	void _update_entity_from_ratings(int64_t const& entityId, int8_t entityType, map<int8_t,vector<Interact> > & typeInteracts);
+	void _update_feature_from_entities(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
+	void _update_entity(int64_t const& entityId, int8_t entityType, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_feature(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_entity_feature_moments();
 public:

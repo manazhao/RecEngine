@@ -154,9 +154,6 @@ void AmazonJSONDataLoader::load_rating_file() {
 	string line;
 	cout << "start to loading user-item ratings..." << endl;
 	timer t;
-#ifdef __DEBUG_LOADING__
-	size_t lineCnt = 0;
-#endif
 	while (std::getline(fs, line)) {
 		stringstream ss;
 		ss << line;
@@ -171,10 +168,6 @@ void AmazonJSONDataLoader::load_rating_file() {
 		ei.add_from_entity(authorId, Entity::ENT_USER);
 		ei.add_to_entity(itemId, Entity::ENT_ITEM);
 		ei.index_if_not_exist();
-//#ifdef __DEBUG_LOADING__
-//		if(lineCnt++ > 100000)
-//		break;
-//#endif
 	}
 	fs.close();
 	cout << "time elapsed:" << t.elapsed() << endl;

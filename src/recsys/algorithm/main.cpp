@@ -26,6 +26,8 @@ int main(int argc, char** argv) {
 #endif
 #ifdef __HYBRID_MODEL__
 	HierarchicalHybridMF::ModelParams modelParam(argc,argv);
+//	modelParam.m_use_feature = true;
+//	modelParam.m_lat_dim = 2;
 	HierarchicalHybridMF model(modelParam);
 	model.infer();
 #endif
