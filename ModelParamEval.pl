@@ -12,15 +12,19 @@ use strict;
 use warnings;
 
 my @lat_dim = (5,10,20,50);
+my @use_feature = (0,1);
 my $max_iter = 50;
 
--d 'result' or  mkdir 'result';
+-d 'amazon_result' or  mkdir 'amazon_result';
 
 foreach (@lat_dim){
 my $dim = $_;
-my $resultFile = "result/dim_$dim.txt";
-my $cmd = "./RecAlgorithmReleaseBuild/RecEngine --lat-dim=$dim --max-iter=$max_iter >$resultFile 2>&1 ";
-print "$cmd\n";
-`$cmd`;
+foreach(@use_feature){
+	my $feature = $_;
+	my $resultFile = "amazon_result/dim_$dim-$feature.txt";
+	my $cmd = "./RecAlgorithmReleaseBuild/RecEngine --lat-dim=$dim --max-iter=$max_iter --use-feature=$feature >$resultFile 2>&1 ";
+	print "$cmd\n";
+	`$cmd`;
+}
 }
 

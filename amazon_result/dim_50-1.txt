@@ -1,0 +1,25 @@
+############## retrieve datasets from data host  ##############
+---------- dataset ----------
+# of users:74263
+# of items:298147
+# of features:35476
+
+---------- train dataset ----------
+# of users:55697
+# of items:149145
+# of features:20456
+
+---------- test dataset ----------
+# of users:55697
+# of items:88982
+# of features:15365
+
+---------- coldstart dataset ----------
+# of users:18566
+# of items:96566
+# of features:15872
+
+>>>>>>>>>>>>>> Time elapsed:4.26 >>>>>>>>>>>>>>
+------------ Model Parameters ------------
+latent dimension:50, number of iterations:50,is diagonal:1,use feature:1
+Killed
