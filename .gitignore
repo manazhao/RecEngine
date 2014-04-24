@@ -24,5 +24,3 @@ RecAlgorithmDebugBuild/
 DataHostReleaseBuild/
 DataHostDebugBuild/
 result/
-*.mk
-makefile
