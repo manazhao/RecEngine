@@ -13,7 +13,9 @@
 #include "recsys/data/AppConfig.h"
 #include "recsys/data/Entity.h"
 #include "recsys/data/EntityInteraction.h"
-#include "recsys/data/AmazonJSONDataLoader.h"
+#include "recsys/data/JSONDataLoader.h"
+#include "recsys/data/AmazonParser.h"
+#include "boost/filesystem.hpp"
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -25,25 +27,56 @@ using namespace ::recsys::thrift;
 using namespace recsys;
 using namespace boost;
 namespace po = boost::program_options;
+namespace bf = boost::filesystem ;
 
 class HandleDataHandler: virtual public HandleDataIf {
 protected:
-	AmazonJSONDataLoader m_amazon_data_loader;
+	/// dataset unique id
+	/// currently support:
+	/// amazon: amazond dataset
+	string m_dataset_name;
+	JSONDataLoader m_data_loader;
+	static map<string, map<string, shared_ptr<EntityParser> > > m_dataset_parser_map;
+	static map<string, int> m_dataset_port_map;
 public:
-	HandleDataHandler(string const& authorFile, string const& itemFile,
-			string const& ratingFile) :
-			m_amazon_data_loader(authorFile, itemFile, ratingFile) {
+	static void register_entity_parsers(){
+		m_dataset_parser_map["amazon"]["user"] = shared_ptr<EntityParser>(new recsys::amazon::UserEntityParser());
+		m_dataset_parser_map["amazon"]["item"] = shared_ptr<EntityParser>(new recsys::amazon::UserEntityParser());
+		/// to do: register parsers for other commonly used dataset
+
+		/// register port
+		int currentPort = 9090;
+		m_dataset_port_map["amazon"] = currentPort;
+		m_dataset_port_map["movielense"] = ++currentPort;
+	}
+
+	HandleDataHandler(string const& datasetName, string const& userFile, string const& itemFile,
+			string const& ratingFile):m_dataset_name(datasetName)
+	{
 		// Your initialization goes here
 		cout
-				<< "############### loading Amazon book rating data ###############"
+				<< "############### loading " << m_dataset_name <<" ###############"
 				<< endl;
-		m_amazon_data_loader.load_author_profile();
-		m_amazon_data_loader.load_item_profile();
-		m_amazon_data_loader.load_rating_file();
-		m_amazon_data_loader.prepare_datasets();
+		if(!userFile.empty() && m_dataset_parser_map[m_dataset_name]["user"]){
+			m_data_loader.load_user_profile(userFile,*(m_dataset_parser_map[m_dataset_name]["user"]));
+		}
+		if(!itemFile.empty() && m_dataset_parser_map[m_dataset_name]["item"]){
+			m_data_loader.load_item_profile(itemFile,*(m_dataset_parser_map[m_dataset_name]["item"]));
+		}
+		m_data_loader.load_user_item_rating(ratingFile);
+		cout << "generate training, testing and coldstart dataset " << endl;
+		m_data_loader.prepare_datasets();
 		cout
 				<< ">>>>>>>>>>>>>>> All done, ready to take request >>>>>>>>>>>>>>>"
 				<< endl;
+	}
+
+	static bool is_dataset_supported(string const& datasetName){
+		return m_dataset_parser_map.find(datasetName) != m_dataset_parser_map.end();
+	}
+
+	static int get_dataset_port(string const& datasetName){
+		return m_dataset_port_map[datasetName];
 	}
 
 	void add_entity(std::string& _return, const std::string& entityJson) {
@@ -65,22 +98,29 @@ public:
 	void get_dataset(Dataset& _return, const DSType::type dsType) {
 		// Your implementation goes here
 		printf("get_dataset\n");
-		_return = m_amazon_data_loader.get_data_set(dsType);
+		_return = m_data_loader.get_data_set(dsType);
 	}
 
 };
 
-void parse_input_files(int argc, char** argv, string & authorFile,
+/// instaniation of the parser registeration
+map<string, map<string, shared_ptr<EntityParser> > > HandleDataHandler::m_dataset_parser_map;
+map<string, int> HandleDataHandler::m_dataset_port_map;
+
+/// parse commandline arguments
+void parse_input_files(int argc, char** argv, string& datasetName, string & userFile,
 		string & itemFile, string & ratingFile) {
+	po::options_description desc(
+			"Load dataset into main memory and share with other applications through thrift interface");
+	desc.add_options()("help", "help message on use this application")(
+			"user-file,u", po::value<string>(&userFile),
+			"user profile file")("item-file,i",
+			po::value<string>(&itemFile), "item profile file")(
+			"rating-file,r", po::value<string>(&ratingFile)->required(),
+			"rating file")(
+					"dataset-name,n", po::value<string>(&datasetName)->required(),
+					"dataset name: should be one of [amazon,movielense]");
 	try {
-		po::options_description desc(
-				"Load Amazon data into main memory and share with other applications through thrift interface");
-		desc.add_options()("help", "help message on use this application")(
-				"author-file,a", po::value<string>(&authorFile)->required(),
-				"amazon author file")("item-file,i",
-				po::value<string>(&itemFile)->required(), "amazon item file")(
-				"rating-file,r", po::value<string>(&ratingFile)->required(),
-				"amazon rating file");
 		po::variables_map vm;
 		po::store(po::parse_command_line(argc, argv, desc), vm);
 		if (vm.count("help")) {
@@ -90,28 +130,58 @@ void parse_input_files(int argc, char** argv, string & authorFile,
 		/// check all required options are provided
 		vm.notify();
 	} catch (std::exception& e) {
-		cerr << "Error:" << e.what() << endl;
+		cerr << "Error:" << e.what() << "\n\n";
+		cout << "Usage:" << "\n";
+		cout << desc << "\n";
 		exit(1);
 	}
 
 }
 
 int main(int argc, char **argv) {
-	string amazonAuthorFile, amazonItemFile, amazonRatingFile;
-	parse_input_files(argc, argv, amazonAuthorFile, amazonItemFile,
-			amazonRatingFile);
-	int port = 9090;
+	string datasetName;
+	string userProfileFile, itemProfileFile, ratingFile;
+	/// parse commandline arguments
+	parse_input_files(argc, argv,datasetName, userProfileFile, itemProfileFile,
+			ratingFile);
+
+	/// check the file existence
+	if(!userProfileFile.empty() && !bf::exists(userProfileFile)){
+		cerr << "user profile file: " << userProfileFile << " does not exist" << endl;
+		exit(1);
+	}
+
+	if(!itemProfileFile.empty() && !bf::exists(itemProfileFile)){
+		cerr << "item profile file: " << itemProfileFile << " does not exist" << endl;
+		exit(1);
+	}
+
+	if(!bf::exists(ratingFile)){
+		cerr << "rating file: " << ratingFile << " does not exist" << endl;
+		exit(1);
+	}
+
+	/// register the entity parsers for the given dataset
+	HandleDataHandler::register_entity_parsers();
+	/// check whether a supported dataset is specified
+	if(!HandleDataHandler::is_dataset_supported(datasetName)){
+		cerr << "the specified dataset:" << datasetName << " is not supported currently" << endl;
+		exit(1);
+	}
+
+	/// get the port number assigned to the given dataset
+	int port = HandleDataHandler::get_dataset_port(datasetName);
 	shared_ptr<HandleDataHandler> handler(
-			new HandleDataHandler(amazonAuthorFile, amazonItemFile,
-					amazonRatingFile));
+			new HandleDataHandler(datasetName,userProfileFile, itemProfileFile,
+					ratingFile));
 	shared_ptr<TProcessor> processor(new HandleDataProcessor(handler));
 	shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
 	shared_ptr<TTransportFactory> transportFactory(
 			new TBufferedTransportFactory());
 	shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
-
 	TSimpleServer server(processor, serverTransport, transportFactory,
 			protocolFactory);
+	cout << "dataset is loaded, start the sharing service at: " << port << endl;
 	server.serve();
 	return 0;
 }

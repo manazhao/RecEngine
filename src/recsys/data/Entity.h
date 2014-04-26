@@ -106,7 +106,7 @@ public:
 	js::Object m_desc;
 protected:
 public:
-	Entity(string const& id, size_t const& type, js::Object const& val = js::Object(), bool memoryMode = true) :m_memory_mode(memoryMode),
+	Entity(string const& id = "", size_t const& type = Entity::ENT_DEFAULT, js::Object const& val = js::Object(), bool memoryMode = true) :m_memory_mode(memoryMode),
 			m_id(id),m_mapped_id(0),m_type(type),m_desc(val) {
 	}
 	Entity(size_t const& id,js::Object const& val = js::Object(), bool memoryMode = true);

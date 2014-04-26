@@ -11,6 +11,7 @@ CPP_SRCS += \
 ../src/recsys/algorithm/LatentObject.cpp \
 ../src/recsys/algorithm/MFImplicitModel.cpp \
 ../src/recsys/algorithm/MFVB.cpp \
+../src/recsys/algorithm/Model.cpp \
 ../src/recsys/algorithm/RecEngine.cpp \
 ../src/recsys/algorithm/UserObject.cpp \
 ../src/recsys/algorithm/VLImplicitModel.cpp \
@@ -24,6 +25,7 @@ OBJS += \
 ./src/recsys/algorithm/LatentObject.o \
 ./src/recsys/algorithm/MFImplicitModel.o \
 ./src/recsys/algorithm/MFVB.o \
+./src/recsys/algorithm/Model.o \
 ./src/recsys/algorithm/RecEngine.o \
 ./src/recsys/algorithm/UserObject.o \
 ./src/recsys/algorithm/VLImplicitModel.o \
@@ -37,6 +39,7 @@ CPP_DEPS += \
 ./src/recsys/algorithm/LatentObject.d \
 ./src/recsys/algorithm/MFImplicitModel.d \
 ./src/recsys/algorithm/MFVB.d \
+./src/recsys/algorithm/Model.d \
 ./src/recsys/algorithm/RecEngine.d \
 ./src/recsys/algorithm/UserObject.d \
 ./src/recsys/algorithm/VLImplicitModel.d \

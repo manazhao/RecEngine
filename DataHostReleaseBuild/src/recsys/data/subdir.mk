@@ -12,6 +12,7 @@ CPP_SRCS += \
 ../src/recsys/data/Entity.cpp \
 ../src/recsys/data/EntityInteraction.cpp \
 ../src/recsys/data/EntityInteraction_test.cpp \
+../src/recsys/data/JSONDataLoader.cpp \
 ../src/recsys/data/MD5.cpp \
 ../src/recsys/data/MD5_test.cpp \
 ../src/recsys/data/MemoryData.cpp \
@@ -32,6 +33,7 @@ OBJS += \
 ./src/recsys/data/Entity.o \
 ./src/recsys/data/EntityInteraction.o \
 ./src/recsys/data/EntityInteraction_test.o \
+./src/recsys/data/JSONDataLoader.o \
 ./src/recsys/data/MD5.o \
 ./src/recsys/data/MD5_test.o \
 ./src/recsys/data/MemoryData.o \
@@ -52,6 +54,7 @@ CPP_DEPS += \
 ./src/recsys/data/Entity.d \
 ./src/recsys/data/EntityInteraction.d \
 ./src/recsys/data/EntityInteraction_test.d \
+./src/recsys/data/JSONDataLoader.d \
 ./src/recsys/data/MD5.d \
 ./src/recsys/data/MD5_test.d \
 ./src/recsys/data/MemoryData.d \
@@ -68,7 +71,7 @@ CPP_DEPS += \
 src/recsys/data/%.o: ../src/recsys/data/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -I"/home/manazhao/git/BayesianNetwork" -I"/home/manazhao/git/BayesianNetwork/src" -I"/home/manazhao/git/RecEngine/src" -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -I"/home/qzhao2/git/BayesianNetwork" -I"/home/qzhao2/git/BayesianNetwork/src" -I"/home/qzhao2/git/RecEngine/src" -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

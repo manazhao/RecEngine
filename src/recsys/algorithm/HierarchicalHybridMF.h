@@ -18,6 +18,7 @@
 #include "vb/prob/DiagMVGaussian.h"
 #include "vb/prob/InverseGamma.h"
 #include "vb/prob/MVInverseGamma.h"
+#include "Model.h"
 
 using namespace ::recsys::thrift;
 using namespace prob;
@@ -36,20 +37,8 @@ namespace recsys {
  * As the Bayesian network framework is not ready yet, we do the implementation
  * in a rushing style.
  */
-class HierarchicalHybridMF {
+class HierarchicalHybridMF : public Model{
 public:
-	struct ModelParams{
-		/// the dimensionality of the latent vector
-		size_t m_lat_dim;
-		/// maximum number of iterations
-		size_t m_max_iter;
-		/// whether use diagonal multivariate Gaussian
-		bool m_diag_cov;
-		// whether use feature
-		bool m_use_feature;
-		ModelParams(size_t const& latDim = 10, size_t const& maxIter = 10, bool diagCov = true, bool useFeature = true);
-		ModelParams(int argc, char** argv);
-	};
 	struct RunTimeLog{
 		/// iteration index
 		size_t m_iter;
@@ -65,7 +54,6 @@ public:
 protected:
 	void _lat_ip_moments(DiagMVGaussian & lat1, DiagMVGaussian & lat2, float & firstMoment, float & secondMoment);
 	void _rating_bias_moments(float rating, float & firstMoment, float& secondMoment);
-	void _prepare_datasets();
 	void _prepare_model_variables();
 	void _init_entity_feature_moment_cache();
 	void _init();
@@ -89,12 +77,12 @@ protected:
 	void _update_feature(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_entity_feature_moments();
 public:
-	HierarchicalHybridMF(ModelParams const& modelParam);
+	HierarchicalHybridMF(ModelParams const& modelParam, DatasetManager& datasetManager);
 	float dataset_rmse(DatasetExt& dataset);
 	float train_rmse();
 	float test_rmse();
 	float cs_rmse();
-	void infer();
+	void train();
 	virtual ~HierarchicalHybridMF();
 protected:
 	/// model variables
@@ -120,23 +108,13 @@ protected:
 	map<int64_t,vec> m_feat_mean_sum;
 	map<int64_t,vec> m_feat_cov_sum;
 	map<int64_t,size_t> m_feat_cnt_map;
-	size_t m_num_users;
-	size_t m_num_items;
-	size_t m_num_features;
-	/// used by thrift client
-	boost::shared_ptr<TTransport> m_socket;
-	boost::shared_ptr<TTransport> m_transport;
-	boost::shared_ptr<TProtocol> m_protocol;
-	rt::HandleDataClient m_client;
-	/// hold all data from the datahost
-	DatasetExt m_dataset;
-	/// training data set
-	DatasetExt m_train_dataset;
-	/// testing dataset
-	DatasetExt m_test_dataset;
-	/// coldstart testing dataset
-	DatasetExt m_cs_dataset;
-	ModelParams m_model_param;
+private:
+	friend class boost::serialization::access;
+	template <class Archive>
+	void serialize(Archive& ar, const unsigned int version ){
+		ar & m_entity & m_user_prior_mean & m_user_prior_cov & m_item_prior_mean & m_item_prior_cov & m_feature_prior_mean & m_feature_prior_cov
+		& m_rating_var & m_bias & m_feat_mean_sum & m_feat_cov_sum & m_feat_cnt_map & m_num_users & m_num_items & m_num_features & m_model_param;
+	}
 };
 
 ostream& operator << (ostream& oss, HierarchicalHybridMF::ModelParams const& rhs);
