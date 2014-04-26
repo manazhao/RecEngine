@@ -73,17 +73,19 @@ public:
 
 };
 
-/// instaniation of the parser registeration
-map<string, map<string, shared_ptr<EntityParser> > > HandleDataHandler::m_dataset_parser_map;
 map<string, int> HandleDataHandler::m_dataset_port_map;
 
 /// parse commandline arguments
-void parse_app_args(int argc, char** argv, string& datasetName) {
+void parse_app_args(int argc, char** argv, string& datasetName, string& userFile, string& itemFile, string& ratingFile) {
 	po::options_description desc(
 			"Load dataset into main memory and share with other applications through thrift interface");
-	desc.add_options()("help", "help message on use this application")(
-					"dataset-name,n", po::value<string>(&datasetName)->required(),
-					"dataset name: should be one of [amazon,movielense]");
+	desc.add_options()
+			("help", "help message on use this application")
+					("user-file,u", po::value<string>(&userFile),"user profile file")
+					("item-file,i", po::value<string>(&itemFile), "item profile file")
+					("rating-file,r", po::value<string>(&ratingFile)->required(),"rating file")
+					("dataset-name,n", po::value<string>(&datasetName)->required(),"dataset name: should be one of [amazon,movielense]");
+
 	try {
 		po::variables_map vm;
 		po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -99,18 +101,18 @@ void parse_app_args(int argc, char** argv, string& datasetName) {
 		cout << desc << "\n";
 		exit(1);
 	}
-
 }
 
 int main(int argc, char **argv) {
 	string datasetName;
+	string userFile, itemFile, ratingFile;
 	/// parse commandline arguments
-	parse_app_arg(argc, argv,datasetName);
+	parse_app_args(argc, argv,datasetName, userFile, itemFile, ratingFile);
 	/// register listening port
 	HandleDataHandler::register_dataset_port();
 	/// get the data loader
 	DataLoaderSwitcher& dlSwitcher = DataLoaderSwitcher::ref();
-	DataLoader& dataLoader = dlSwitcher.get_local_loader(argc,argv);
+	DataLoader& dataLoader = dlSwitcher.get_local_loader(datasetName, userFile, itemFile, ratingFile);
 
 	/// attach data loader to the handler
 	shared_ptr<HandleDataHandler> handler(

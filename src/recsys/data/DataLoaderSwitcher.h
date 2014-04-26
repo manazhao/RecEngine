@@ -24,9 +24,9 @@ protected:
 	DataLoaderSwitcher();
 	bool _is_dataset_supported(string const& datasetName);
 	void _register_entity_parsers();
-	void _parse_remote_loader(int argc, char** argv, string& host, int& port);
-	void _parse_local_loader(int argc, char** argv,string& datasetName, string & userFile,
-			string & itemFile, string & ratingFile);
+	DataLoader& _create_remote_loader(string const& host, int& port);
+	DataLoader& _create_local_loader(string const& datasetName, string const& userFile,
+			string const& itemFile, string const& ratingFile);
 public:
 	/**
 	 * @brief get a data loader based on the arguments
@@ -34,6 +34,8 @@ public:
 	DataLoader& get_loader(int argc, char** argv);
 	DataLoader& get_remote_loader(int argc, char** argv);
 	DataLoader& get_local_loader(int argc, char** argv);
+	DataLoader& get_remote_loader(string const& host, int port);
+	DataLoader& get_local_loader(string const& datasetName, string const& userFile, string const& itemFile, string const& ratingFile);
 	static DataLoaderSwitcher& ref(){
 		static DataLoaderSwitcher switcher;
 		return switcher;

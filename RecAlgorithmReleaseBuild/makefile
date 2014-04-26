@@ -43,7 +43,7 @@ endif
 all: RecEngine
 
 dependents:
-	-cd /home/manazhao/git/BayesianNetwork/LibRelease && $(MAKE) all
+	-cd /home/manazhao/git/BayesianNetwork/LibRelease && $(MAKE) clean all
 
 # Tool invocations
 RecEngine: $(OBJS) $(USER_OBJS) /home/manazhao/git/BayesianNetwork/LibRelease/libBayesianNetwork.a
