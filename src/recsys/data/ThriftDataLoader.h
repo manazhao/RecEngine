@@ -13,6 +13,7 @@
 #include "recsys/thrift/cpp/HandleData.h"
 #include "recsys/data/DatasetExt.h"
 #include "DatasetManager.h"
+#include "DataLoader.h"
 
 using namespace ::recsys::thrift;
 using namespace std;
@@ -23,7 +24,7 @@ namespace rt = recsys::thrift;
 
 namespace recsys {
 
-class ThriftDataLoader {
+class ThriftDataLoader : public DataLoader{
 protected:
 	string m_host;
 	int m_port;
@@ -32,12 +33,8 @@ protected:
 	boost::shared_ptr<TTransport> m_transport;
 	boost::shared_ptr<TProtocol> m_protocol;
 	rt::HandleDataClient m_client;
-	DatasetManager m_dataset_manager;
 public:
 	ThriftDataLoader(string const& host = "localhost", int port = 9090);
-	DatasetManager& get_dataset_manager(){
-		return m_dataset_manager;
-	}
 	virtual ~ThriftDataLoader();
 };
 

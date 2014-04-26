@@ -34,8 +34,8 @@ void HierarchicalHybridMF::_init() {
 void HierarchicalHybridMF::_prepare_model_variables() {
 	cout << m_model_param << "\n\n";
 	/// initialize entity latent variables
-	m_entity.reserve(m_dataset.ent_type_interacts.size());
-	for (size_t i = 0; i < m_dataset.ent_type_interacts.size(); i++) {
+	m_entity.reserve(m_dataset_manager.dataset(rt::DSType::DS_ALL).ent_type_interacts.size());
+	for (size_t i = 0; i < m_dataset_manager.dataset(rt::DSType::DS_ALL).ent_type_interacts.size(); i++) {
 		m_entity.push_back(
 				DiagMVGaussian(vec(m_model_param.m_lat_dim, arma::fill::randn),
 						vec(m_model_param.m_lat_dim, arma::fill::ones), false,
@@ -135,7 +135,7 @@ void HierarchicalHybridMF::_update_feature_from_entities(int64_t const& featId,
 	for (vector<Interact>::const_iterator iter = interacts.begin();
 			iter < interacts.end(); ++iter) {
 		int64_t entityId = iter->ent_id;
-		int8_t entityType = m_train_dataset.m_id_type_map[entityId];
+		int8_t entityType = m_dataset_manager.dataset(rt::DSType::DS_TRAIN).m_id_type_map[entityId];
 		assert(entityType > 0);
 		DistParam entityCovSuff2 = (
 				entityType == Entity::ENT_USER ?
@@ -151,7 +151,7 @@ void HierarchicalHybridMF::_update_feature_from_entities(int64_t const& featId,
 		/// substract other features
 		vec otherFeautreMean(m_model_param.m_lat_dim, fill::zeros);
 		vector<Interact>& entityFeatureInteracts =
-				m_train_dataset.ent_type_interacts[entityId][EntityInteraction::ADD_FEATURE];
+				m_dataset_manager.dataset(rt::DSType::DS_TRAIN).ent_type_interacts[entityId][EntityInteraction::ADD_FEATURE];
 		for (vector<Interact>::iterator iter1 = entityFeatureInteracts.begin();
 				iter1 < entityFeatureInteracts.end(); ++iter1) {
 			int64_t tmpFeatId = iter1->ent_id;
@@ -180,8 +180,8 @@ void HierarchicalHybridMF::_update_entity(int64_t const& entityId,
 
 void HierarchicalHybridMF::_init_entity_feature_moment_cache() {
 	/// update the user/item prior mean
-	set<int64_t> & userIds = m_train_dataset.type_ent_ids[Entity::ENT_USER];
-	set<int64_t> & itemIds = m_train_dataset.type_ent_ids[Entity::ENT_ITEM];
+	set<int64_t> & userIds = m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_USER];
+	set<int64_t> & itemIds = m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_ITEM];
 	vector<int64_t> mergedIds;
 	mergedIds.insert(mergedIds.end(), userIds.begin(), userIds.end());
 	mergedIds.insert(mergedIds.end(), itemIds.begin(), itemIds.end());
@@ -195,8 +195,8 @@ void HierarchicalHybridMF::_init_entity_feature_moment_cache() {
 
 void HierarchicalHybridMF::_update_entity_feature_moments() {
 	/// update the user/item prior mean
-	set<int64_t> & userIds = m_train_dataset.type_ent_ids[Entity::ENT_USER];
-	set<int64_t> & itemIds = m_train_dataset.type_ent_ids[Entity::ENT_ITEM];
+	set<int64_t> & userIds = m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_USER];
+	set<int64_t> & itemIds = m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_ITEM];
 	vector<int64_t> mergedIds;
 	mergedIds.insert(mergedIds.end(), userIds.begin(), userIds.end());
 	mergedIds.insert(mergedIds.end(), itemIds.begin(), itemIds.end());
@@ -205,7 +205,7 @@ void HierarchicalHybridMF::_update_entity_feature_moments() {
 		m_feat_mean_sum[*iter].fill(0);
 		m_feat_cov_sum[*iter].fill(0);
 		vector<Interact> const & featureInteracts =
-				m_train_dataset.ent_type_interacts[*iter][EntityInteraction::ADD_FEATURE];
+				m_dataset_manager.dataset(rt::DSType::DS_TRAIN).ent_type_interacts[*iter][EntityInteraction::ADD_FEATURE];
 		m_feat_cnt_map[*iter] = featureInteracts.size();
 		for (vector<Interact>::const_iterator iter1 = featureInteracts.begin();
 				iter1 < featureInteracts.end(); ++iter1) {
@@ -235,7 +235,7 @@ void HierarchicalHybridMF::_update_feature(int64_t const& featId,
 }
 
 void HierarchicalHybridMF::_update_user_prior_mean() {
-	set<int64_t> & userIds = m_train_dataset.type_ent_ids[Entity::ENT_USER];
+	set<int64_t> & userIds = m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_USER];
 	size_t numUsers = userIds.size();
 	/// update user prior mean and covariance matrix
 	DistParamBundle userPriorUpdateMessage(2);
@@ -260,7 +260,7 @@ void HierarchicalHybridMF::_update_user_prior_mean() {
 }
 
 void HierarchicalHybridMF::_update_user_prior_cov() {
-	set<int64_t> & userIds = m_train_dataset.type_ent_ids[Entity::ENT_USER];
+	set<int64_t> & userIds = m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_USER];
 	size_t numUsers = userIds.size();
 	/// aggregate over the users
 	DistParamBundle userCovUpdateMessage(2);
@@ -298,7 +298,7 @@ void HierarchicalHybridMF::_update_user_prior_cov() {
 }
 
 void HierarchicalHybridMF::_update_item_prior_mean() {
-	set<int64_t> & itemIds = m_train_dataset.type_ent_ids[Entity::ENT_ITEM];
+	set<int64_t> & itemIds = m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_ITEM];
 	size_t numItems = itemIds.size();
 	DistParamBundle itemPriorUpdateMessage(2);
 	vec covSuff2 = m_item_prior_cov.suff_mean(2);
@@ -320,7 +320,7 @@ void HierarchicalHybridMF::_update_item_prior_mean() {
 }
 
 void HierarchicalHybridMF::_update_item_prior_cov() {
-	set<int64_t> & itemIds = m_train_dataset.type_ent_ids[Entity::ENT_ITEM];
+	set<int64_t> & itemIds = m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_ITEM];
 	size_t numItems = itemIds.size();
 	DistParamBundle itemCovUpdateMessage(2);
 	itemCovUpdateMessage[0].m_vec = (vec(m_model_param.m_lat_dim, fill::ones)
@@ -358,7 +358,7 @@ void HierarchicalHybridMF::_update_item_prior_cov() {
 
 void HierarchicalHybridMF::_update_feature_prior_mean() {
 	//	/// update the mean and covariance sequentially
-	set<int64_t> & featIds = m_train_dataset.type_ent_ids[Entity::ENT_FEATURE];
+	set<int64_t> & featIds = m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_FEATURE];
 	size_t numFeats = featIds.size();
 	if (numFeats > 0) {
 		DistParamBundle updateMessage(2);
@@ -378,7 +378,7 @@ void HierarchicalHybridMF::_update_feature_prior_mean() {
 
 void HierarchicalHybridMF::_update_feature_prior_cov() {
 	//	/// update the mean and covariance sequentially
-	set<int64_t> & featIds = m_train_dataset.type_ent_ids[Entity::ENT_FEATURE];
+	set<int64_t> & featIds = m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_FEATURE];
 	size_t numFeats = featIds.size();
 	if (numFeats > 0) {
 		/// update the covariance
@@ -450,14 +450,14 @@ void HierarchicalHybridMF::_update_rating_var() {
 	/// go through all ratings
 	DistParamBundle updateMessage(2);
 	updateMessage[0] = updateMessage[1] = (float) 0;
-	set<int64_t> & userIds = m_train_dataset.type_ent_ids[Entity::ENT_USER];
+	set<int64_t> & userIds = m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_USER];
 	size_t numRatings = 0;
 	for (set<int64_t>::const_iterator iter = userIds.begin();
 			iter != userIds.end(); ++iter) {
 		int64_t userId = *iter;
 		DiagMVGaussian & userLat = m_entity[userId];
 		vector<Interact> & ratings =
-				m_train_dataset.ent_type_interacts[userId][EntityInteraction::RATE_ITEM];
+				m_dataset_manager.dataset(rt::DSType::DS_TRAIN).ent_type_interacts[userId][EntityInteraction::RATE_ITEM];
 
 		for (vector<Interact>::const_iterator iter1 = ratings.begin();
 				iter1 < ratings.end(); ++iter1) {
@@ -480,13 +480,13 @@ void HierarchicalHybridMF::_update_rating_var() {
 
 float HierarchicalHybridMF::_get_mean_rating() {
 	float avgRating = 0;
-	set<int64_t> & userIds = m_train_dataset.type_ent_ids[Entity::ENT_USER];
+	set<int64_t> & userIds = m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_USER];
 	size_t numRatings = 0;
 	for (set<int64_t>::iterator iter = userIds.begin(); iter != userIds.end();
 			++iter) {
 		int64_t userId = *iter;
 		vector<Interact> const & ratings =
-				m_train_dataset.ent_type_interacts[userId][EntityInteraction::RATE_ITEM];
+				m_dataset_manager.dataset(rt::DSType::DS_TRAIN).ent_type_interacts[userId][EntityInteraction::RATE_ITEM];
 		for (vector<Interact>::const_iterator iter1 = ratings.begin();
 				iter1 < ratings.end(); ++iter1) {
 			double rating = iter1->ent_val;
@@ -501,14 +501,14 @@ void HierarchicalHybridMF::_update_bias() {
 	float rvSuff2 = (float) m_rating_var.suff_mean(2);
 	DistParamBundle updateMessage(2);
 	updateMessage[0] = updateMessage[1] = (float) 0;
-	set<int64_t> & userIds = m_train_dataset.type_ent_ids[Entity::ENT_USER];
+	set<int64_t> & userIds = m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_USER];
 	size_t numRatings = 0;
 	for (set<int64_t>::iterator iter = userIds.begin(); iter != userIds.end();
 			++iter) {
 		int64_t userId = *iter;
 		DiagMVGaussian & userLat = m_entity[userId];
 		vector<Interact> const & ratings =
-				m_train_dataset.ent_type_interacts[userId][EntityInteraction::RATE_ITEM];
+				m_dataset_manager.dataset(rt::DSType::DS_TRAIN).ent_type_interacts[userId][EntityInteraction::RATE_ITEM];
 		for (vector<Interact>::const_iterator iter1 = ratings.begin();
 				iter1 < ratings.end(); ++iter1) {
 			int64_t itemId = iter1->ent_id;
@@ -534,8 +534,8 @@ float HierarchicalHybridMF::dataset_rmse(DatasetExt& dataset) {
 	for (set<int64_t>::iterator iter = featIds.begin(); iter != featIds.end();
 			++iter) {
 		int64_t entityId = *iter;
-		if (m_train_dataset.ent_ids.find(entityId)
-				== m_train_dataset.ent_ids.end()) {
+		if (m_dataset_manager.dataset(rt::DSType::DS_TRAIN).ent_ids.find(entityId)
+				== m_dataset_manager.dataset(rt::DSType::DS_TRAIN).ent_ids.end()) {
 			m_entity[entityId].reset();
 			_update_feature_from_prior(entityId);
 		}
@@ -551,8 +551,8 @@ float HierarchicalHybridMF::dataset_rmse(DatasetExt& dataset) {
 		int8_t entityType = dataset.m_id_type_map[entityId];
 		assert(entityType > 0);
 		/// new entity, initialize its latent vector by prior information
-		if (m_train_dataset.ent_ids.find(entityId)
-				== m_train_dataset.ent_ids.end()) {
+		if (m_dataset_manager.dataset(rt::DSType::DS_TRAIN).ent_ids.find(entityId)
+				== m_dataset_manager.dataset(rt::DSType::DS_TRAIN).ent_ids.end()) {
 			m_entity[entityId].reset();
 			_update_entity_from_prior(entityId, entityType);
 		}
@@ -593,13 +593,12 @@ float HierarchicalHybridMF::cs_rmse() {
 
 void HierarchicalHybridMF::train() {
 	/// train Bayesian model on the training dataset
-	DatasetExt& m_train_dataset = get_train_ds();
-	set<int64_t> const& userIds = m_train_dataset.type_ent_ids[Entity::ENT_USER];
-	set<int64_t> const& itemIds = m_train_dataset.type_ent_ids[Entity::ENT_ITEM];
+	set<int64_t> const& userIds = m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_USER];
+	set<int64_t> const& itemIds = m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_ITEM];
 	set<int64_t> const& featureIds =
-			m_train_dataset.type_ent_ids[Entity::ENT_FEATURE];
+			m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_FEATURE];
 	vector<map<int8_t, vector<Interact> > >& type_interacts =
-			m_train_dataset.ent_type_interacts;
+			m_dataset_manager.dataset(rt::DSType::DS_TRAIN).ent_type_interacts;
 	typedef set<int64_t>::iterator id_set_iter;
 	////
 	cout << "----------- Variational Bayesian Message Inference -----------"
@@ -655,8 +654,7 @@ void HierarchicalHybridMF::train() {
 
 HierarchicalHybridMF::HierarchicalHybridMF(ModelParams const& modelParam,
 		DatasetManager& datasetManager) :
-		Model(modelParam, datasetManager), m_num_users(0), m_num_items(0), m_num_features(
-				0){
+		Model(modelParam, datasetManager){
 	_init();
 }
 

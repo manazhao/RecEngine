@@ -11,6 +11,7 @@
 #include "DatasetExt.h"
 #include "Entity.h"
 #include "EntityInteraction.h"
+namespace rt = recsys::thrift;
 
 namespace recsys {
 
@@ -25,10 +26,10 @@ protected:
 	void _split_by_user(float splitRatio, DatasetExt & inputDataset, DatasetExt& subSet1, DatasetExt& subSet2);
 public:
 	DatasetManager();
-	void generate_datasets();
-	DatasetExt& get_dataset(rt::DSType::type dsType){
-		return m_datasets[dsType];
+	DatasetExt& dataset(rt::DSType::type type){
+		return m_datasets[type];
 	}
+	void generate_datasets();
 	virtual ~DatasetManager();
 };
 

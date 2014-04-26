@@ -10,7 +10,7 @@
 #include <string>
 #include <set>
 #include <boost/shared_ptr.hpp>
-#include "DatasetManager.h"
+#include "DataLoader.h"
 using namespace boost;
 using namespace std;
 
@@ -25,12 +25,10 @@ public:
 	void parse(string const& line);
 };
 
-class JSONDataLoader {
+class JSONDataLoader : public DataLoader{
 protected:
 	typedef set<string> str_set;
 	typedef shared_ptr<str_set> str_set_ptr;
-protected:
-	DatasetManager m_dataset_manager;
 protected:
 	void _load_entity_profile(string const& file, EntityParser& parser);
 public:
@@ -42,7 +40,7 @@ public:
 		return m_dataset_manager;
 	}
 	rt::Dataset& get_data_set(rt::DSType::type dsType){
-		return m_dataset_manager.get_dataset(dsType);
+		return dataset(dsType);
 	}
 public:
 	JSONDataLoader();

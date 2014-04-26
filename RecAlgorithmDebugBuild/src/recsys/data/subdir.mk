@@ -4,9 +4,9 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/recsys/data/AmazonJSONDataLoader.cpp \
-../src/recsys/data/AmazonJSONDataLoader_test.cpp \
 ../src/recsys/data/AppConfig.cpp \
+../src/recsys/data/DataLoader.cpp \
+../src/recsys/data/DataLoaderSwitcher.cpp \
 ../src/recsys/data/DatasetExt.cpp \
 ../src/recsys/data/DatasetManager.cpp \
 ../src/recsys/data/Entity.cpp \
@@ -26,9 +26,9 @@ CPP_SRCS += \
 ../src/recsys/data/csv.cpp 
 
 OBJS += \
-./src/recsys/data/AmazonJSONDataLoader.o \
-./src/recsys/data/AmazonJSONDataLoader_test.o \
 ./src/recsys/data/AppConfig.o \
+./src/recsys/data/DataLoader.o \
+./src/recsys/data/DataLoaderSwitcher.o \
 ./src/recsys/data/DatasetExt.o \
 ./src/recsys/data/DatasetManager.o \
 ./src/recsys/data/Entity.o \
@@ -48,9 +48,9 @@ OBJS += \
 ./src/recsys/data/csv.o 
 
 CPP_DEPS += \
-./src/recsys/data/AmazonJSONDataLoader.d \
-./src/recsys/data/AmazonJSONDataLoader_test.d \
 ./src/recsys/data/AppConfig.d \
+./src/recsys/data/DataLoader.d \
+./src/recsys/data/DataLoaderSwitcher.d \
 ./src/recsys/data/DatasetExt.d \
 ./src/recsys/data/DatasetManager.d \
 ./src/recsys/data/Entity.d \
@@ -74,7 +74,7 @@ CPP_DEPS += \
 src/recsys/data/%.o: ../src/recsys/data/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -I"/home/qzhao2/git/BayesianNetwork" -I"/home/qzhao2/git/BayesianNetwork/src" -I"/home/qzhao2/git/RecEngine/src" -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -I"/home/manazhao/git/BayesianNetwork" -I"/home/manazhao/git/BayesianNetwork/src" -I"/home/manazhao/git/RecEngine/src" -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

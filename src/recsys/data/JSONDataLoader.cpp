@@ -38,7 +38,8 @@ void EntityParser::parse(string const& line) {
 	}
 }
 
-JSONDataLoader::JSONDataLoader() {
+JSONDataLoader::JSONDataLoader(){
+
 }
 
 void JSONDataLoader::_load_entity_profile(string const& file,

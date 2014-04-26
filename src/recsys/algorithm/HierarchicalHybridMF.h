@@ -82,7 +82,7 @@ public:
 	float train_rmse();
 	float test_rmse();
 	float cs_rmse();
-	void train();
+	virtual void train();
 	virtual ~HierarchicalHybridMF();
 protected:
 	/// model variables

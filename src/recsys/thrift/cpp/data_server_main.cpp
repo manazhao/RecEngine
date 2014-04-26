@@ -13,8 +13,7 @@
 #include "recsys/data/AppConfig.h"
 #include "recsys/data/Entity.h"
 #include "recsys/data/EntityInteraction.h"
-#include "recsys/data/JSONDataLoader.h"
-#include "recsys/data/AmazonParser.h"
+#include "recsys/data/DataLoaderSwitcher.h"
 #include "boost/filesystem.hpp"
 
 using namespace ::apache::thrift;
@@ -35,49 +34,20 @@ protected:
 	/// currently support:
 	/// amazon: amazond dataset
 	string m_dataset_name;
-	JSONDataLoader m_data_loader;
-	static map<string, map<string, shared_ptr<EntityParser> > > m_dataset_parser_map;
+	DataLoader& m_data_loader;
 	static map<string, int> m_dataset_port_map;
 public:
-	static void register_entity_parsers(){
-		m_dataset_parser_map["amazon"]["user"] = shared_ptr<EntityParser>(new recsys::amazon::UserEntityParser());
-		m_dataset_parser_map["amazon"]["item"] = shared_ptr<EntityParser>(new recsys::amazon::UserEntityParser());
-		/// to do: register parsers for other commonly used dataset
-
-		/// register port
+	static void register_dataset_port(){
 		int currentPort = 9090;
 		m_dataset_port_map["amazon"] = currentPort;
 		m_dataset_port_map["movielense"] = ++currentPort;
 	}
 
-	HandleDataHandler(string const& datasetName, string const& userFile, string const& itemFile,
-			string const& ratingFile):m_dataset_name(datasetName)
-	{
-		// Your initialization goes here
-		cout
-				<< "############### loading " << m_dataset_name <<" ###############"
-				<< endl;
-		if(!userFile.empty() && m_dataset_parser_map[m_dataset_name]["user"]){
-			m_data_loader.load_user_profile(userFile,*(m_dataset_parser_map[m_dataset_name]["user"]));
-		}
-		if(!itemFile.empty() && m_dataset_parser_map[m_dataset_name]["item"]){
-			m_data_loader.load_item_profile(itemFile,*(m_dataset_parser_map[m_dataset_name]["item"]));
-		}
-		m_data_loader.load_user_item_rating(ratingFile);
-		cout << "generate training, testing and coldstart dataset " << endl;
-		m_data_loader.prepare_datasets();
-		cout
-				<< ">>>>>>>>>>>>>>> All done, ready to take request >>>>>>>>>>>>>>>"
-				<< endl;
-	}
-
-	static bool is_dataset_supported(string const& datasetName){
-		return m_dataset_parser_map.find(datasetName) != m_dataset_parser_map.end();
-	}
-
 	static int get_dataset_port(string const& datasetName){
 		return m_dataset_port_map[datasetName];
 	}
+
+	HandleDataHandler(DataLoader& dataLoader):m_data_loader(dataLoader){}
 
 	void add_entity(std::string& _return, const std::string& entityJson) {
 		// Your implementation goes here
@@ -98,7 +68,7 @@ public:
 	void get_dataset(Dataset& _return, const DSType::type dsType) {
 		// Your implementation goes here
 		printf("get_dataset\n");
-		_return = m_data_loader.get_data_set(dsType);
+		_return = m_data_loader.dataset(dsType);
 	}
 
 };
@@ -108,16 +78,10 @@ map<string, map<string, shared_ptr<EntityParser> > > HandleDataHandler::m_datase
 map<string, int> HandleDataHandler::m_dataset_port_map;
 
 /// parse commandline arguments
-void parse_input_files(int argc, char** argv, string& datasetName, string & userFile,
-		string & itemFile, string & ratingFile) {
+void parse_app_args(int argc, char** argv, string& datasetName) {
 	po::options_description desc(
 			"Load dataset into main memory and share with other applications through thrift interface");
 	desc.add_options()("help", "help message on use this application")(
-			"user-file,u", po::value<string>(&userFile),
-			"user profile file")("item-file,i",
-			po::value<string>(&itemFile), "item profile file")(
-			"rating-file,r", po::value<string>(&ratingFile)->required(),
-			"rating file")(
 					"dataset-name,n", po::value<string>(&datasetName)->required(),
 					"dataset name: should be one of [amazon,movielense]");
 	try {
@@ -140,40 +104,21 @@ void parse_input_files(int argc, char** argv, string& datasetName, string & user
 
 int main(int argc, char **argv) {
 	string datasetName;
-	string userProfileFile, itemProfileFile, ratingFile;
 	/// parse commandline arguments
-	parse_input_files(argc, argv,datasetName, userProfileFile, itemProfileFile,
-			ratingFile);
+	parse_app_arg(argc, argv,datasetName);
+	/// register listening port
+	HandleDataHandler::register_dataset_port();
+	/// get the data loader
+	DataLoaderSwitcher& dlSwitcher = DataLoaderSwitcher::ref();
+	DataLoader& dataLoader = dlSwitcher.get_local_loader(argc,argv);
 
-	/// check the file existence
-	if(!userProfileFile.empty() && !bf::exists(userProfileFile)){
-		cerr << "user profile file: " << userProfileFile << " does not exist" << endl;
-		exit(1);
-	}
+	/// attach data loader to the handler
+	shared_ptr<HandleDataHandler> handler(
+			new HandleDataHandler(dataLoader));
 
-	if(!itemProfileFile.empty() && !bf::exists(itemProfileFile)){
-		cerr << "item profile file: " << itemProfileFile << " does not exist" << endl;
-		exit(1);
-	}
-
-	if(!bf::exists(ratingFile)){
-		cerr << "rating file: " << ratingFile << " does not exist" << endl;
-		exit(1);
-	}
-
-	/// register the entity parsers for the given dataset
-	HandleDataHandler::register_entity_parsers();
-	/// check whether a supported dataset is specified
-	if(!HandleDataHandler::is_dataset_supported(datasetName)){
-		cerr << "the specified dataset:" << datasetName << " is not supported currently" << endl;
-		exit(1);
-	}
-
+	/// run Thrift Service
 	/// get the port number assigned to the given dataset
 	int port = HandleDataHandler::get_dataset_port(datasetName);
-	shared_ptr<HandleDataHandler> handler(
-			new HandleDataHandler(datasetName,userProfileFile, itemProfileFile,
-					ratingFile));
 	shared_ptr<TProcessor> processor(new HandleDataProcessor(handler));
 	shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
 	shared_ptr<TTransportFactory> transportFactory(

@@ -6,6 +6,7 @@
  */
 
 #include <recsys/data/ThriftDataLoader.h>
+#include <boost/timer.hpp>
 
 namespace recsys {
 
@@ -21,22 +22,22 @@ ThriftDataLoader::ThriftDataLoader(string const& host, int port) :
 				<< "############## retrieve datasets from data host  ##############"
 				<< endl;
 		timer t;
-		m_client.get_dataset(m_dataset_manager.m_datasets[rt::DSType::DS_ALL], rt::DSType::DS_ALL);
-		m_client.get_dataset(m_dataset_manager.m_datasets[rt::DSType::DS_TRAIN], rt::DSType::DS_TRAIN);
-		m_client.get_dataset(m_dataset_manager.m_datasets[rt::DSType::DS_TEST], rt::DSType::DS_TEST);
-		m_client.get_dataset(m_dataset_manager.m_datasets[rt::DSType::DS_CS], rt::DSType::DS_CS);
-		m_dataset.prepare_id_type_map();
-		m_train_dataset.prepare_id_type_map();
-		m_test_dataset.prepare_id_type_map();
-		m_cs_dataset.prepare_id_type_map();
+		m_client.get_dataset(dataset(rt::DSType::DS_ALL), rt::DSType::DS_ALL);
+		m_client.get_dataset(dataset(rt::DSType::DS_TRAIN), rt::DSType::DS_TRAIN);
+		m_client.get_dataset(dataset(rt::DSType::DS_TEST), rt::DSType::DS_TEST);
+		m_client.get_dataset(dataset(rt::DSType::DS_CS), rt::DSType::DS_CS);
+		dataset(rt::DSType::DS_ALL).prepare_id_type_map();
+		dataset(rt::DSType::DS_TRAIN).prepare_id_type_map();
+		dataset(rt::DSType::DS_TEST).prepare_id_type_map();
+		dataset(rt::DSType::DS_CS).prepare_id_type_map();
 		cout << "---------- dataset ----------" << endl;
-		cout << m_dataset_manager.m_datasets[rt::DSType::DS_ALL] << endl;
+		cout << dataset(rt::DSType::DS_ALL) << endl;
 		cout << "---------- train dataset ----------" << endl;
-		cout << m_dataset_manager.m_datasets[rt::DSType::DS_TRAIN] << endl;
+		cout << dataset(rt::DSType::DS_TRAIN) << endl;
 		cout << "---------- test dataset ----------" << endl;
-		cout << m_dataset_manager.m_datasets[rt::DSType::DS_TEST] << endl;
+		cout << dataset(rt::DSType::DS_TEST) << endl;
 		cout << "---------- coldstart dataset ----------" << endl;
-		cout << m_dataset_manager.m_datasets[rt::DSType::DS_CS] << endl;
+		cout << dataset(rt::DSType::DS_CS) << endl;
 		cout << ">>>>>>>>>>>>>> Time elapsed:" << t.elapsed()
 				<< " >>>>>>>>>>>>>>" << endl;
 		m_transport->close();

@@ -8,6 +8,8 @@
 #ifndef MODEL_H_
 #define MODEL_H_
 #include "recsys/data/DatasetExt.h"
+#include <boost/serialization/access.hpp>
+#include "recsys/data/DatasetManager.h"
 namespace rt = recsys::thrift;
 
 namespace recsys {
@@ -44,17 +46,18 @@ protected:
 public:
 	Model(ModelParams const& modelParam, DatasetManager& datasetManager);
 	DatasetExt& get_train_ds(){
-		return m_dataset_manager.get_dataset(rt::DSType::DS_TRAIN);
+		return m_dataset_manager.dataset(rt::DSType::DS_TRAIN);
 	}
 	DatasetExt& get_test_ds(){
-		return m_dataset_manager.get_dataset(rt::DSType::DS_TEST);
+		return m_dataset_manager.dataset(rt::DSType::DS_TEST);
 	}
 	DatasetExt& get_cs_ds(){
-		return m_dataset_manager.get_dataset(rt::DSType::DS_CS);
+		return m_dataset_manager.dataset(rt::DSType::DS_CS);
 	}
 	DatasetExt& get_ds(){
-		return m_dataset_manager.get_dataset(rt::DSType::DS_ALL);
+		return m_dataset_manager.dataset(rt::DSType::DS_ALL);
 	}
+	virtual void train() = 0;
 	virtual ~Model();
 };
 
