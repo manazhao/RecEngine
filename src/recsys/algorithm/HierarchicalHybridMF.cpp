@@ -280,10 +280,10 @@ vec HierarchicalHybridMF::_entity_feature_cov_sum(int64_t const& entityId) {
 void HierarchicalHybridMF::_get_entity_feature_cnt() {
 	set<int64_t>
 			& userIds =
-					m_dataset_manager.dataset(rt::DSType::DS_ALL).type_ent_ids[Entity::ENT_USER];
+					m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_USER];
 	set<int64_t>
 			& itemIds =
-					m_dataset_manager.dataset(rt::DSType::DS_ALL).type_ent_ids[Entity::ENT_ITEM];
+					m_dataset_manager.dataset(rt::DSType::DS_TRAIN).type_ent_ids[Entity::ENT_ITEM];
 	vector<int64_t> mergedIds;
 	mergedIds.insert(mergedIds.end(), userIds.begin(), userIds.end());
 	mergedIds.insert(mergedIds.end(), itemIds.begin(), itemIds.end());
@@ -291,7 +291,7 @@ void HierarchicalHybridMF::_get_entity_feature_cnt() {
 			< mergedIds.end(); ++iter) {
 		vector<Interact> const
 				& featureInteracts =
-						m_dataset_manager.dataset(rt::DSType::DS_ALL).ent_type_interacts[*iter][EntityInteraction::ADD_FEATURE];
+						m_dataset_manager.dataset(rt::DSType::DS_TRAIN).ent_type_interacts[*iter][EntityInteraction::ADD_FEATURE];
 		m_feat_cnt_map[*iter] = featureInteracts.size();
 	}
 }
@@ -326,7 +326,6 @@ void HierarchicalHybridMF::_update_user_prior_mean() {
 		userPriorUpdateMessage[0] += (userLatMean);
 	}
 	userPriorUpdateMessage[0].m_vec %= covSuff2;
-
 	m_user_prior_mean = userPriorUpdateMessage;
 }
 
