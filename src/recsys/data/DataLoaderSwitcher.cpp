@@ -136,7 +136,11 @@ DataLoaderSwitcher::DataLoaderSwitcher() {
 void DataLoaderSwitcher::_register_entity_parsers(){
 	// TODO Auto-generated constructor stub
 	m_dataset_parser_map["amazon"]["user"] = shared_ptr<EntityParser>(new recsys::amazon::UserEntityParser());
-	m_dataset_parser_map["amazon"]["item"] = shared_ptr<EntityParser>(new recsys::amazon::UserEntityParser());
+	m_dataset_parser_map["amazon"]["item"] = shared_ptr<EntityParser>(new recsys::amazon::ItemEntityParser());
+	m_dataset_parser_map["movielens"]["user"] = shared_ptr<EntityParser>();
+	m_dataset_parser_map["movielens"]["item"] = shared_ptr<EntityParser>();
+
+
 }
 
 DataLoader& DataLoaderSwitcher::_create_remote_loader(string const& host, int& port){

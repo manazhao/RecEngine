@@ -76,6 +76,9 @@ protected:
 	void _update_entity(int64_t const& entityId, int8_t entityType, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_feature(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_entity_feature_moments();
+	vec _entity_feature_mean_sum(int64_t const& entityId);
+	vec _entity_feature_cov_sum(int64_t const& entityId);
+	void _get_entity_feature_cnt();
 public:
 	HierarchicalHybridMF(ModelParams const& modelParam, DatasetManager& datasetManager);
 	float dataset_rmse(DatasetExt& dataset);

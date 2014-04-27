@@ -40,7 +40,7 @@ public:
 	static void register_dataset_port(){
 		int currentPort = 9090;
 		m_dataset_port_map["amazon"] = currentPort;
-		m_dataset_port_map["movielense"] = ++currentPort;
+		m_dataset_port_map["movielens"] = ++currentPort;
 	}
 
 	static int get_dataset_port(string const& datasetName){
@@ -84,7 +84,7 @@ void parse_app_args(int argc, char** argv, string& datasetName, string& userFile
 					("user-file,u", po::value<string>(&userFile),"user profile file")
 					("item-file,i", po::value<string>(&itemFile), "item profile file")
 					("rating-file,r", po::value<string>(&ratingFile)->required(),"rating file")
-					("dataset-name,n", po::value<string>(&datasetName)->required(),"dataset name: should be one of [amazon,movielense]");
+					("dataset-name,n", po::value<string>(&datasetName)->required(),"dataset name: should be one of [amazon,movielens]");
 
 	try {
 		po::variables_map vm;
