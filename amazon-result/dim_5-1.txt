@@ -1,0 +1,79 @@
+############## retrieve datasets from data host  ##############
+---------- dataset ----------
+# of users:74263
+# of items:298147
+# of features:35476
+
+---------- train dataset ----------
+# of users:55697
+# of items:149066
+# of features:20507
+
+---------- test dataset ----------
+# of users:55697
+# of items:89085
+# of features:15323
+
+---------- coldstart dataset ----------
+# of users:18566
+# of items:96564
+# of features:15872
+
+>>>>>>>>>>>>>> Time elapsed:2.76 >>>>>>>>>>>>>>
+------------ Model Parameters ------------
+latent dimension:5, number of iterations:50,is diagonal:1,use feature:1
+
+
+----------- Variational Bayesian Message Inference -----------
+iteration:1,time:16.12,train rmse:0.907961,test rmse:0.998792,cs rmse:0.986379
+iteration:2,time:16.64,train rmse:0.907669,test rmse:0.97717,cs rmse:0.986023
+iteration:3,time:16.51,train rmse:0.85855,test rmse:0.955992,cs rmse:0.985499
+iteration:4,time:16.41,train rmse:0.838577,test rmse:0.945631,cs rmse:0.984666
+iteration:5,time:16.43,train rmse:0.83163,test rmse:0.938381,cs rmse:0.983381
+iteration:6,time:16.46,train rmse:0.829735,test rmse:0.932888,cs rmse:0.981945
+iteration:7,time:16.45,train rmse:0.829374,test rmse:0.92781,cs rmse:0.979965
+iteration:8,time:16.42,train rmse:0.82889,test rmse:0.923231,cs rmse:0.977977
+iteration:9,time:16.37,train rmse:0.827587,test rmse:0.918427,cs rmse:0.975765
+iteration:10,time:16.44,train rmse:0.825538,test rmse:0.913864,cs rmse:0.973661
+iteration:11,time:16.43,train rmse:0.823186,test rmse:0.910132,cs rmse:0.971766
+iteration:12,time:16.49,train rmse:0.820696,test rmse:0.907027,cs rmse:0.970031
+iteration:13,time:16.43,train rmse:0.817905,test rmse:0.904238,cs rmse:0.96838
+iteration:14,time:16.48,train rmse:0.814934,test rmse:0.901862,cs rmse:0.966963
+iteration:15,time:16.42,train rmse:0.811944,test rmse:0.899864,cs rmse:0.965763
+iteration:16,time:16.44,train rmse:0.809067,test rmse:0.898211,cs rmse:0.964841
+iteration:17,time:16.39,train rmse:0.806442,test rmse:0.896916,cs rmse:0.964008
+iteration:18,time:16.44,train rmse:0.804043,test rmse:0.895916,cs rmse:0.963236
+iteration:19,time:16.38,train rmse:0.801667,test rmse:0.895025,cs rmse:0.962622
+iteration:20,time:16.48,train rmse:0.799221,test rmse:0.894135,cs rmse:0.962339
+iteration:21,time:16.56,train rmse:0.797012,test rmse:0.893447,cs rmse:0.962027
+iteration:22,time:16.54,train rmse:0.795142,test rmse:0.893032,cs rmse:0.96173
+iteration:23,time:16.46,train rmse:0.79357,test rmse:0.892788,cs rmse:0.961779
+iteration:24,time:16.53,train rmse:0.792199,test rmse:0.892677,cs rmse:0.961674
+iteration:25,time:16.41,train rmse:0.790959,test rmse:0.892614,cs rmse:0.961635
+iteration:26,time:16.39,train rmse:0.789884,test rmse:0.892613,cs rmse:0.961572
+iteration:27,time:16.41,train rmse:0.788894,test rmse:0.892634,cs rmse:0.961752
+iteration:28,time:16.38,train rmse:0.78796,test rmse:0.892665,cs rmse:0.961638
+iteration:29,time:16.42,train rmse:0.78704,test rmse:0.892663,cs rmse:0.961841
+iteration:30,time:16.41,train rmse:0.786117,test rmse:0.892624,cs rmse:0.962005
+iteration:31,time:16.4,train rmse:0.7852,test rmse:0.892554,cs rmse:0.962017
+iteration:32,time:16.38,train rmse:0.784403,test rmse:0.89252,cs rmse:0.96226
+iteration:33,time:16.33,train rmse:0.78375,test rmse:0.892559,cs rmse:0.962436
+iteration:34,time:16.41,train rmse:0.783195,test rmse:0.892627,cs rmse:0.962503
+iteration:35,time:16.47,train rmse:0.782688,test rmse:0.892683,cs rmse:0.962666
+iteration:36,time:16.47,train rmse:0.782202,test rmse:0.892733,cs rmse:0.962887
+iteration:37,time:16.59,train rmse:0.781704,test rmse:0.892784,cs rmse:0.963138
+iteration:38,time:16.45,train rmse:0.781211,test rmse:0.892818,cs rmse:0.963162
+iteration:39,time:16.43,train rmse:0.78078,test rmse:0.892872,cs rmse:0.963377
+iteration:40,time:16.42,train rmse:0.780429,test rmse:0.892965,cs rmse:0.963624
+iteration:41,time:16.4,train rmse:0.780098,test rmse:0.893058,cs rmse:0.963859
+iteration:42,time:16.42,train rmse:0.779752,test rmse:0.893122,cs rmse:0.963858
+iteration:43,time:16.47,train rmse:0.779376,test rmse:0.893149,cs rmse:0.96411
+iteration:44,time:16.73,train rmse:0.778984,test rmse:0.89313,cs rmse:0.964323
+iteration:45,time:16.64,train rmse:0.778588,test rmse:0.893105,cs rmse:0.964477
+iteration:46,time:16.93,train rmse:0.778177,test rmse:0.893051,cs rmse:0.96471
+iteration:47,time:16.5,train rmse:0.77773,test rmse:0.892944,cs rmse:0.964816
+iteration:48,time:16.49,train rmse:0.777178,test rmse:0.89275,cs rmse:0.964986
+iteration:49,time:16.53,train rmse:0.776408,test rmse:0.892338,cs rmse:0.965063
+iteration:50,time:16.55,train rmse:0.775272,test rmse:0.891611,cs rmse:0.965286
+----------- Done! -----------
+

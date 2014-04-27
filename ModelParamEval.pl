@@ -11,18 +11,21 @@
 use strict;
 use warnings;
 
-my @lat_dim = (5,10,20,50);
-my @use_feature = (0,1);
+my @lat_dim = (5,10,20);
+my @use_feature = (0);
 my $max_iter = 50;
 
--d 'amazon_result' or  mkdir 'amazon_result';
+my $dataset = "movielens";
+
+my $result_dir = "$dataset-result";
+-d $result_dir  or  mkdir $result_dir;
 
 foreach (@lat_dim){
 my $dim = $_;
 foreach(@use_feature){
 	my $feature = $_;
-	my $resultFile = "amazon_result/dim_$dim-$feature.txt";
-	my $cmd = "./RecAlgorithmReleaseBuild/RecEngine --lat-dim=$dim --max-iter=$max_iter --use-feature=$feature >$resultFile 2>&1 ";
+	my $resultFile = "$result_dir/dim_$dim-$feature.txt";
+	my $cmd = "./RecAlgorithmReleaseBuild/RecEngine -n $dataset  -l 0 --data-host localhost --data-port 9091 --lat-dim=$dim --max-iter=$max_iter --use-feature=$feature >$resultFile 2>&1 ";
 	print "$cmd\n";
 	`$cmd`;
 }
