@@ -30,28 +30,67 @@ namespace bf = boost::filesystem ;
 
 class HandleDataHandler: virtual public HandleDataIf {
 protected:
-	/// dataset unique id
-	/// currently support:
-	/// amazon: amazond dataset
 	string m_dataset_name;
 	DataLoader& m_data_loader;
 	static map<string, int> m_dataset_port_map;
+	static map<string,Entity::ENTITY_TYPE> m_entity_type_map;
 public:
 	static void register_dataset_port(){
 		int currentPort = 9090;
 		m_dataset_port_map["amazon"] = currentPort;
 		m_dataset_port_map["movielens"] = ++currentPort;
 	}
-
 	static int get_dataset_port(string const& datasetName){
 		return m_dataset_port_map[datasetName];
+	}
+
+	static void register_entity_type(){
+		m_entity_type_map["user"] = Entity::ENT_USER;
+		m_entity_type_map["item"] = Entity::ENT_ITEM;
+		m_entity_type_map["feature"] = Entity::ENT_FEATURE;
 	}
 
 	HandleDataHandler(DataLoader& dataLoader):m_data_loader(dataLoader){}
 
 	void add_entity(std::string& _return, const std::string& entityJson) {
-		// Your implementation goes here
-		printf("add_entity\n");
+		/// extract entity id and type from the json data
+		stringstream ss;
+		ss << entityJson;
+		js::Object entityObj;
+		/// construct json object from line
+		js::Reader::Read(entityObj, ss);
+		js::Object returnObj;
+		returnObj["status"] = js::String("success");
+		returnObj["message"] = js::String("");
+		bool status = true;
+		/// find the id and type
+		if (entityObj.Find("id") != entityObj.End() && entityObj.Find("type") != entityObj.End()) {
+			js::String id = entityObj["id"];
+			js::String type = entityObj["type"];
+			if(id.Value().empty()){
+				returnObj["status"] = "fail";
+				returnObj["message"] = "empty entity id";
+				status = false;
+			}
+			if(m_entity_type_map.find(type.Value()) == m_entity_type_map.end()){
+				returnObj["status"] = "fail";
+				returnObj["message"] = "unsupported entity type";
+				status = false;
+			}
+			if(status){
+				Entity::ENTITY_TYPE entType = m_entity_type_map[type.Value()];
+				Entity entity(id.Value(),entType);
+				Entity::entity_ptr entityPtr = entity.index_if_not_exist();
+				/// get the mapped id
+				returnObj["id"] = entityPtr->get_mapped_id();
+			}
+		}else{
+			returnObj["status"] = js::String("fail");
+			returnObj["message"] = "entity id or type is missing";
+		}
+		stringstream returnSS;
+		js::Writer(returnObj, returnSS);
+		_return = returnSS.str();
 	}
 
 	void add_interaction(std::string& _return,
@@ -73,7 +112,10 @@ public:
 
 };
 
+//// static members
 map<string, int> HandleDataHandler::m_dataset_port_map;
+map<string,Entity::ENTITY_TYPE> HandleDataHandler::m_entity_type_map;
+
 
 /// parse commandline arguments
 void parse_app_args(int argc, char** argv, string& datasetName, string& userFile, string& itemFile, string& ratingFile) {
@@ -108,8 +150,11 @@ int main(int argc, char **argv) {
 	string userFile, itemFile, ratingFile;
 	/// parse commandline arguments
 	parse_app_args(argc, argv,datasetName, userFile, itemFile, ratingFile);
+
 	/// register listening port
 	HandleDataHandler::register_dataset_port();
+	HandleDataHandler::register_entity_type();
+
 	/// get the data loader
 	DataLoaderSwitcher& dlSwitcher = DataLoaderSwitcher::ref();
 	shared_ptr<DataLoader> dataLoaderPtr = dlSwitcher.get_local_loader(datasetName, userFile, itemFile, ratingFile);

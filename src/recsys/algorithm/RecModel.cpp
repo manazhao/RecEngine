@@ -7,9 +7,11 @@
 
 #include <recsys/algorithm/RecModel.h>
 #include <boost/program_options.hpp>
+#include <boost/timer.hpp>
 
 namespace po = boost::program_options;
 
+using namespace boost;
 namespace recsys {
 
 ostream& operator <<(ostream& oss, RecModel::TrainIterLog const& rhs) {
@@ -27,42 +29,43 @@ RecModel::ModelParams::ModelParams(size_t const& latDim, size_t const& maxIter,
 
 }
 
-void RecModel::setup_training(ModelParams const& modelParam, shared_ptr<
+void RecModel::setup_train(ModelParams const& modelParam, shared_ptr<
 		DatasetManager> datasetManager){
 	m_model_param = modelParam;
 	m_dataset_manager = datasetManager;
-	/// initialize training envrionment
-	_init_training();
 }
 
-void RecModel::model_selection(){
+void RecModel::train(DatasetExt& trainSet, DatasetExt& testSet, DatasetExt& csSet){
+	/// initialize training model
 	/// train the model on the training dataset and evaluate on the testing and coldstart dataset
+	m_active_dataset = &trainSet;
+	cout << "initialize training environment" << endl;
+	_init_training();
+	cout << "start model optimization" << endl;
 	for(size_t iterNum = 1; iterNum <= m_model_param.m_max_iter; iterNum++){
 		timer timer;
-		TrainIterLog iterLog = _training_single_iteration(m_dataset_manager->dataset(rt::DSType::DS_TRAIN));
-		iterLog.m_train_rmse = _dataset_rmse(m_dataset_manager->dataset(rt::DSType::DS_TRAIN));
-		iterLog.m_test_rmse = _dataset_rmse(m_dataset_manager->dataset(rt::DSType::DS_TEST));
-		iterLog.m_cs_rmse = _dataset_rmse(m_dataset_manager->dataset(rt::DSType::DS_CS));
+		TrainIterLog iterLog = _train_update();
+		iterLog.m_train_rmse = _dataset_rmse(trainSet);
+		if(!testSet.empty()){
+			iterLog.m_test_rmse = _dataset_rmse(testSet);
+		}
+		if(!csSet.empty()){
+			iterLog.m_cs_rmse = _dataset_rmse(csSet);
+		}
 		iterLog.m_iter_time = timer.elapsed();
-		cout << iterLog << endl;
-	}
-}
-
-void RecModel::train(){
-	for(size_t iterNum = 1; iterNum <= m_model_param.m_max_iter; iterNum++){
-		TrainIterLog iterLog = _training_single_iteration(m_dataset_manager->dataset(rt::DSType::DS_ALL));
+		cout << iterLog;
 	}
 }
 
 float RecModel::_dataset_rmse(DatasetExt& dataset){
 	/// evaluate the rmse of the training dataset
-	vector<int64_t>& userIds = dataset.m_id_type_map[Entity::ENT_USER];
+	set<int64_t>& userIds = dataset.type_ent_ids[Entity::ENT_USER];
 	size_t numRating = 0;
 	float rmse = 0;
-	for(vector<int64_t>::iterator iter = userIds.begin(); iter < userIds.end(); ++iter){
+	for(set<int64_t>::iterator iter = userIds.begin(); iter != userIds.end(); ++iter){
 		int64_t userId = *iter;
-		map<int8_t,vector<Interact> >& userInteracts = dataset.type_ent_ids[userId];
-		size_t userNumRating =  userInteracts[EntityInteraction::RATE_ITEM];
+		map<int8_t,vector<Interact> >& userInteracts = dataset.ent_type_interacts[userId];
+		size_t userNumRating =  userInteracts[EntityInteraction::RATE_ITEM].size();
 		/// evaluate the prediction error
 		float userError = _pred_error(userId, userInteracts);
 		rmse += userError;
@@ -106,7 +109,7 @@ ostream& operator <<(ostream& oss, RecModel::ModelParams const& rhs) {
 	return oss;
 }
 
-RecModel::RecModel() {
+RecModel::RecModel():m_active_dataset(NULL) {
 	// TODO Auto-generated constructor stub
 
 }

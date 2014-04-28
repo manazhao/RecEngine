@@ -34,6 +34,9 @@ public:
 	inline bool entity_exist(int64_t const& id) {
 		return ent_ids.find(id) != ent_ids.end();
 	}
+	inline bool empty(){
+		return m_id_type_map.empty();
+	}
 	void prepare_id_type_map();
 	void verify_interaction();
 	void filter_entity_interactions(

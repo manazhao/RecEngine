@@ -58,6 +58,9 @@ public:
 		float m_cs_rmse;
 		/// iteration time
 		float m_iter_time;
+		TrainIterLog():m_iter(0),m_train_rmse(0),m_test_rmse(0),m_cs_rmse(0),m_iter_time(0){
+
+		}
 	};
 
 protected:
@@ -65,6 +68,7 @@ protected:
 	size_t m_num_items;
 	size_t m_num_features;
 	ModelParams m_model_param;
+	DatasetExt* m_active_dataset;
 	shared_ptr<DatasetManager> m_dataset_manager;
 private:
 	friend class boost::serialization::access;
@@ -76,18 +80,14 @@ private:
 
 protected:
 	virtual void _init_training() = 0;
-
-	virtual TrainIterLog _training_single_iteration(DatasetExt& dataset) = 0;
-	virtual float _pred_error(int64_t const& entityId, vector<map<int8_t, vector<Interact> > >& entityInteractMap) = 0;
+	virtual TrainIterLog _train_update() = 0;
+	virtual float _pred_error(int64_t const& entityId, map<int8_t, vector<Interact> >& entityInteractMap) = 0;
 	float _dataset_rmse(DatasetExt& dataset);
 public:
 	RecModel();
-
-	void setup_training(ModelParams const& modelParam, shared_ptr<
+	void setup_train(ModelParams const& modelParam, shared_ptr<
 			DatasetManager> datasetManager);
-
-	void model_selection();
-	void train();
+	void train(DatasetExt& trainSet, DatasetExt& testSet, DatasetExt& csSet);
 	DatasetExt& get_train_ds() {
 		return m_dataset_manager->dataset(rt::DSType::DS_TRAIN);
 	}
@@ -100,7 +100,6 @@ public:
 	DatasetExt& get_ds() {
 		return m_dataset_manager->dataset(rt::DSType::DS_ALL);
 	}
-	virtual void train() = 0;
 	virtual ~RecModel();
 };
 

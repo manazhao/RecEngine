@@ -114,8 +114,9 @@ void ModelDriver::run_from_cmd(int argc, char** argv) {
 			dataLoaderPtr = dlSwitcher.get_remote_loader(host,port);
 		}
 		/// construct the model
-		m_model_ptr = shared_ptr<RecModel>(new HierarchicalHybridMF(modelParams,dataLoaderPtr->get_dataset_manager()));
-		m_model_ptr->train();
+		m_model_ptr = shared_ptr<RecModel>(new HierarchicalHybridMF());
+		m_model_ptr->setup_train(modelParams,dataLoaderPtr->get_dataset_manager());
+		m_model_ptr->train(m_model_ptr->get_train_ds(),m_model_ptr->get_test_ds(),m_model_ptr->get_cs_ds());
 		_save_model();
 	}
 

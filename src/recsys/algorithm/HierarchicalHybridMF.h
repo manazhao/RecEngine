@@ -56,10 +56,11 @@ public:
 		float m_iter_time;
 	};
 protected:
+	virtual void _init_training();
+	virtual TrainIterLog _train_update();
+	virtual float _pred_error(int64_t const& entityId, map<int8_t, vector<Interact> >& entityInteractMap);
 	void _lat_ip_moments(DiagMVGaussian & lat1, DiagMVGaussian & lat2, float & firstMoment, float & secondMoment);
 	void _rating_bias_moments(float rating, float & firstMoment, float& secondMoment);
-	void _prepare_model_variables();
-	void _init_training();
 	void _update_user_prior_mean();
 	void _update_user_prior_cov();
 	void _update_item_prior_mean();
@@ -78,25 +79,14 @@ protected:
 	void _update_feature_from_entities(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_entity(int64_t const& entityId, int8_t entityType, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_feature(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
-//	void _init_entity_feature_moment_cache();
-//	void _update_entity_feature_moments();
 	vec _entity_feature_mean_sum(int64_t const& entityId);
 	vec _entity_feature_cov_sum(int64_t const& entityId);
 	void _get_entity_feature_cnt();
 public:
 	HierarchicalHybridMF(ModelParams const& modelParam, shared_ptr<DatasetManager> datasetManager);
 	HierarchicalHybridMF();
-	float dataset_rmse(DatasetExt& dataset);
-	float train_rmse();
-	float test_rmse();
-	float cs_rmse();
-	virtual void train();
 	virtual ~HierarchicalHybridMF();
 protected:
-	/// model variables
-	/// we use hierarchical Bayesian model and represent each variable
-	/// as random variables defined in BN project
-
 	/// user, item and feature latent variables
 	vector<DiagMVGaussian> m_entity;
 	/// user prior
