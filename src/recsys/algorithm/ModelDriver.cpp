@@ -21,7 +21,35 @@ namespace bf = boost::filesystem ;
 using namespace boost;
 namespace recsys {
 
-ModelDriver::ModelDriver(int argc, char** argv) {
+void ModelDriver::_save_model(){
+	/// save the model to the file
+	if(m_model_file.empty()){
+		/// generate a file name
+		stringstream ss;
+		ss << m_model_name << "_" << (string)(m_model_ptr->m_model_param) << "_model.bin";
+		string fileName = ss.str();
+		/// get working directory
+		boost::filesystem::path cwd(boost::filesystem::current_path());
+		m_model_file = string(cwd.c_str()) + "/" + fileName;
+	}
+	//// create an archive
+	cout << "start to write the model to file: " << m_model_file << endl;
+	std::ofstream ofs(m_model_file.c_str());
+	boost::archive::binary_oarchive oa(ofs);
+	/// serialize the model
+	oa << *this;
+	cout << "done!" << endl;
+}
+
+void ModelDriver::_load_model(){
+	cout << "load model from file: " << m_model_file << endl;
+	ifstream ifs(m_model_file.c_str());
+	boost::archive::binary_iarchive ia(ifs);
+	ia >> *this;
+	cout << "done!" << endl;
+}
+
+void ModelDriver::run_from_cmd(int argc, char** argv) {
 	// TODO Auto-generated constructor stub
 	/// determine whether it's a local or remote data loader
 	bool localLoader = true;
@@ -31,8 +59,6 @@ ModelDriver::ModelDriver(int argc, char** argv) {
 	int port;
 	//// for local loader
 	string userFile, itemFile, ratingFile;
-	/// save the trained model
-	string modelFile;
 	/// parameters
 	Model::ModelParams modelParams;
 	po::options_description desc(
@@ -49,7 +75,8 @@ ModelDriver::ModelDriver(int argc, char** argv) {
 			("diag-cov", po::value<bool>(&(modelParams.m_diag_cov)),"diagonal multivariate Gaussian")
 			("max-iter", po::value<size_t>(&(modelParams.m_max_iter)), "maximum number of iterations")
 			("use-feature", po::value<bool>(&(modelParams.m_use_feature)), "integrate content feature as prior")
-			("model-file", po::value<string>(&modelFile), "file storing the model training result");
+			("model-file", po::value<string>(&m_model_file), "file storing the model training result")
+			("model", po::value<string>(&m_model_name)->required(), "the name of the model");
 
 	po::variables_map vm;
 	try {
@@ -66,10 +93,8 @@ ModelDriver::ModelDriver(int argc, char** argv) {
 		exit(1);
 	}
 	/// if model file is supplied and exists, it suggests load a trained model
-	if(!modelFile.empty() && bf::exists(modelFile)){
-		/// restoring the trained model from the file
-		shared_ptr<Model> model_inst_ptr(new HierarchicalHybridMF(modelFile));
-		model_inst_ptr->load_model();
+	if(!m_model_file.empty() && bf::exists(m_model_file)){
+		_load_model();
 	}
 	else{
 		/// The presence of rating file implies local data loader
@@ -85,9 +110,9 @@ ModelDriver::ModelDriver(int argc, char** argv) {
 			dataLoaderPtr = dlSwitcher.get_remote_loader(host,port);
 		}
 		/// construct the model
-		shared_ptr<Model> model_inst_ptr(new HierarchicalHybridMF(modelParams,dataLoaderPtr->get_dataset_manager(),modelFile));
-		model_inst_ptr->train();
-		model_inst_ptr->save_model();
+		m_model_ptr = shared_ptr<Model>(new HierarchicalHybridMF(modelParams,dataLoaderPtr->get_dataset_manager()));
+		m_model_ptr->train();
+		_save_model();
 	}
 
 }

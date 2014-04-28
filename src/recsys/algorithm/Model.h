@@ -10,6 +10,7 @@
 #include "recsys/data/DatasetExt.h"
 #include <sstream>
 #include <boost/serialization/access.hpp>
+#include <boost/serialization/string.hpp>
 #include "recsys/data/DatasetManager.h"
 namespace rt = recsys::thrift;
 
@@ -18,6 +19,7 @@ using namespace std;
 namespace recsys {
 
 class Model {
+	friend class ModelDriver;
 public:
 	struct ModelParams {
 	private:
@@ -50,14 +52,19 @@ protected:
 	size_t m_num_features;
 	ModelParams m_model_param;
 	shared_ptr<DatasetManager> m_dataset_manager;
-	string m_model_file;
+private:
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int version) {
+		/// serialize every data member except for the dataset
+		ar & m_num_users & m_num_items & m_num_features & m_model_param;
+	}
+
 protected:
 	virtual void _init() = 0;
 public:
-	Model(ModelParams const& modelParam = ModelParams(),
-			shared_ptr<DatasetManager> datasetManager = shared_ptr<
-					DatasetManager>(), string const& modelFile = string());
-	Model(string const& modelFile);
+	Model(ModelParams const& modelParam = ModelParams(), shared_ptr<
+			DatasetManager> datasetManager = shared_ptr<DatasetManager> ());
 	DatasetExt& get_train_ds() {
 		return m_dataset_manager->dataset(rt::DSType::DS_TRAIN);
 	}
@@ -70,11 +77,6 @@ public:
 	DatasetExt& get_ds() {
 		return m_dataset_manager->dataset(rt::DSType::DS_ALL);
 	}
-	operator string() {
-		return "model";
-	}
-	virtual void save_model() = 0;
-	virtual void load_model() = 0;
 	virtual void train() = 0;
 	virtual ~Model();
 };

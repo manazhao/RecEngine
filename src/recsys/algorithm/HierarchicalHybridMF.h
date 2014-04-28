@@ -7,10 +7,14 @@
 
 #ifndef HIERARCHICALHYBRIDMF_H_
 #define HIERARCHICALHYBRIDMF_H_
+
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TSocket.h>
 #include <thrift/transport/TTransportUtils.h>
 #include <armadillo>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/set.hpp>
 #include "recsys/thrift/cpp/HandleData.h"
 #include "recsys/data/DatasetExt.h"
 #include "vb/prob/Gaussian.h"
@@ -55,7 +59,6 @@ protected:
 	void _lat_ip_moments(DiagMVGaussian & lat1, DiagMVGaussian & lat2, float & firstMoment, float & secondMoment);
 	void _rating_bias_moments(float rating, float & firstMoment, float& secondMoment);
 	void _prepare_model_variables();
-	void _init_entity_feature_moment_cache();
 	void _init();
 	void _update_user_prior_mean();
 	void _update_user_prior_cov();
@@ -71,26 +74,22 @@ protected:
 	float _get_mean_rating();
 	void _update_entity_from_prior(int64_t const& entityId, int8_t entityType);
 	void _update_feature_from_prior(int64_t const& entityId);
-	void _update_entity_from_ratings(int64_t const& entityId, int8_t entityType, map<int8_t,vector<Interact> > & typeInteracts);
+	void _update_entity_from_ratings(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_feature_from_entities(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_entity(int64_t const& entityId, int8_t entityType, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_feature(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
-	void _update_entity_feature_moments();
+//	void _init_entity_feature_moment_cache();
+//	void _update_entity_feature_moments();
 	vec _entity_feature_mean_sum(int64_t const& entityId);
 	vec _entity_feature_cov_sum(int64_t const& entityId);
 	void _get_entity_feature_cnt();
 public:
-	HierarchicalHybridMF(ModelParams const& modelParam, shared_ptr<DatasetManager> datasetManager, string const& modelFile = string());
-	HierarchicalHybridMF(string const& modelFile);
+	HierarchicalHybridMF(ModelParams const& modelParam, shared_ptr<DatasetManager> datasetManager);
+	HierarchicalHybridMF();
 	float dataset_rmse(DatasetExt& dataset);
 	float train_rmse();
 	float test_rmse();
 	float cs_rmse();
-	operator string(){
-		return "HHMF";
-	}
-	virtual void save_model();
-	virtual void load_model();
 	virtual void train();
 	virtual ~HierarchicalHybridMF();
 protected:
@@ -113,16 +112,14 @@ protected:
 	InverseGamma m_rating_var;
 	/// assume bias prior is diffuse
 	Gaussian m_bias;
-	///
-	map<int64_t,vec> m_feat_mean_sum;
-	map<int64_t,vec> m_feat_cov_sum;
 	map<int64_t,size_t> m_feat_cnt_map;
 private:
 	friend class boost::serialization::access;
 	template <class Archive>
 	void serialize(Archive& ar, const unsigned int version ){
+		ar & boost::serialization::base_object<Model>(*this);
 		ar & m_entity & m_user_prior_mean & m_user_prior_cov & m_item_prior_mean & m_item_prior_cov & m_feature_prior_mean & m_feature_prior_cov
-		& m_rating_var & m_bias & m_feat_mean_sum & m_feat_cov_sum & m_feat_cnt_map & m_num_users & m_num_items & m_num_features & m_model_param;
+		& m_rating_var & m_bias  & m_feat_cnt_map;
 	}
 };
 

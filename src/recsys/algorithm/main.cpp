@@ -15,7 +15,7 @@ using namespace boost;
 using namespace recsys;
 
 int main(int argc, char** argv) {
-	ModelDriver driver(argc,argv);
-
+	ModelDriver& MODEL_DRIVER = ModelDriver::ref();
+	MODEL_DRIVER.run_from_cmd(argc, argv);
 	return 0;
 }
