@@ -82,7 +82,7 @@ public:
 	entity_interact_ptr index_if_not_exist();
 	virtual ~EntityInteraction();
 public:
-	static SharedData init_shared_data();;
+	static SharedData init_shared_data();
 	static bool entity_interact_exist(Entity::mapped_id_type const& fromId, Entity::mapped_id_type& toId, bool memoryMode);
 	static entity_interact_vec_ptr query(string const& entityName, int8_t const& entityType, int8_t const& intType, bool memoryMode = true, bool isFrom = true);
 	static entity_interact_vec_ptr query(size_t const& entityId, int8_t const& intType, bool memoryMode = true, bool isFrom = true);

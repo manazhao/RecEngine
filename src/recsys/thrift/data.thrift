@@ -8,10 +8,9 @@ namespace cpp recsys.thrift
 namespace php recsys.thrift
 namespace perl recsys.thrift
 
-
 struct Interact{
 1: i64 ent_id,
-3: double ent_val
+2: double ent_val
 }
 
 enum DSType{
@@ -27,10 +26,32 @@ struct Dataset{
 3: list<map<byte,list<Interact>>> ent_type_interacts
 }
 
-service HandleData{
-string add_entity(1:string entityJson),
-string add_interaction(1:string interactionJson),
-string get_recommend_list(1:string userId),
+struct Recommendation{
+1:string id,
+2:byte type,
+3:double score,
+}
+
+enum StatusCode{
+SC_FAIL,
+SC_SUCCESS
+}
+
+struct Response{
+1:StatusCode status,
+2:string message
+}
+
+service DataHost{
+Response index_interaction(1:string fromId, 2:byte fromType, 3:string toId, 4:byte toType, 5:byte type, 6:double val),
+map<byte,list<Interact> > query_entity_interacts(1:i64 id), /// used by recommendation engine
+string query_entity_name(1:i64 id), /// used by web server: get the original entity id
+list<string> query_entity_names(1:list<i64> idList), /// the same purpose as above function, except in batch mode
+i64 query_entity_id(1:string name, 2:byte type),
 Dataset get_dataset(1:DSType dsType),
+}
+
+service RecEngine{
+list<Recommendation> get_recommendation(1:string userId),
 }
 

@@ -15,7 +15,7 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/set.hpp>
-#include "recsys/thrift/cpp/HandleData.h"
+#include "recsys/thrift/cpp/DataHost.h"
 #include "recsys/data/DatasetExt.h"
 #include "vb/prob/Gaussian.h"
 #include "vb/prob/MVGaussian.h"

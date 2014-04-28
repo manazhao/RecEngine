@@ -10,7 +10,7 @@
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TSocket.h>
 #include <thrift/transport/TTransportUtils.h>
-#include "recsys/thrift/cpp/HandleData.h"
+#include "recsys/thrift/cpp/DataHost.h"
 #include "recsys/data/DatasetExt.h"
 #include "DatasetManager.h"
 #include "DataLoader.h"
@@ -32,7 +32,7 @@ protected:
 	boost::shared_ptr<TTransport> m_socket;
 	boost::shared_ptr<TTransport> m_transport;
 	boost::shared_ptr<TProtocol> m_protocol;
-	rt::HandleDataClient m_client;
+	rt::DataHostClient m_client;
 public:
 	ThriftDataLoader(string const& host = "localhost", int port = 9090);
 	virtual ~ThriftDataLoader();

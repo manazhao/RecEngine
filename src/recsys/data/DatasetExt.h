@@ -14,7 +14,7 @@
 #include <iostream>
 #include <recsys/data/Entity.h>
 #include <recsys/data/EntityInteraction.h>
-#include "recsys/thrift/cpp/HandleData.h"
+#include "recsys/thrift/cpp/DataHost.h"
 using namespace ::recsys::thrift;
 namespace rt=::recsys::thrift;
 

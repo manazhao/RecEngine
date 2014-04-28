@@ -52,13 +52,14 @@ Entity::SharedData Entity::init_shared_data() {
 	return Entity::m_shared_data;
 }
 
+
+
 //// static members of Entity class
 Entity::SharedData Entity::m_shared_data;
 Entity::name_id_map Entity::m_name_id_map;
 Entity::id_name_map Entity::m_id_name_map;
 Entity::entity_ptr_map Entity::m_entity_ptr_map;
 Entity::mapped_id_type Entity::m_max_id = 0;
-///
 
 Entity::Entity(size_t const& id,js::Object const& val,
 		bool memoryMode) :m_memory_mode(memoryMode),
