@@ -18,7 +18,7 @@ using namespace std;
 
 namespace recsys {
 
-class Model {
+class RecModel {
 	friend class ModelDriver;
 public:
 	struct ModelParams {
@@ -46,6 +46,20 @@ public:
 			return ss.str();
 		}
 	};
+
+	struct TrainIterLog{
+		/// iteration index
+		size_t m_iter;
+		/// training rmse
+		float m_train_rmse;
+		/// testing rmse
+		float m_test_rmse;
+		/// coldstart dataset rmse
+		float m_cs_rmse;
+		/// iteration time
+		float m_iter_time;
+	};
+
 protected:
 	size_t m_num_users;
 	size_t m_num_items;
@@ -61,10 +75,19 @@ private:
 	}
 
 protected:
-	virtual void _init() = 0;
+	virtual void _init_training() = 0;
+
+	virtual TrainIterLog _training_single_iteration(DatasetExt& dataset) = 0;
+	virtual float _pred_error(int64_t const& entityId, vector<map<int8_t, vector<Interact> > >& entityInteractMap) = 0;
+	float _dataset_rmse(DatasetExt& dataset);
 public:
-	Model(ModelParams const& modelParam = ModelParams(), shared_ptr<
-			DatasetManager> datasetManager = shared_ptr<DatasetManager> ());
+	RecModel();
+
+	void setup_training(ModelParams const& modelParam, shared_ptr<
+			DatasetManager> datasetManager);
+
+	void model_selection();
+	void train();
 	DatasetExt& get_train_ds() {
 		return m_dataset_manager->dataset(rt::DSType::DS_TRAIN);
 	}
@@ -78,10 +101,11 @@ public:
 		return m_dataset_manager->dataset(rt::DSType::DS_ALL);
 	}
 	virtual void train() = 0;
-	virtual ~Model();
+	virtual ~RecModel();
 };
 
-ostream& operator <<(ostream& oss, Model::ModelParams const& param);
+ostream& operator <<(ostream& oss, RecModel::ModelParams const& param);
+ostream& operator << (ostream& oss, RecModel::TrainIterLog const& rhs);
 
 } /* namespace recsys */
 

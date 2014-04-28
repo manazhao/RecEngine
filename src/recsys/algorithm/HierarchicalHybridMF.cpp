@@ -29,7 +29,7 @@ ostream& operator <<(ostream& oss, HierarchicalHybridMF::RunTimeLog const& rhs) 
 	return oss;
 }
 
-void HierarchicalHybridMF::_init() {
+void HierarchicalHybridMF::_init_training() {
 	/// allocate space for model variables
 	_prepare_model_variables();
 	/// we are all set, embark the fun journey!
@@ -729,12 +729,12 @@ void HierarchicalHybridMF::train() {
 
 HierarchicalHybridMF::HierarchicalHybridMF(ModelParams const& modelParam,
 		shared_ptr<DatasetManager> datasetManager) :
-	Model(modelParam, datasetManager) {
-	_init();
+	RecModel(modelParam, datasetManager) {
+	_init_training();
 }
 
 HierarchicalHybridMF::HierarchicalHybridMF()
-:Model(ModelParams(), shared_ptr<DatasetManager>()){
+:RecModel(ModelParams(), shared_ptr<DatasetManager>()){
 
 }
 

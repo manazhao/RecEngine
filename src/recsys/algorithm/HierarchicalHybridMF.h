@@ -22,7 +22,7 @@
 #include "vb/prob/DiagMVGaussian.h"
 #include "vb/prob/InverseGamma.h"
 #include "vb/prob/MVInverseGamma.h"
-#include "Model.h"
+#include "RecModel.h"
 
 using namespace ::recsys::thrift;
 using namespace prob;
@@ -41,7 +41,7 @@ namespace recsys {
  * As the Bayesian network framework is not ready yet, we do the implementation
  * in a rushing style.
  */
-class HierarchicalHybridMF : public Model{
+class HierarchicalHybridMF : public RecModel{
 public:
 	struct RunTimeLog{
 		/// iteration index
@@ -59,7 +59,7 @@ protected:
 	void _lat_ip_moments(DiagMVGaussian & lat1, DiagMVGaussian & lat2, float & firstMoment, float & secondMoment);
 	void _rating_bias_moments(float rating, float & firstMoment, float& secondMoment);
 	void _prepare_model_variables();
-	void _init();
+	void _init_training();
 	void _update_user_prior_mean();
 	void _update_user_prior_cov();
 	void _update_item_prior_mean();
@@ -117,13 +117,12 @@ private:
 	friend class boost::serialization::access;
 	template <class Archive>
 	void serialize(Archive& ar, const unsigned int version ){
-		ar & boost::serialization::base_object<Model>(*this);
+		ar & boost::serialization::base_object<RecModel>(*this);
 		ar & m_entity & m_user_prior_mean & m_user_prior_cov & m_item_prior_mean & m_item_prior_cov & m_feature_prior_mean & m_feature_prior_cov
 		& m_rating_var & m_bias  & m_feat_cnt_map;
 	}
 };
 
-ostream& operator << (ostream& oss, HierarchicalHybridMF::ModelParams const& rhs);
 ostream& operator << (ostream& oss, HierarchicalHybridMF::RunTimeLog const& rhs);
 
 

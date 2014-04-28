@@ -23,7 +23,7 @@ class ModelDriver {
 protected:
 	string m_model_name;
 	string m_model_file;
-	shared_ptr<Model> m_model_ptr;
+	shared_ptr<RecModel> m_model_ptr;
 	ModelDriver(){
 
 	}
@@ -33,13 +33,12 @@ protected:
 	void _load_model();
 private:
 	friend class boost::serialization::access;
-
 	template <class Archive>
 	void load(Archive& ar, const unsigned int version ){
 		ar & m_model_name;
 		/// generate the Model based on the model name
 		if(m_model_name == "HHMF"){
-			m_model_ptr = shared_ptr<Model>(new HierarchicalHybridMF());
+			m_model_ptr = shared_ptr<RecModel>(new HierarchicalHybridMF());
 			HierarchicalHybridMF& modelRef = dynamic_cast<HierarchicalHybridMF&>(*m_model_ptr);
 			ar & modelRef;
 		}else{
@@ -65,8 +64,11 @@ public:
 		static ModelDriver MODEL_DRIVER;
 		return MODEL_DRIVER;
 	}
+	bool is_model_supported(string const& modelName){
+		return modelName == "HHMF";
+	}
 	/// get model reference
-	Model& get_model_ref(){
+	RecModel& get_model_ref(){
 		return *m_model_ptr;
 	}
 	void run_from_cmd(int argc, char** argv);
