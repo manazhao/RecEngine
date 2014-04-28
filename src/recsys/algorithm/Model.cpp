@@ -54,11 +54,12 @@ ostream& operator <<(ostream& oss, Model::ModelParams const& rhs) {
 	return oss;
 }
 
-Model::Model(ModelParams const& modelParam, DatasetManager& datasetManager) :
-	m_model_param(modelParam), m_dataset_manager(datasetManager) {
+Model::Model(ModelParams const& modelParam, shared_ptr<DatasetManager> datasetManager, string const& modelFile) :
+	m_model_param(modelParam), m_dataset_manager(datasetManager),m_model_file(modelFile) {
 	// TODO Auto-generated constructor stub
 
 }
+
 
 Model::~Model() {
 	// TODO Auto-generated destructor stub

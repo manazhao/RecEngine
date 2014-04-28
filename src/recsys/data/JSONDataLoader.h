@@ -36,12 +36,6 @@ public:
 	void load_item_profile(string const& file, EntityParser& parser);
 	void load_user_item_rating(string const& file);
 	void prepare_datasets();
-	DatasetManager& get_dataset_manager(){
-		return m_dataset_manager;
-	}
-	rt::Dataset& get_data_set(rt::DSType::type dsType){
-		return dataset(dsType);
-	}
 public:
 	JSONDataLoader();
 	virtual ~JSONDataLoader();

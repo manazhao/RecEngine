@@ -80,11 +80,17 @@ protected:
 	vec _entity_feature_cov_sum(int64_t const& entityId);
 	void _get_entity_feature_cnt();
 public:
-	HierarchicalHybridMF(ModelParams const& modelParam, DatasetManager& datasetManager);
+	HierarchicalHybridMF(ModelParams const& modelParam, shared_ptr<DatasetManager> datasetManager, string const& modelFile = string());
+	HierarchicalHybridMF(string const& modelFile);
 	float dataset_rmse(DatasetExt& dataset);
 	float train_rmse();
 	float test_rmse();
 	float cs_rmse();
+	operator string(){
+		return "HHMF";
+	}
+	virtual void save_model();
+	virtual void load_model();
 	virtual void train();
 	virtual ~HierarchicalHybridMF();
 protected:

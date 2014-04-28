@@ -9,7 +9,8 @@
 
 namespace recsys {
 
-DataLoader::DataLoader(){
+DataLoader::DataLoader()
+:m_dataset_manager(shared_ptr<DatasetManager>(new DatasetManager())){
 	// TODO Auto-generated constructor stub
 
 }

@@ -16,7 +16,7 @@ using namespace boost;
 
 namespace recsys {
 
-DataLoader& DataLoaderSwitcher::get_loader(int argc, char** argv){
+shared_ptr<DataLoader> DataLoaderSwitcher::get_loader(int argc, char** argv){
 	/// determine whether it's a local or remote data loader
 	bool localLoader = true;
 	string datasetName;
@@ -59,15 +59,15 @@ DataLoader& DataLoaderSwitcher::get_loader(int argc, char** argv){
 	}
 }
 
-DataLoader& DataLoaderSwitcher::get_remote_loader(string const& host, int port){
+shared_ptr<DataLoader> DataLoaderSwitcher::get_remote_loader(string const& host, int port){
 	return _create_remote_loader(host,port);
 }
 
-DataLoader& DataLoaderSwitcher::get_local_loader(string const& datasetName, string const& userFile, string const& itemFile, string const& ratingFile){
+shared_ptr<DataLoader> DataLoaderSwitcher::get_local_loader(string const& datasetName, string const& userFile, string const& itemFile, string const& ratingFile){
 	return _create_local_loader(datasetName,userFile,itemFile,ratingFile);
 }
 
-DataLoader& DataLoaderSwitcher::get_remote_loader(int argc, char** argv){
+shared_ptr<DataLoader> DataLoaderSwitcher::get_remote_loader(int argc, char** argv){
 	/// extract host and port for the data sharing service
 	string host;
 	int port;
@@ -95,7 +95,7 @@ DataLoader& DataLoaderSwitcher::get_remote_loader(int argc, char** argv){
 	return _create_remote_loader(host,port);
 }
 
-DataLoader& DataLoaderSwitcher::get_local_loader(int argc, char** argv){
+shared_ptr<DataLoader> DataLoaderSwitcher::get_local_loader(int argc, char** argv){
 	string userFile, itemFile, ratingFile;
 	string datasetName;
 
@@ -143,17 +143,17 @@ void DataLoaderSwitcher::_register_entity_parsers(){
 
 }
 
-DataLoader& DataLoaderSwitcher::_create_remote_loader(string const& host, int& port){
+shared_ptr<DataLoader> DataLoaderSwitcher::_create_remote_loader(string const& host, int& port){
 	if(host.empty() || !port){
 		cerr << "host name and port must be supplied" << endl;
 		exit(1);
 	}
 	/// the data sets will be loaded from network
 	m_data_loader_ptr = shared_ptr<DataLoader>(new ThriftDataLoader(host,port));
-	return *m_data_loader_ptr;
+	return m_data_loader_ptr;
 }
 
-DataLoader& DataLoaderSwitcher::_create_local_loader(string const& datasetName, string const& userFile,
+shared_ptr<DataLoader> DataLoaderSwitcher::_create_local_loader(string const& datasetName, string const& userFile,
 		string const& itemFile, string const& ratingFile){
 	/// check the file existence
 	if(!_is_dataset_supported(datasetName)){
@@ -194,7 +194,7 @@ DataLoader& DataLoaderSwitcher::_create_local_loader(string const& datasetName, 
 	cout
 			<< ">>>>>>>>>>>>>>> All done! data is ready for use >>>>>>>>>>>>>>>"
 			<< endl;
-	return loaderRef;
+	return m_data_loader_ptr;
 }
 
 DataLoaderSwitcher::~DataLoaderSwitcher() {

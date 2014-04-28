@@ -112,11 +112,11 @@ int main(int argc, char **argv) {
 	HandleDataHandler::register_dataset_port();
 	/// get the data loader
 	DataLoaderSwitcher& dlSwitcher = DataLoaderSwitcher::ref();
-	DataLoader& dataLoader = dlSwitcher.get_local_loader(datasetName, userFile, itemFile, ratingFile);
+	shared_ptr<DataLoader> dataLoaderPtr = dlSwitcher.get_local_loader(datasetName, userFile, itemFile, ratingFile);
 
 	/// attach data loader to the handler
 	shared_ptr<HandleDataHandler> handler(
-			new HandleDataHandler(dataLoader));
+			new HandleDataHandler(*dataLoaderPtr));
 
 	/// run Thrift Service
 	/// get the port number assigned to the given dataset

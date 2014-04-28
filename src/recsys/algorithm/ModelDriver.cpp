@@ -10,8 +10,14 @@
 #include <boost/shared_ptr.hpp>
 #include "recsys/data/DataLoaderSwitcher.h"
 #include "recsys/data/DataLoader.h"
+#include <boost/filesystem.hpp>
+#include <fstream>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
 
 namespace po = boost::program_options;
+namespace bf = boost::filesystem ;
+
 using namespace boost;
 namespace recsys {
 
@@ -25,13 +31,14 @@ ModelDriver::ModelDriver(int argc, char** argv) {
 	int port;
 	//// for local loader
 	string userFile, itemFile, ratingFile;
+	/// save the trained model
+	string modelFile;
 	/// parameters
 	Model::ModelParams modelParams;
 	po::options_description desc(
 			"choose data loader based on the command line arguments");
 	desc.add_options()
 			("help,h", "help message on use this application")
-			("local-data,l", po::value<bool>(&localLoader), "indicate data set is local or remote")
 			("data-host,dh", po::value<string>(&host), "host of the data sharing service")
 			("data-port,p", po::value<int>(&port), "port at which the data sharing service is listening at")
 			("user-file,u", po::value<string>(&userFile),"user profile file")
@@ -41,7 +48,8 @@ ModelDriver::ModelDriver(int argc, char** argv) {
 			("lat-dim", po::value<size_t>(&(modelParams.m_lat_dim)), "latent dimension")
 			("diag-cov", po::value<bool>(&(modelParams.m_diag_cov)),"diagonal multivariate Gaussian")
 			("max-iter", po::value<size_t>(&(modelParams.m_max_iter)), "maximum number of iterations")
-			("use-feature", po::value<bool>(&(modelParams.m_use_feature)), "integrate content feature as prior");
+			("use-feature", po::value<bool>(&(modelParams.m_use_feature)), "integrate content feature as prior")
+			("model-file", po::value<string>(&modelFile), "file storing the model training result");
 
 	po::variables_map vm;
 	try {
@@ -57,20 +65,31 @@ ModelDriver::ModelDriver(int argc, char** argv) {
 		cerr << "\nUsage:\n" << desc << "\n\n";
 		exit(1);
 	}
-
-	/// choose the data loader
-	DataLoaderSwitcher& dlSwitcher = DataLoaderSwitcher::ref();
-	DataLoader* dataLoaderPtr  = NULL;
-	/// if it's a local loader, extract the required files
-	if(localLoader){
-		//// check whether the files are supplied
-		dataLoaderPtr = &(dlSwitcher.get_local_loader(datasetName, userFile, itemFile, ratingFile));
-	}else{
-		dataLoaderPtr = &(dlSwitcher.get_remote_loader(host,port));
+	/// if model file is supplied and exists, it suggests load a trained model
+	if(!modelFile.empty() && bf::exists(modelFile)){
+		/// restoring the trained model from the file
+		shared_ptr<Model> model_inst_ptr(new HierarchicalHybridMF(modelFile));
+		model_inst_ptr->load_model();
 	}
-	/// construct the model
-	shared_ptr<Model> model_inst_ptr(new HierarchicalHybridMF(modelParams,dataLoaderPtr->get_dataset_manager()));
-	model_inst_ptr->train();
+	else{
+		/// The presence of rating file implies local data loader
+		localLoader = !ratingFile.empty();
+		/// choose the data loader
+		DataLoaderSwitcher& dlSwitcher = DataLoaderSwitcher::ref();
+		shared_ptr<DataLoader> dataLoaderPtr;
+		/// if it's a local loader, extract the required files
+		if(localLoader){
+			//// check whether the files are supplied
+			dataLoaderPtr = dlSwitcher.get_local_loader(datasetName, userFile, itemFile, ratingFile);
+		}else{
+			dataLoaderPtr = dlSwitcher.get_remote_loader(host,port);
+		}
+		/// construct the model
+		shared_ptr<Model> model_inst_ptr(new HierarchicalHybridMF(modelParams,dataLoaderPtr->get_dataset_manager(),modelFile));
+		model_inst_ptr->train();
+		model_inst_ptr->save_model();
+	}
+
 }
 
 ModelDriver::~ModelDriver() {
