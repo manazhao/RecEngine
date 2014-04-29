@@ -40,22 +40,22 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: RecEngine
+all: RecModel
 
 dependents:
 	-cd /home/manazhao/git/BayesianNetwork/LibDebug && $(MAKE) clean all
 
 # Tool invocations
-RecEngine: $(OBJS) $(USER_OBJS) /home/manazhao/git/BayesianNetwork/LibDebug/libBayesianNetwork.a
+RecModel: $(OBJS) $(USER_OBJS) /home/manazhao/git/BayesianNetwork/LibDebug/libBayesianNetwork.a
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L"/home/manazhao/git/BayesianNetwork/LibDebug" -o "RecEngine" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L"/home/manazhao/git/BayesianNetwork/LibDebug" -o "RecModel" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(CPP_DEPS)$(EXECUTABLES)$(CXX_DEPS)$(C_UPPER_DEPS) RecEngine
+	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(CPP_DEPS)$(EXECUTABLES)$(CXX_DEPS)$(C_UPPER_DEPS) RecModel
 	-@echo ' '
 
 .PHONY: all clean dependents

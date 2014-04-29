@@ -83,7 +83,14 @@ public:
 		EntityInteraction::type_interact_map result = EntityInteraction::m_entity_type_interact_map[id];
 		/// convert the result to _return
 		for(EntityInteraction::type_interact_map::iterator iter = result.begin(); iter != result.end(); ++iter){
-			_return[iter->first] = *(iter->second);
+			EntityInteraction::entity_interact_vec& vec = *(iter->second);
+			for(EntityInteraction::entity_interact_vec::iterator iter1 = vec.begin(); iter1 < vec.end(); ++iter1){
+				EntityInteraction& tmpInteract = **iter1;
+				rt::Interact tmpInteract1;
+				tmpInteract1.ent_id = tmpInteract.m_to_entity->m_mapped_id;
+				tmpInteract1.ent_val = tmpInteract.m_val;
+				_return[iter->first].push_back(tmpInteract1);
+			}
 		}
 	}
 
@@ -104,7 +111,7 @@ public:
 			string name = "";
 			if (Entity::m_id_name_map.find(*iter)
 					!= Entity::m_id_name_map.end()) {
-				name = Entity::m_id_name_map[id];
+				name = Entity::m_id_name_map[*iter];
 			}
 			_return.push_back(name);
 		}

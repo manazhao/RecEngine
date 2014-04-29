@@ -6,7 +6,6 @@
 CPP_SRCS += \
 ../src/recsys/thrift/cpp/DataHost.cpp \
 ../src/recsys/thrift/cpp/DataHost_server.cpp \
-../src/recsys/thrift/cpp/DataHost_server.skeleton.cpp \
 ../src/recsys/thrift/cpp/RecEngine.cpp \
 ../src/recsys/thrift/cpp/data_constants.cpp \
 ../src/recsys/thrift/cpp/data_types.cpp 
@@ -14,7 +13,6 @@ CPP_SRCS += \
 OBJS += \
 ./src/recsys/thrift/cpp/DataHost.o \
 ./src/recsys/thrift/cpp/DataHost_server.o \
-./src/recsys/thrift/cpp/DataHost_server.skeleton.o \
 ./src/recsys/thrift/cpp/RecEngine.o \
 ./src/recsys/thrift/cpp/data_constants.o \
 ./src/recsys/thrift/cpp/data_types.o 
@@ -22,7 +20,6 @@ OBJS += \
 CPP_DEPS += \
 ./src/recsys/thrift/cpp/DataHost.d \
 ./src/recsys/thrift/cpp/DataHost_server.d \
-./src/recsys/thrift/cpp/DataHost_server.skeleton.d \
 ./src/recsys/thrift/cpp/RecEngine.d \
 ./src/recsys/thrift/cpp/data_constants.d \
 ./src/recsys/thrift/cpp/data_types.d 
