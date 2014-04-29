@@ -73,12 +73,15 @@ protected:
 	void _update_rating_var();
 	void _update_bias();
 	float _get_mean_rating();
+	void _update_entity_from_prior_helper(int64_t const& entityId, int8_t entityType, vector<Interact>& featureInteracts);
 	void _update_entity_from_prior(int64_t const& entityId, int8_t entityType);
+
 	void _update_feature_from_prior(int64_t const& entityId);
 	void _update_entity_from_ratings(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_feature_from_entities(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_entity(int64_t const& entityId, int8_t entityType, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_feature(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
+	vec _entity_feature_mean_sum(vector<Interact> const& featureInteracts);
 	vec _entity_feature_mean_sum(int64_t const& entityId);
 	vec _entity_feature_cov_sum(int64_t const& entityId);
 	void _get_entity_feature_cnt();

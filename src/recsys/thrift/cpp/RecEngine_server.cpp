@@ -294,13 +294,29 @@ int main(int argc, char **argv) {
 	/// create the handler by passing the command line arguments
 	shared_ptr<RecEngineHandler> handler(new RecEngineHandler(argc, argv));
 	//	handler->test_datahost_client();
-	handler->test_add_entity_interaction("gbl-female", 20, "Female");
-	vector<rt::Recommendation> recList;
-	handler->get_recommendation(recList, "gbl-female");
-	/// dump the list
-	for(size_t i = 0; i < recList.size(); i++){
-		Recommendation& rec = recList[i];
-		cout << "id:" << rec.id << ", score:" << rec.score << endl;
+	vector<string> genderVec;
+	genderVec.push_back("Female");
+	int ages[] = {20,30,40,50};
+	vector<int> ageVec;
+	ageVec.assign(ages,ages + sizeof(ages)/sizeof(ages[0]));
+	for(size_t i = 0; i < genderVec.size(); i++){
+		string gender = genderVec[i];
+		for(size_t j = 0; j < ageVec.size(); j++){
+			int age = ageVec[j];
+			string userName = "test_user_" + gender + "_" + lexical_cast<string,int>(age);
+			handler->test_add_entity_interaction(userName, age, gender);
+			vector<rt::Recommendation> recList;
+			handler->get_recommendation(recList, userName);
+			cout << "--------------- recommendation for user:" << userName << "--------------------------" << endl;
+			/// dump the list
+			for(size_t i = 0; i < recList.size(); i++){
+				Recommendation& rec = recList[i];
+				vector<string> splits;
+				boost::split(splits,rec.id,boost::is_any_of("_"));
+				string url = "http://amazon.com/dp/" + splits[1];
+				cout << "id:" << url << ", score:" << rec.score << endl;
+			}
+		}
 	}
 //	shared_ptr<TProcessor> processor(new RecEngineProcessor(handler));
 //	shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));

@@ -141,6 +141,28 @@ void HierarchicalHybridMF::_update_entity_from_prior(int64_t const& entityId,
 	m_entity[entityId] += message;
 }
 
+void HierarchicalHybridMF::_update_entity_from_prior_helper(int64_t const& entityId, int8_t entityType, vector<Interact>& featureInteracts){
+	DistParamBundle message(2);
+	DistParam upCovSuff2 =
+			(entityType == Entity::ENT_USER ? m_user_prior_cov.suff_mean(2)
+					: m_item_prior_cov.suff_mean(2));
+	vec entityLatMean =
+			(entityType == Entity::ENT_USER ? m_user_prior_mean.moment(1).m_vec
+					: m_item_prior_mean.moment(1).m_vec);
+	/// number of content features for current entity
+	size_t entityFeatCnt = featureInteracts.size();
+	/// add content feature prior information
+	if (m_model_param.m_use_feature && entityFeatCnt > 0) {
+		vec contentFeatPrior = 1 / sqrt(entityFeatCnt)
+				* _entity_feature_mean_sum(featureInteracts);
+		entityLatMean += contentFeatPrior;
+	}
+	message[0] = (vec) (upCovSuff2.m_vec % (entityLatMean));
+	message[1] = (vec) (-0.5 * upCovSuff2.m_vec);
+	m_entity[entityId] += message;
+
+}
+
 void HierarchicalHybridMF::_update_entity_from_ratings(int64_t const& entityId,
 		map<int8_t, vector<Interact> > & typeInteracts) {
 	/// first reset the natural parameter of user vector
@@ -225,6 +247,11 @@ vec HierarchicalHybridMF::_entity_feature_mean_sum(int64_t const& entityId) {
 	vector<Interact> const
 			& featureInteracts =
 					m_active_dataset.ent_type_interacts[entityId][EntityInteraction::ADD_FEATURE];
+	return _entity_feature_mean_sum(featureInteracts);
+}
+
+
+vec HierarchicalHybridMF::_entity_feature_mean_sum(vector<Interact> const& featureInteracts) {
 	vec meanSum(m_model_param.m_lat_dim, fill::zeros);
 	for (vector<Interact>::const_iterator iter1 = featureInteracts.begin(); iter1
 			< featureInteracts.end(); ++iter1) {
@@ -233,6 +260,7 @@ vec HierarchicalHybridMF::_entity_feature_mean_sum(int64_t const& entityId) {
 	}
 	return meanSum;
 }
+
 
 vec HierarchicalHybridMF::_entity_feature_cov_sum(int64_t const& entityId) {
 	vector<Interact> const
@@ -641,19 +669,21 @@ vector<rt::Recommendation> HierarchicalHybridMF::recommend(int64_t const& userId
 		int8_t, vector<rt::Interact> >& userInteracts) {
 	/// note: not consider new items
 	if(userId >= m_entity.size()){
+		cout << "add new user:" << userId << endl;
 		_add_new_entity(userId,Entity::ENT_USER);
 		vector<rt::Interact>& featureInteracts = userInteracts[EntityInteraction::ADD_FEATURE];
 		for(vector<rt::Interact>::iterator iter = featureInteracts.begin(); iter < featureInteracts.end(); ++iter){
 			int64_t entId = iter->ent_id;
 			if(entId >= m_entity.size()){
 				_add_new_entity(entId, Entity::ENT_FEATURE);
+				m_entity[entId].reset();
 				_update_feature_from_prior(entId);
 			}
 		}
 		/// initialize user profile
 		m_entity[userId].reset();
-		_update_entity_from_prior(userId,Entity::ENT_USER);
-		_update_entity_from_ratings(userId, userInteracts);
+		_update_entity_from_prior_helper(userId,Entity::ENT_USER,featureInteracts);
+//		_update_entity_from_ratings(userId, userInteracts);
 	}
 	/// now make recommendation
 	/// naive strategy: predict the rating for each item and sort the recommendation result

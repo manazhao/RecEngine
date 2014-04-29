@@ -9,7 +9,7 @@
 #define AMAZONPARSER_H_
 
 #include "JSONDataLoader.h"
-
+#include <boost/algorithm/string.hpp>
 namespace recsys {
 namespace amazon {
 class UserEntityParser: public recsys::EntityParser {
@@ -22,9 +22,10 @@ protected:
 //		js::String location = jsObj["l"];
 		/// create user entity
 		if (jsObj.Find("age") != jsObj.End()) {
-			js::String age = jsObj["age"];
-			float ageF = lexical_cast<float>(age.Value());
-			int ageI = (int) (ageF / 5);
+			js::Number age = jsObj["age"];
+//			float ageF = lexical_cast<float>(age.Value());
+//			int ageI = (int) (ageF / 5);
+			int ageI = (int)(age.Value());
 			string featureName = "ag_" + lexical_cast<string,int>(ageI);
 			Entity tmpEntity(featureName,
 					Entity::ENT_FEATURE);
@@ -32,7 +33,9 @@ protected:
 		}
 		if (jsObj.Find("gender") != jsObj.End()) {
 			js::String gender = jsObj["gender"];
-			Entity tmpEntity("gd_" + gender.Value(), Entity::ENT_FEATURE);
+			string genderStr = gender.Value();
+			boost::algorithm::to_lower(genderStr);
+			Entity tmpEntity("gd_" + genderStr, Entity::ENT_FEATURE);
 			entityFeatures.push_back(tmpEntity);
 		}
 	}
