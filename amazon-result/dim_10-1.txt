@@ -29,3 +29,4 @@ latent dimension:10, number of iterations:20,is diagonal:1,use feature:1
 iteration:1,time:27.11,train rmse:0.892759,test rmse:0.994685,cs rmse:0.98703
 iteration:2,time:26.67,train rmse:0.893129,test rmse:0.968291,cs rmse:0.98678
 iteration:3,time:26.65,train rmse:0.851718,test rmse:0.949789,cs rmse:0.986438
+iteration:4,time:26.66,train rmse:0.843948,test rmse:0.94349,cs rmse:0.985861
