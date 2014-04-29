@@ -6,12 +6,12 @@
  */
 
 #include "ModelDriver.h"
-#include <boost/program_options.hpp>
-#include <boost/shared_ptr.hpp>
 #include "recsys/data/DataLoaderSwitcher.h"
 #include "recsys/data/DataLoader.h"
-#include <boost/filesystem.hpp>
 #include <fstream>
+#include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 

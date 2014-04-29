@@ -26,93 +26,127 @@ using namespace ::recsys::thrift;
 using namespace recsys;
 using namespace boost;
 namespace po = boost::program_options;
-namespace bf = boost::filesystem ;
+namespace bf = boost::filesystem;
 
-class DataHostHandler : virtual public DataHostIf {
+class DataHostHandler: virtual public DataHostIf {
 protected:
 	string m_dataset_name;
 	DataLoader& m_data_loader;
 	static map<string, int> m_dataset_port_map;
-	static map<string,Entity::ENTITY_TYPE> m_entity_type_map;
- public:
-	static void register_dataset_port(){
+	static map<string, Entity::ENTITY_TYPE> m_entity_type_map;
+public:
+	static void register_dataset_port() {
 		int currentPort = 9090;
 		m_dataset_port_map["amazon"] = currentPort;
 		m_dataset_port_map["movielens"] = ++currentPort;
 	}
-	static int get_dataset_port(string const& datasetName){
+	static int get_dataset_port(string const& datasetName) {
 		return m_dataset_port_map[datasetName];
 	}
 
-	static void register_entity_type(){
+	static void register_entity_type() {
 		m_entity_type_map["user"] = Entity::ENT_USER;
 		m_entity_type_map["item"] = Entity::ENT_ITEM;
 		m_entity_type_map["feature"] = Entity::ENT_FEATURE;
 	}
-  DataHostHandler(DataLoader& dataLoader):m_data_loader(dataLoader) {
-    // Your initialization goes here
-  }
+	DataHostHandler(DataLoader& dataLoader) :
+		m_data_loader(dataLoader) {
+		// Your initialization goes here
+	}
 
-  void index_interaction(Response& _return, const std::string& fromId, const int8_t fromType, const std::string& toId, const int8_t toType, const int8_t type, const double val) {
-    // Your implementation goes here
-	EntityInteraction interaction(type,val);
-	/// index the from and to entities
-	Entity fromEntity(fromId,fromType);
-	Entity::entity_ptr fromEntityPtr = fromEntity.index_if_not_exist();
-	Entity toEntity(toId,toType);
-	Entity::entity_ptr toEntityPtr = toEntity.index_if_not_exist();
-	/// attach the entiy pointers to the interaction object
-	interaction.set_from_entity(fromEntityPtr);
-	interaction.set_to_entity(toEntityPtr);
-	EntityInteraction::entity_interact_ptr interactPtr = interaction.index_if_not_exist();
-	cout << "add interaction from: [" << fromId << "-" << fromEntityPtr->get_mapped_id() << "] to [" << toId << "-"
-			<< toEntityPtr->get_mapped_id() << "]" << endl;
-	_return.status = StatusCode::SC_SUCCESS;
-  }
+	void index_interaction(Response& _return, const std::string& fromId,
+			const int8_t fromType, const std::string& toId,
+			const int8_t toType, const int8_t type, const double val) {
+		// Your implementation goes here
+		EntityInteraction interaction(type, val);
+		/// index the from and to entities
+		Entity fromEntity(fromId, fromType);
+		Entity::entity_ptr fromEntityPtr = fromEntity.index_if_not_exist();
+		Entity toEntity(toId, toType);
+		Entity::entity_ptr toEntityPtr = toEntity.index_if_not_exist();
+		/// attach the entiy pointers to the interaction object
+		interaction.set_from_entity(fromEntityPtr);
+		interaction.set_to_entity(toEntityPtr);
+		EntityInteraction::entity_interact_ptr interactPtr =
+				interaction.index_if_not_exist();
+		cout << "add interaction from: [" << fromId << "-"
+				<< fromEntityPtr->get_mapped_id() << "] to [" << toId << "-"
+				<< toEntityPtr->get_mapped_id() << "]" << endl;
+		_return.status = StatusCode::SC_SUCCESS;
+	}
 
-  void query_entity_interacts(std::map<int8_t, std::vector<Interact> > & _return, const int64_t id) {
-    // Your implementation goes here
-    printf("query_entity_interacts\n");
-  }
+	void query_entity_interacts(
+			std::map<int8_t, std::vector<Interact> > & _return,
+			const int64_t id) {
+		// Your implementation goes here
+		printf("query_entity_interacts\n");
+		EntityInteraction::type_interact_map result = EntityInteraction::m_entity_type_interact_map[id];
+		/// convert the result to _return
+		for(EntityInteraction::type_interact_map::iterator iter = result.begin(); iter != result.end(); ++iter){
+			_return[iter->first] = *(iter->second);
+		}
+	}
 
-  void query_entity_name(std::string& _return, const int64_t id) {
-    // Your implementation goes here
-    printf("query_entity_name\n");
-  }
+	void query_entity_name(std::string& _return, const int64_t id) {
+		printf("query_entity_name\n");
+		_return = "";
+		if (Entity::m_id_name_map.find(id) != Entity::m_id_name_map.end()) {
+			_return = Entity::m_id_name_map[id];
+		}
+	}
 
-  void query_entity_names(std::vector<std::string> & _return, const std::vector<int64_t> & idList) {
-    // Your implementation goes here
-    printf("query_entity_names\n");
-  }
+	void query_entity_names(std::vector<std::string> & _return,
+			const std::vector<int64_t> & idList) {
+		// Your implementation goes here
+		printf("query_entity_names\n");
+		for (std::vector<int64_t>::const_iterator iter = idList.begin(); iter
+				< idList.end(); ++iter) {
+			string name = "";
+			if (Entity::m_id_name_map.find(*iter)
+					!= Entity::m_id_name_map.end()) {
+				name = Entity::m_id_name_map[id];
+			}
+			_return.push_back(name);
+		}
+	}
 
-  int64_t query_entity_id(const std::string& name, const int8_t type) {
-    // Your implementation goes here
-    printf("query_entity_id\n");
-  }
+	int64_t query_entity_id(const std::string& name, const int8_t type) {
+		// Your implementation goes here
+		/// get the composite key
+		printf("query_entity_id\n");
+		string cKey = Entity::create_composit_key(name, type);
+		int64_t id = -1;
+		if (Entity::m_name_id_map.find(cKey) != Entity::m_name_id_map.end()) {
+			id = Entity::m_name_id_map[cKey];
+		}
+		return id;
+	}
 
-  void get_dataset(Dataset& _return, const DSType::type dsType) {
-    // Your implementation goes here
-    printf("get_dataset\n");
-	_return = m_data_loader.dataset(dsType);
-  }
+	void get_dataset(Dataset& _return, const DSType::type dsType) {
+		// Your implementation goes here
+		printf("get_dataset\n");
+		_return = m_data_loader.dataset(dsType);
+	}
 
 };
 
-
 //// static members
 map<string, int> DataHostHandler::m_dataset_port_map;
-map<string,Entity::ENTITY_TYPE> DataHostHandler::m_entity_type_map;
+map<string, Entity::ENTITY_TYPE> DataHostHandler::m_entity_type_map;
 
 /// parse commandline arguments
-void parse_app_args(int argc, char** argv, string& datasetName, string& userFile, string& itemFile, string& ratingFile) {
-	po::options_description desc(
-			"Load dataset into main memory and share with other applications through thrift interface");
-	desc.add_options()
-			("help", "help message on use this application")
-					("user-file,u", po::value<string>(&userFile),"user profile file")
-					("item-file,i", po::value<string>(&itemFile), "item profile file")
-					("rating-file,r", po::value<string>(&ratingFile)->required(),"rating file")
-					("dataset-name,n", po::value<string>(&datasetName)->required(),"dataset name: should be one of [amazon,movielens]");
+void parse_app_args(int argc, char** argv, string& datasetName,
+		string& userFile, string& itemFile, string& ratingFile) {
+	po::options_description
+			desc(
+					"Load dataset into main memory and share with other applications through thrift interface");
+	desc.add_options()("help", "help message on use this application")(
+			"user-file,u", po::value<string>(&userFile), "user profile file")(
+			"item-file,i", po::value<string>(&itemFile), "item profile file")(
+			"rating-file,r", po::value<string>(&ratingFile)->required(),
+			"rating file")("dataset-name,n",
+			po::value<string>(&datasetName)->required(),
+			"dataset name: should be one of [amazon,movielens]");
 
 	try {
 		po::variables_map vm;
@@ -135,7 +169,7 @@ int main(int argc, char **argv) {
 	string datasetName;
 	string userFile, itemFile, ratingFile;
 	/// parse commandline arguments
-	parse_app_args(argc, argv,datasetName, userFile, itemFile, ratingFile);
+	parse_app_args(argc, argv, datasetName, userFile, itemFile, ratingFile);
 
 	/// register listening port
 	DataHostHandler::register_dataset_port();
@@ -143,11 +177,11 @@ int main(int argc, char **argv) {
 
 	/// get the data loader
 	DataLoaderSwitcher& dlSwitcher = DataLoaderSwitcher::ref();
-	shared_ptr<DataLoader> dataLoaderPtr = dlSwitcher.get_local_loader(datasetName, userFile, itemFile, ratingFile);
+	shared_ptr<DataLoader> dataLoaderPtr = dlSwitcher.get_local_loader(
+			datasetName, userFile, itemFile, ratingFile);
 
 	/// attach data loader to the handler
-	shared_ptr<DataHostHandler> handler(
-			new DataHostHandler(*dataLoaderPtr));
+	shared_ptr<DataHostHandler> handler(new DataHostHandler(*dataLoaderPtr));
 
 	/// run Thrift Service
 	/// get the port number assigned to the given dataset

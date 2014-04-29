@@ -2,11 +2,23 @@
 // You should copy it to another filename to avoid overwriting it.
 
 #include "RecEngine.h"
+#include "DataHost.h"
 #include "recsys/data/Entity.h"
+#include <thrift/transport/TSocket.h>
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TSimpleServer.h>
 #include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TBufferTransports.h>
+#include "recsys/algorithm/ModelDriver.h"
+#include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+
+namespace po = boost::program_options;
+namespace bf = boost::filesystem ;
+
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -18,9 +30,12 @@ using boost::shared_ptr;
 using namespace ::recsys::thrift;
 using namespace recsys;
 
+namespace rt = recsys::thrift;
+
 class RecEngineHandler: virtual public RecEngineIf {
 protected:
 	class DataHostClientWrapper {
+		friend class RecEngineHandler;
 	protected:
 		string m_host;
 		int m_port;
@@ -39,41 +54,109 @@ protected:
 	};
 protected:
 	shared_ptr<DataHostClientWrapper> m_datahost_client_wrapper_ptr;
-public:
-	RecEngineHandler() {
-		// Your initialization goes here
+	string m_model_file;
+	string m_model_name;
+	string m_dataset_name;
+protected:
+	void _init_datahost_client(string const& host, int port){
+		m_datahost_client_wrapper_ptr = shared_ptr<DataHostClientWrapper>(new DataHostClientWrapper(host,port));
 	}
 
-	void init_data_host_client(string const& host, int port){
-		m_datahost_client_wrapper_ptr = shared_ptr<DataHostClientWrapper>(new DataHostClientWrapper(host,port));
+	void _load_model( ){
+		cout << "load model from file: " << m_model_file << endl;
+		ifstream ifs(m_model_file.c_str());
+		boost::archive::binary_iarchive ia(ifs);
+		ModelDriver& MODEL_DRIVER = ModelDriver::ref();
+		ia >> MODEL_DRIVER;
+		cout << "done!" << endl;
+	}
+
+	void _init_from_cmd(int argc, char** argv) {
+		// TODO Auto-generated constructor stub
+		/// for remote loader
+		string host;
+		int port;
+		po::options_description desc(
+				"choose data loader based on the command line arguments");
+		desc.add_options()
+				("help,h", "help message on use this application")
+				("model-file", po::value<string>(&m_model_file), "file storing the model training result")
+				("model", po::value<string>(&m_model_name)->required(), "the name of the model: must be one of [HHMF]")
+				("data-host", po::value<string>(&host), "host of the data sharing service")
+				("data-port", po::value<int>(&port), "port at which the data sharing service is listening at")
+				("dataset-name", po::value<string>(&m_dataset_name)->required(),"dataset name: should be one of [amazon,movielens]");
+
+		po::variables_map vm;
+		try {
+			po::store(po::parse_command_line(argc, argv, desc), vm);
+			if (vm.count("help")) {
+				cout << desc << "\n";
+				exit(1);
+			}
+			/// check all required options are provided
+			vm.notify();
+		} catch (std::exception& e) {
+			cerr << "Error:" << e.what() << endl;
+			cerr << "\nUsage:\n" << desc << "\n\n";
+			exit(1);
+		}
+		ModelDriver& MODEL_DRIVER = ModelDriver::ref();
+		if(!MODEL_DRIVER.is_model_supported(m_model_name)){
+			cerr << "unsupported model specified:" <<  m_model_name << endl;
+			exit(1);
+		}
+		/// if model file is supplied and exists, it suggests load a trained model
+		if(!m_model_file.empty() && bf::exists(m_model_file)){
+			_init_datahost_client(host,port);
+			_load_model();
+		}
+
+	}
+public:
+	RecEngineHandler(int argc, char** argv) {
+		// Your initialization goes here
+		_init_from_cmd(argc,argv);
 	}
 
 	void get_recommendation(std::vector<Recommendation> & _return,
 			const std::string& userId) {
 		// Your implementation goes here
 		/// first get all the interactions about the user
+		map<int8_t, vector<Interact> > entityInteracts;
+		int64_t mappedUserId;
 		try {
 			m_datahost_client_wrapper_ptr->m_transport->open();
-			cout
-					<< "############## retrieve user interacts from data host  ##############"
-					<< endl;
-			timer t;
-			map<int8_t, vector<Interact> > entityInteracts;
-			m_datahost_client_wrapper_ptr->m_client.query_entity_interacts(entityInteracts,userId,Entity::ENT_USER);
-
-			//// now do t
-			m_transport->close();
+			/// first retrieve the integer user id
+			mappedUserId = m_datahost_client_wrapper_ptr->m_client.query_entity_id(userId,Entity::ENT_USER);
+			m_datahost_client_wrapper_ptr->m_client.query_entity_interacts(entityInteracts,mappedUserId);
+			m_datahost_client_wrapper_ptr->m_transport->close();
 		} catch (TException &tx) {
 			printf("ERROR: %s\n", tx.what());
 		}
 		printf("get_recommendation\n");
+		/// make recommendations
+		ModelDriver& MODEL_DRIVER = ModelDriver::ref();
+		RecModel& recModel = MODEL_DRIVER.get_model_ref();
+		_return = recModel.recommend(mappedUserId,entityInteracts);
+		/// convert mapped id to original id
+		/// this looks really ugly
+		vector<int64_t> idVec;
+		for(vector<Recommendation>::iterator iter = _return.begin(); iter < _return.end(); ++iter){
+			int64_t itemId = lexical_cast<int64_t>(iter->id);
+			idVec.push_back(itemId);
+		}
+		vector<string> origIdVec;
+		m_datahost_client_wrapper_ptr->m_client.query_entity_names(origIdVec,idVec);
+		/// put it back
+		for(size_t i = 0; i < origIdVec.size(); i++){
+			_return[i].id = origIdVec[i];
+		}
 	}
-
 };
 
 int main(int argc, char **argv) {
 	int port = 9090;
-	shared_ptr<RecEngineHandler> handler(new RecEngineHandler());
+	shared_ptr<RecEngineHandler> handler(new RecEngineHandler(argc,argv));
 	shared_ptr<TProcessor> processor(new RecEngineProcessor(handler));
 	shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
 	shared_ptr<TTransportFactory> transportFactory(

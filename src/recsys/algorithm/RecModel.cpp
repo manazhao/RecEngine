@@ -38,7 +38,7 @@ void RecModel::setup_train(ModelParams const& modelParam, shared_ptr<
 void RecModel::train(DatasetExt& trainSet, DatasetExt& testSet, DatasetExt& csSet){
 	/// initialize training model
 	/// train the model on the training dataset and evaluate on the testing and coldstart dataset
-	m_active_dataset = &trainSet;
+	m_active_dataset = trainSet;
 	cout << "initialize training environment" << endl;
 	_init_training();
 	cout << "start model optimization" << endl;
@@ -109,7 +109,7 @@ ostream& operator <<(ostream& oss, RecModel::ModelParams const& rhs) {
 	return oss;
 }
 
-RecModel::RecModel():m_active_dataset(NULL) {
+RecModel::RecModel() {
 	// TODO Auto-generated constructor stub
 
 }

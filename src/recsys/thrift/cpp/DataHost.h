@@ -122,7 +122,7 @@ class DataHost_index_interaction_args {
   }
 
   void __set_val(const double val) {
-    val = val;
+    this->val = val;
   }
 
   bool operator == (const DataHost_index_interaction_args & rhs) const

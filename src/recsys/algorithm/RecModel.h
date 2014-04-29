@@ -8,6 +8,7 @@
 #ifndef MODEL_H_
 #define MODEL_H_
 #include "recsys/data/DatasetExt.h"
+#include "recsys/thrift/cpp/data_types.h"
 #include <sstream>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/string.hpp>
@@ -68,25 +69,27 @@ protected:
 	size_t m_num_items;
 	size_t m_num_features;
 	ModelParams m_model_param;
-	DatasetExt* m_active_dataset;
+	DatasetExt m_active_dataset;
 	shared_ptr<DatasetManager> m_dataset_manager;
 private:
 	friend class boost::serialization::access;
 	template<class Archive>
 	void serialize(Archive& ar, const unsigned int version) {
 		/// serialize every data member except for the dataset
-		ar & m_num_users & m_num_items & m_num_features & m_model_param;
+		ar & m_num_users & m_num_items & m_num_features & m_model_param & m_active_dataset;
 	}
 
 protected:
 	virtual void _init_training() = 0;
 	virtual TrainIterLog _train_update() = 0;
 	virtual float _pred_error(int64_t const& entityId, map<int8_t, vector<Interact> >& entityInteractMap) = 0;
+	virtual void _add_new_entity(int64_t const& entityId, int8_t const& entityType) = 0;
 	float _dataset_rmse(DatasetExt& dataset);
 public:
 	RecModel();
 	void setup_train(ModelParams const& modelParam, shared_ptr<
 			DatasetManager> datasetManager);
+	virtual vector<rt::Recommendation> recommend(int64_t const& userId, map<int8_t, vector<rt::Interact> >& userInteracts) = 0;
 	void train(DatasetExt& trainSet, DatasetExt& testSet, DatasetExt& csSet);
 	DatasetExt& get_train_ds() {
 		return m_dataset_manager->dataset(rt::DSType::DS_TRAIN);
@@ -101,6 +104,12 @@ public:
 		return m_dataset_manager->dataset(rt::DSType::DS_ALL);
 	}
 	virtual ~RecModel();
+};
+
+struct RecommendationComparator{
+	bool operator()(rt::Recommendation const& rt1, rt::Recommendation const& rt2) const{
+		return rt1.score > rt2.score;
+	}
 };
 
 ostream& operator <<(ostream& oss, RecModel::ModelParams const& param);

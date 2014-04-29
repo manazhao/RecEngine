@@ -82,9 +82,11 @@ protected:
 	vec _entity_feature_mean_sum(int64_t const& entityId);
 	vec _entity_feature_cov_sum(int64_t const& entityId);
 	void _get_entity_feature_cnt();
+	virtual void _add_new_entity(int64_t const& entityId, int8_t const& entityType);
 public:
 	HierarchicalHybridMF(ModelParams const& modelParam, shared_ptr<DatasetManager> datasetManager);
 	HierarchicalHybridMF();
+	virtual vector<rt::Recommendation> recommend(int64_t const& userId, map<int8_t, vector<rt::Interact> >& userInteracts);
 	virtual ~HierarchicalHybridMF();
 protected:
 	/// user, item and feature latent variables
