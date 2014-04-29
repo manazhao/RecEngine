@@ -19,14 +19,54 @@
 # of items:96566
 # of features:15861
 
->>>>>>>>>>>>>> Time elapsed:3.97 >>>>>>>>>>>>>>
+>>>>>>>>>>>>>> Time elapsed:4.47 >>>>>>>>>>>>>>
 >>> initialize training environment
 ------------ Model Parameters ------------
-latent dimension:10, number of iterations:20,is diagonal:1,use feature:1
+latent dimension:10, number of iterations:50,is diagonal:1,use feature:1
 
 
 >>> start model optimization
-iteration:1,time:27.11,train rmse:0.892759,test rmse:0.994685,cs rmse:0.98703
-iteration:2,time:26.67,train rmse:0.893129,test rmse:0.968291,cs rmse:0.98678
-iteration:3,time:26.65,train rmse:0.851718,test rmse:0.949789,cs rmse:0.986438
-iteration:4,time:26.66,train rmse:0.843948,test rmse:0.94349,cs rmse:0.985861
+iteration:1,time:27.26,train rmse:0.892759,test rmse:0.994685,cs rmse:0.98703
+iteration:2,time:26.45,train rmse:0.893129,test rmse:0.968291,cs rmse:0.98678
+iteration:3,time:26.48,train rmse:0.851718,test rmse:0.949789,cs rmse:0.986438
+iteration:4,time:26.42,train rmse:0.843948,test rmse:0.94349,cs rmse:0.985861
+iteration:5,time:26.39,train rmse:0.846564,test rmse:0.940642,cs rmse:0.98509
+iteration:6,time:26.49,train rmse:0.851508,test rmse:0.938789,cs rmse:0.984186
+iteration:7,time:26.65,train rmse:0.856536,test rmse:0.937322,cs rmse:0.983195
+iteration:8,time:26.4,train rmse:0.861374,test rmse:0.936362,cs rmse:0.982151
+iteration:9,time:26.42,train rmse:0.865617,test rmse:0.935607,cs rmse:0.981093
+iteration:10,time:26.41,train rmse:0.869191,test rmse:0.934907,cs rmse:0.980055
+iteration:11,time:26.41,train rmse:0.872395,test rmse:0.934452,cs rmse:0.979057
+iteration:12,time:26.38,train rmse:0.875201,test rmse:0.934159,cs rmse:0.97811
+iteration:13,time:26.4,train rmse:0.877518,test rmse:0.933864,cs rmse:0.977213
+iteration:14,time:26.55,train rmse:0.879298,test rmse:0.933436,cs rmse:0.976374
+iteration:15,time:26.4,train rmse:0.880511,test rmse:0.932811,cs rmse:0.975594
+iteration:16,time:26.42,train rmse:0.881337,test rmse:0.932093,cs rmse:0.974877
+iteration:17,time:26.42,train rmse:0.882248,test rmse:0.931681,cs rmse:0.97424
+iteration:18,time:26.4,train rmse:0.883222,test rmse:0.931526,cs rmse:0.973669
+iteration:19,time:26.43,train rmse:0.884049,test rmse:0.931407,cs rmse:0.973144
+iteration:20,time:26.46,train rmse:0.884699,test rmse:0.931274,cs rmse:0.972662
+iteration:21,time:26.56,train rmse:0.885176,test rmse:0.931115,cs rmse:0.972214
+iteration:22,time:26.56,train rmse:0.885492,test rmse:0.930929,cs rmse:0.971804
+iteration:23,time:26.56,train rmse:0.885662,test rmse:0.930714,cs rmse:0.971428
+iteration:24,time:26.46,train rmse:0.885698,test rmse:0.93047,cs rmse:0.971073
+iteration:25,time:26.37,train rmse:0.885603,test rmse:0.930177,cs rmse:0.970751
+iteration:26,time:26.51,train rmse:0.885372,test rmse:0.929831,cs rmse:0.970448
+iteration:27,time:26.47,train rmse:0.885042,test rmse:0.929458,cs rmse:0.970166
+iteration:28,time:26.51,train rmse:0.884671,test rmse:0.929094,cs rmse:0.969903
+iteration:29,time:26.49,train rmse:0.88427,test rmse:0.928741,cs rmse:0.969652
+iteration:30,time:26.53,train rmse:0.883827,test rmse:0.928395,cs rmse:0.969417
+iteration:31,time:26.55,train rmse:0.883341,test rmse:0.928052,cs rmse:0.969193
+iteration:32,time:26.54,train rmse:0.882806,test rmse:0.927701,cs rmse:0.96898
+iteration:33,time:26.41,train rmse:0.882211,test rmse:0.927342,cs rmse:0.968777
+iteration:34,time:26.38,train rmse:0.881557,test rmse:0.926962,cs rmse:0.968588
+iteration:35,time:26.52,train rmse:0.880838,test rmse:0.926557,cs rmse:0.968402
+iteration:36,time:26.52,train rmse:0.880059,test rmse:0.926138,cs rmse:0.968227
+iteration:37,time:26.57,train rmse:0.879228,test rmse:0.9257,cs rmse:0.968061
+iteration:38,time:26.53,train rmse:0.878346,test rmse:0.925245,cs rmse:0.967902
+iteration:39,time:26.44,train rmse:0.877417,test rmse:0.924771,cs rmse:0.967749
+iteration:40,time:26.4,train rmse:0.876438,test rmse:0.92428,cs rmse:0.967604
+iteration:41,time:26.38,train rmse:0.875395,test rmse:0.923763,cs rmse:0.967463
+iteration:42,time:26.37,train rmse:0.874265,test rmse:0.923202,cs rmse:0.967329
+iteration:43,time:26.4,train rmse:0.873025,test rmse:0.922569,cs rmse:0.967196
+iteration:44,time:26.38,train rmse:0.871635,test rmse:0.921839,cs rmse:0.967068

@@ -1,5 +1,50 @@
-Thrift: Tue Apr 29 15:11:14 2014 TSocket::open() connect() <Host: localhost Port: 9091>Connection refused
-ERROR: connect() failed: Connection refused
+############## retrieve datasets from data host  ##############
+---------- dataset ----------
+# of users:74263
+# of items:298147
+# of features:35462
+
+---------- train dataset ----------
+# of users:55697
+# of items:149145
+# of features:20442
+
+---------- test dataset ----------
+# of users:55697
+# of items:88982
+# of features:15351
+
+---------- coldstart dataset ----------
+# of users:18566
+# of items:96566
+# of features:15861
+
+>>>>>>>>>>>>>> Time elapsed:4.17 >>>>>>>>>>>>>>
 >>> initialize training environment
-RecModel: ../src/recsys/algorithm/HierarchicalHybridMF.cpp:33: virtual void recsys::HierarchicalHybridMF::_init_training(): Assertion `!m_active_dataset.ent_type_interacts.empty()' failed.
-Aborted (core dumped)
+------------ Model Parameters ------------
+latent dimension:20, number of iterations:20,is diagonal:1,use feature:1
+
+
+>>> start model optimization
+iteration:1,time:66.25,train rmse:0.890473,test rmse:0.995852,cs rmse:0.98694
+iteration:2,time:64.89,train rmse:0.882949,test rmse:0.967409,cs rmse:0.986608
+iteration:3,time:65.08,train rmse:0.860257,test rmse:0.956904,cs rmse:0.986258
+iteration:4,time:64.8,train rmse:0.859186,test rmse:0.953913,cs rmse:0.985808
+iteration:5,time:64.84,train rmse:0.863089,test rmse:0.952625,cs rmse:0.985254
+iteration:6,time:65.16,train rmse:0.868752,test rmse:0.952112,cs rmse:0.984609
+iteration:7,time:64.89,train rmse:0.874735,test rmse:0.951823,cs rmse:0.98389
+iteration:8,time:64.73,train rmse:0.880464,test rmse:0.951555,cs rmse:0.983124
+iteration:9,time:64.07,train rmse:0.885938,test rmse:0.951472,cs rmse:0.982337
+iteration:10,time:63.84,train rmse:0.890979,test rmse:0.951494,cs rmse:0.981554
+iteration:11,time:63.99,train rmse:0.895395,test rmse:0.951462,cs rmse:0.980798
+iteration:12,time:64,train rmse:0.899369,test rmse:0.951501,cs rmse:0.980079
+iteration:13,time:63.82,train rmse:0.903141,test rmse:0.951788,cs rmse:0.979417
+iteration:14,time:63.99,train rmse:0.906668,test rmse:0.952243,cs rmse:0.978811
+iteration:15,time:64.02,train rmse:0.909883,test rmse:0.952757,cs rmse:0.978264
+iteration:16,time:63.81,train rmse:0.912776,test rmse:0.95327,cs rmse:0.977773
+iteration:17,time:63.99,train rmse:0.915368,test rmse:0.953767,cs rmse:0.977333
+iteration:18,time:64,train rmse:0.917682,test rmse:0.954221,cs rmse:0.976947
+iteration:19,time:63.83,train rmse:0.919747,test rmse:0.954615,cs rmse:0.976607
+iteration:20,time:63.98,train rmse:0.92152,test rmse:0.95489,cs rmse:0.976309
+>>> start to write the model to file: /home/qzhao2/git/RecEngine/HHMF-d_20-f_1-model[SEL].bin
+done!

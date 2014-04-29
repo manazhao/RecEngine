@@ -11,9 +11,9 @@
 use strict;
 use warnings;
 
-my @lat_dim = (10,20);
+my @lat_dim = (5,10,20);
 my @use_feature = (0,1);
-my $max_iter = 20;
+my $max_iter = 50;
 my $dataset = "amazon";
 my $result_dir = "$dataset-result";
 -d $result_dir  or  mkdir $result_dir;
