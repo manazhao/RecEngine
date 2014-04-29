@@ -39,9 +39,10 @@ void RecModel::train(DatasetExt& trainSet, DatasetExt& testSet, DatasetExt& csSe
 	/// initialize training model
 	/// train the model on the training dataset and evaluate on the testing and coldstart dataset
 	m_active_dataset = trainSet;
-	cout << "initialize training environment" << endl;
+	cout << ">>> initialize training environment" << endl;
 	_init_training();
-	cout << "start model optimization" << endl;
+	m_model_selection = !testSet.empty();
+	cout << ">>> start model optimization" << endl;
 	for(size_t iterNum = 1; iterNum <= m_model_param.m_max_iter; iterNum++){
 		timer timer;
 		TrainIterLog iterLog = _train_update();
@@ -53,6 +54,7 @@ void RecModel::train(DatasetExt& trainSet, DatasetExt& testSet, DatasetExt& csSe
 			iterLog.m_cs_rmse = _dataset_rmse(csSet);
 		}
 		iterLog.m_iter_time = timer.elapsed();
+		iterLog.m_iter = iterNum;
 		cout << iterLog;
 	}
 }
@@ -109,7 +111,7 @@ ostream& operator <<(ostream& oss, RecModel::ModelParams const& rhs) {
 	return oss;
 }
 
-RecModel::RecModel() {
+RecModel::RecModel():m_model_selection(false) {
 	// TODO Auto-generated constructor stub
 
 }

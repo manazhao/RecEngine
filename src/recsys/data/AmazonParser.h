@@ -24,8 +24,9 @@ protected:
 		if (jsObj.Find("age") != jsObj.End()) {
 			js::String age = jsObj["age"];
 			float ageF = lexical_cast<float>(age.Value());
-			int8_t ageI = (int8_t) ageF / 5;
-			Entity tmpEntity("ag_" + lexical_cast<string>(ageI),
+			int ageI = (int) (ageF / 5);
+			string featureName = "ag_" + lexical_cast<string,int>(ageI);
+			Entity tmpEntity(featureName,
 					Entity::ENT_FEATURE);
 			entityFeatures.push_back(tmpEntity);
 		}

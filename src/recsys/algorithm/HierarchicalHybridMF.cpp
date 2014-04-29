@@ -37,6 +37,7 @@ void HierarchicalHybridMF::_init_training() {
 		exit(1);
 	}
 	/// initialize entity latent variables
+	m_entity.clear();
 	m_entity.reserve(
 			m_dataset_manager->dataset(rt::DSType::DS_ALL).ent_type_interacts.size());
 	for (size_t i = 0; i
@@ -45,7 +46,6 @@ void HierarchicalHybridMF::_init_training() {
 				arma::fill::randn), vec(m_model_param.m_lat_dim,
 				arma::fill::ones), false, true));
 	}
-
 	/// initialize prior variables
 	m_user_prior_mean = DiagMVGaussian(
 			vec(m_model_param.m_lat_dim, fill::zeros), (vec(
@@ -624,6 +624,19 @@ void HierarchicalHybridMF::_add_new_entity(int64_t const& entityId,
 	}
 }
 
+string HierarchicalHybridMF::model_summary(){
+	stringstream ss;
+	ss << "# of entities: " << m_entity.size() << "\n";
+	ss << "# of users: " << m_active_dataset.type_ent_ids[Entity::ENT_USER].size() << "\n";
+	ss << "# of items: " << m_active_dataset.type_ent_ids[Entity::ENT_ITEM].size() << "\n";
+	ss << "# of features: " << m_active_dataset.type_ent_ids[Entity::ENT_FEATURE].size() << "\n";
+	/// dump model information
+	ss << "global rating bias mean:" << (float)m_bias.moment(1) << "\n";
+	ss << "global rating variance: " << (float)m_rating_var.moment(1) << "\n";
+	float rmse = _dataset_rmse(m_active_dataset);
+	ss << "rmse on the training dataset:" << rmse << "\n";
+	return ss.str();
+}
 vector<rt::Recommendation> HierarchicalHybridMF::recommend(int64_t const& userId, map<
 		int8_t, vector<rt::Interact> >& userInteracts) {
 	/// note: not consider new items

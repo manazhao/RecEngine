@@ -86,6 +86,7 @@ protected:
 public:
 	HierarchicalHybridMF(ModelParams const& modelParam, shared_ptr<DatasetManager> datasetManager);
 	HierarchicalHybridMF();
+	virtual string model_summary();
 	virtual vector<rt::Recommendation> recommend(int64_t const& userId, map<int8_t, vector<rt::Interact> >& userInteracts);
 	virtual ~HierarchicalHybridMF();
 protected:

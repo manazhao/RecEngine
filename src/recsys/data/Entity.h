@@ -122,7 +122,7 @@ public:
 	unsigned int _get_next_mapped_id();
 	static string create_composit_key(string const& key, int8_t type){
 		stringstream ss;
-		ss << type << "_" << key;
+		ss << lexical_cast<string,int>(type) << "_" << key;
 		return ss.str();
 	}
 	static void break_composite_key(string const& cKey, string& key, int8_t& type){

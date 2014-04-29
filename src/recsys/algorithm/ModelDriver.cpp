@@ -26,14 +26,14 @@ void ModelDriver::_save_model(){
 	if(m_model_file.empty()){
 		/// generate a file name
 		stringstream ss;
-		ss << m_model_name << "_" << (string)(m_model_ptr->m_model_param) << "_model.bin";
+		ss << m_model_name << "-" << (string)(m_model_ptr->m_model_param) << "-model" << (m_model_ptr->m_model_selection ? "[SEL]": "") << ".bin";
 		string fileName = ss.str();
 		/// get working directory
 		boost::filesystem::path cwd(boost::filesystem::current_path());
 		m_model_file = string(cwd.c_str()) + "/" + fileName;
 	}
 	//// create an archive
-	cout << "start to write the model to file: " << m_model_file << endl;
+	cout << ">>> start to write the model to file: " << m_model_file << endl;
 	std::ofstream ofs(m_model_file.c_str());
 	boost::archive::binary_oarchive oa(ofs);
 	/// serialize the model
@@ -42,7 +42,7 @@ void ModelDriver::_save_model(){
 }
 
 void ModelDriver::_load_model(){
-	cout << "load model from file: " << m_model_file << endl;
+	cout << ">>> load model from file: " << m_model_file << endl;
 	ifstream ifs(m_model_file.c_str());
 	boost::archive::binary_iarchive ia(ifs);
 	ia >> *this;
@@ -53,6 +53,7 @@ void ModelDriver::run_from_cmd(int argc, char** argv) {
 	// TODO Auto-generated constructor stub
 	/// determine whether it's a local or remote data loader
 	bool localLoader = true;
+	bool modelSelection = false;
 	string datasetName;
 	/// for remote loader
 	string host;
@@ -76,7 +77,8 @@ void ModelDriver::run_from_cmd(int argc, char** argv) {
 			("max-iter", po::value<size_t>(&(modelParams.m_max_iter)), "maximum number of iterations")
 			("use-feature", po::value<bool>(&(modelParams.m_use_feature)), "integrate content feature as prior")
 			("model-file", po::value<string>(&m_model_file), "file storing the model training result")
-			("model", po::value<string>(&m_model_name)->required(), "the name of the model: must be one of [HHMF]");
+			("model", po::value<string>(&m_model_name)->required(), "the name of the model: must be one of [HHMF]")
+			("model-sel", "whether is model selection");
 
 	po::variables_map vm;
 	try {
@@ -99,8 +101,16 @@ void ModelDriver::run_from_cmd(int argc, char** argv) {
 	/// if model file is supplied and exists, it suggests load a trained model
 	if(!m_model_file.empty() && bf::exists(m_model_file)){
 		_load_model();
+		/// dump model information
+		string modelSummary = m_model_ptr->model_summary();
+		cout << "--------------- model summary ---------------" << endl;
+		cout << modelSummary << "\n";
+		cout << "---------------------------------------------" << endl;
 	}
 	else{
+		if(vm.count("model-sel")){
+			modelSelection = true;
+		}
 		/// The presence of rating file implies local data loader
 		localLoader = !ratingFile.empty();
 		/// choose the data loader
@@ -116,7 +126,14 @@ void ModelDriver::run_from_cmd(int argc, char** argv) {
 		/// construct the model
 		m_model_ptr = shared_ptr<RecModel>(new HierarchicalHybridMF());
 		m_model_ptr->setup_train(modelParams,dataLoaderPtr->get_dataset_manager());
-		m_model_ptr->train(m_model_ptr->get_train_ds(),m_model_ptr->get_test_ds(),m_model_ptr->get_cs_ds());
+		if(modelSelection){
+			/// running model selection
+			m_model_ptr->train(m_model_ptr->get_train_ds(),m_model_ptr->get_test_ds(),m_model_ptr->get_cs_ds());
+		}else{
+			/// train model using entire dataset
+			DatasetExt dummyDataset;
+			m_model_ptr->train(m_model_ptr->get_ds(), dummyDataset, dummyDataset);
+		}
 		_save_model();
 	}
 

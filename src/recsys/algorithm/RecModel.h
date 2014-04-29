@@ -71,6 +71,7 @@ protected:
 	ModelParams m_model_param;
 	DatasetExt m_active_dataset;
 	shared_ptr<DatasetManager> m_dataset_manager;
+	bool m_model_selection;
 private:
 	friend class boost::serialization::access;
 	template<class Archive>
@@ -90,7 +91,11 @@ public:
 	void setup_train(ModelParams const& modelParam, shared_ptr<
 			DatasetManager> datasetManager);
 	virtual vector<rt::Recommendation> recommend(int64_t const& userId, map<int8_t, vector<rt::Interact> >& userInteracts) = 0;
+	virtual string model_summary() = 0;
 	void train(DatasetExt& trainSet, DatasetExt& testSet, DatasetExt& csSet);
+	DatasetExt& get_active_ds(){
+		return m_active_dataset;
+	}
 	DatasetExt& get_train_ds() {
 		return m_dataset_manager->dataset(rt::DSType::DS_TRAIN);
 	}

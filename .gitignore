@@ -17,6 +17,7 @@
 tmp*
 *.conf
 *.d
+*.bin
 RecEngine
 DataHostThrift
 RecAlgorithmReleaseBuild/
@@ -24,3 +25,4 @@ RecAlgorithmDebugBuild/
 DataHostReleaseBuild/
 DataHostDebugBuild/
 result/
+model-result/
