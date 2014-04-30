@@ -70,3 +70,11 @@ iteration:41,time:26.38,train rmse:0.875395,test rmse:0.923763,cs rmse:0.967463
 iteration:42,time:26.37,train rmse:0.874265,test rmse:0.923202,cs rmse:0.967329
 iteration:43,time:26.4,train rmse:0.873025,test rmse:0.922569,cs rmse:0.967196
 iteration:44,time:26.38,train rmse:0.871635,test rmse:0.921839,cs rmse:0.967068
+iteration:45,time:26.4,train rmse:0.87006,test rmse:0.920976,cs rmse:0.966942
+iteration:46,time:26.38,train rmse:0.868264,test rmse:0.919951,cs rmse:0.966817
+iteration:47,time:26.37,train rmse:0.866262,test rmse:0.918789,cs rmse:0.966702
+iteration:48,time:26.36,train rmse:0.864086,test rmse:0.917513,cs rmse:0.966593
+iteration:49,time:26.38,train rmse:0.861866,test rmse:0.916238,cs rmse:0.966493
+iteration:50,time:26.37,train rmse:0.859712,test rmse:0.915061,cs rmse:0.966396
+>>> start to write the model to file: /home/qzhao2/git/RecEngine/HHMF-d_10-f_1-model[SEL].bin
+done!
