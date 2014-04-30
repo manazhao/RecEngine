@@ -65,9 +65,9 @@ public:
 	};
 
 protected:
-	size_t m_num_users;
-	size_t m_num_items;
-	size_t m_num_features;
+//	size_t m_num_users;
+//	size_t m_num_items;
+//	size_t m_num_features;
 	ModelParams m_model_param;
 	DatasetExt m_active_dataset;
 	shared_ptr<DatasetManager> m_dataset_manager;
@@ -77,7 +77,8 @@ private:
 	template<class Archive>
 	void serialize(Archive& ar, const unsigned int version) {
 		/// serialize every data member except for the dataset
-		ar & m_num_users & m_num_items & m_num_features & m_model_param & m_active_dataset;
+//		ar & m_num_users & m_num_items & m_num_features &
+		ar & m_model_param & m_active_dataset;
 	}
 
 protected:

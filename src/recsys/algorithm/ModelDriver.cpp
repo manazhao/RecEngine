@@ -26,7 +26,7 @@ void ModelDriver::_save_model(){
 	if(m_model_file.empty()){
 		/// generate a file name
 		stringstream ss;
-		ss << m_model_name << "-" << (string)(m_model_ptr->m_model_param) << "-model" << (m_model_ptr->m_model_selection ? "[SEL]": "") << ".bin";
+		ss << m_model_name << "-" << (string)(get_model_ref().m_model_param) << "-model" << (get_model_ref().m_model_selection ? "[SEL]": "") << ".bin";
 		string fileName = ss.str();
 		/// get working directory
 		boost::filesystem::path cwd(boost::filesystem::current_path());
@@ -77,7 +77,7 @@ void ModelDriver::run_from_cmd(int argc, char** argv) {
 			("max-iter", po::value<size_t>(&(modelParams.m_max_iter)), "maximum number of iterations")
 			("use-feature", po::value<bool>(&(modelParams.m_use_feature)), "integrate content feature as prior")
 			("model-file", po::value<string>(&m_model_file), "file storing the model training result")
-			("model", po::value<string>(&m_model_name)->required(), "the name of the model: must be one of [HHMF]")
+			("model", po::value<string>(&m_model_name)->required(), "the name of the model: must be one of [HHMF,AVG]")
 			("model-sel", "whether is model selection");
 
 	po::variables_map vm;
@@ -102,7 +102,7 @@ void ModelDriver::run_from_cmd(int argc, char** argv) {
 	if(!m_model_file.empty() && bf::exists(m_model_file)){
 		_load_model();
 		/// dump model information
-		string modelSummary = m_model_ptr->model_summary();
+		string modelSummary = get_model_ref().model_summary();
 		cout << "--------------- model summary ---------------" << endl;
 		cout << modelSummary << "\n";
 		cout << "---------------------------------------------" << endl;
@@ -124,15 +124,15 @@ void ModelDriver::run_from_cmd(int argc, char** argv) {
 			dataLoaderPtr = dlSwitcher.get_remote_loader(host,port);
 		}
 		/// construct the model
-		m_model_ptr = shared_ptr<RecModel>(new HierarchicalHybridMF());
-		m_model_ptr->setup_train(modelParams,dataLoaderPtr->get_dataset_manager());
+		RecModel& modelRef = get_model_ref();
+		modelRef.setup_train(modelParams,dataLoaderPtr->get_dataset_manager());
 		if(modelSelection){
 			/// running model selection
-			m_model_ptr->train(m_model_ptr->get_train_ds(),m_model_ptr->get_test_ds(),m_model_ptr->get_cs_ds());
+			modelRef.train(modelRef.get_train_ds(),modelRef.get_test_ds(),modelRef.get_cs_ds());
 		}else{
 			/// train model using entire dataset
 			DatasetExt dummyDataset;
-			m_model_ptr->train(m_model_ptr->get_ds(), dummyDataset, dummyDataset);
+			modelRef.train(modelRef.get_ds(), dummyDataset, dummyDataset);
 		}
 		_save_model();
 	}

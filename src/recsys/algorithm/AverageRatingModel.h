@@ -10,7 +10,7 @@
 
 #include <recsys/algorithm/RecModel.h>
 #include "recsys/thrift/cpp/DataHost.h"
-
+#include <boost/serialization/base_object.hpp>
 namespace rt = recsys::thrift;
 
 namespace recsys {
@@ -28,6 +28,13 @@ public:
 	virtual vector<rt::Recommendation> recommend(int64_t const& userId, map<int8_t, vector<rt::Interact> >& userInteracts);
 	virtual string model_summary();
 	virtual ~AverageRatingModel();
+private:
+	friend class boost::serialization::access;
+	template <class Archive>
+	void serialize(Archive& ar, const unsigned int version ){
+		ar & boost::serialization::base_object<RecModel>(*this);
+		ar & m_avg_rating;
+	}
 };
 
 } /* namespace recsys */
