@@ -13,9 +13,19 @@
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/string.hpp>
 #include "recsys/data/DatasetManager.h"
+
 namespace rt = recsys::thrift;
 
 using namespace std;
+
+namespace boost {
+namespace serialization {
+template<class Archive>
+void serialize(Archive & ar, Recommendation& rec, unsigned version) {
+	ar & rec.id & rec.score & rec.type;
+}
+}
+}
 
 namespace recsys {
 
@@ -48,7 +58,7 @@ public:
 		}
 	};
 
-	struct TrainIterLog{
+	struct TrainIterLog {
 		/// iteration index
 		size_t m_iter;
 		/// training rmse
@@ -59,7 +69,9 @@ public:
 		float m_cs_rmse;
 		/// iteration time
 		float m_iter_time;
-		TrainIterLog():m_iter(0),m_train_rmse(0),m_test_rmse(0),m_cs_rmse(0),m_iter_time(0){
+		TrainIterLog() :
+				m_iter(0), m_train_rmse(0), m_test_rmse(0), m_cs_rmse(0), m_iter_time(
+						0) {
 
 		}
 	};
@@ -77,24 +89,26 @@ private:
 	template<class Archive>
 	void serialize(Archive& ar, const unsigned int version) {
 		/// serialize every data member except for the dataset
-//		ar & m_num_users & m_num_items & m_num_features &
 		ar & m_model_param & m_active_dataset;
 	}
 
 protected:
 	virtual void _init_training() = 0;
 	virtual TrainIterLog _train_update() = 0;
-	virtual float _pred_error(int64_t const& entityId, map<int8_t, vector<Interact> >& entityInteractMap) = 0;
-	virtual void _add_new_entity(int64_t const& entityId, int8_t const& entityType) = 0;
+	virtual float _pred_error(int64_t const& entityId,
+			map<int8_t, vector<Interact> >& entityInteractMap) = 0;
+	virtual void _add_new_entity(int64_t const& entityId,
+			int8_t const& entityType) = 0;
 	float _dataset_rmse(DatasetExt& dataset);
 public:
 	RecModel();
-	void setup_train(ModelParams const& modelParam, shared_ptr<
-			DatasetManager> datasetManager);
-	virtual vector<rt::Recommendation> recommend(int64_t const& userId, map<int8_t, vector<rt::Interact> >& userInteracts) = 0;
+	void setup_train(ModelParams const& modelParam,
+			shared_ptr<DatasetManager> datasetManager);
+	virtual vector<rt::Recommendation> recommend(int64_t const& userId,
+			map<int8_t, vector<rt::Interact> >& userInteracts) = 0;
 	virtual string model_summary() = 0;
 	void train(DatasetExt& trainSet, DatasetExt& testSet, DatasetExt& csSet);
-	DatasetExt& get_active_ds(){
+	DatasetExt& get_active_ds() {
 		return m_active_dataset;
 	}
 	DatasetExt& get_train_ds() {
@@ -112,14 +126,15 @@ public:
 	virtual ~RecModel();
 };
 
-struct RecommendationComparator{
-	bool operator()(rt::Recommendation const& rt1, rt::Recommendation const& rt2) const{
+struct RecommendationComparator {
+	bool operator()(rt::Recommendation const& rt1,
+			rt::Recommendation const& rt2) const {
 		return rt1.score > rt2.score;
 	}
 };
 
 ostream& operator <<(ostream& oss, RecModel::ModelParams const& param);
-ostream& operator << (ostream& oss, RecModel::TrainIterLog const& rhs);
+ostream& operator <<(ostream& oss, RecModel::TrainIterLog const& rhs);
 
 } /* namespace recsys */
 

@@ -15,6 +15,7 @@
 #include <boost/serialization/split_member.hpp>
 #include <recsys/algorithm/HierarchicalHybridMF.h>
 #include <recsys/algorithm/AverageRatingModel.h>
+#include <recsys/algorithm/PopularityModel.h>
 #include <boost/lexical_cast.hpp>
 using namespace boost;
 
@@ -30,6 +31,7 @@ protected:
 	ModelDriver(){
 		m_models["HHMF"] = rec_model_ptr(new HierarchicalHybridMF());
 		m_models["AVG"] = rec_model_ptr(new AverageRatingModel());
+		m_models["POP"] = rec_model_ptr(new PopularityModel());
 	}
 	ModelDriver& operator=(ModelDriver const& rhs);
 	ModelDriver(ModelDriver const& rhs);
@@ -47,7 +49,11 @@ private:
 		}else if(m_model_name == "AVG"){
 			AverageRatingModel& modelRef = dynamic_cast<AverageRatingModel&>(get_model_ref());
 			ar & modelRef;
-		}else{
+		}else if(m_model_name == "POP"){
+			PopularityModel& modelRef = dynamic_cast<PopularityModel&>(get_model_ref());
+			ar & modelRef;
+		}
+		else{
 			cerr << "unknown model" << endl;
 			exit(1);
 		}
@@ -62,7 +68,11 @@ private:
 		}else if(m_model_name == "AVG"){
 			AverageRatingModel const& modelRef = dynamic_cast<AverageRatingModel const&>(get_model_ref());
 			ar & modelRef;
-		}else{
+		}else if(m_model_name == "POP"){
+			PopularityModel const& modelRef = dynamic_cast<PopularityModel const&>(get_model_ref());
+			ar & modelRef;
+		}
+		else{
 			cerr << "unknown model" << endl;
 			exit(1);
 		}

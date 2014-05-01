@@ -22,11 +22,11 @@ protected:
 //		js::String location = jsObj["l"];
 		/// create user entity
 		if (jsObj.Find("age") != jsObj.End()) {
-			js::Number age = jsObj["age"];
-//			float ageF = lexical_cast<float>(age.Value());
-//			int ageI = (int) (ageF / 5);
-			int ageI = (int)(age.Value());
+			js::String age = jsObj["age"];
+			float ageF = lexical_cast<float>(age.Value());
+			int ageI = (int) (ageF);
 			string featureName = "ag_" + lexical_cast<string,int>(ageI);
+//			cout << featureName << "\n";
 			Entity tmpEntity(featureName,
 					Entity::ENT_FEATURE);
 			entityFeatures.push_back(tmpEntity);

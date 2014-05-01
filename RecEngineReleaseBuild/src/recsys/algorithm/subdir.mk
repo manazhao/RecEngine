@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/recsys/algorithm/AverageRatingModel.cpp \
 ../src/recsys/algorithm/FeatureObject.cpp \
 ../src/recsys/algorithm/Feedback.cpp \
 ../src/recsys/algorithm/HierarchicalHybridMF.cpp \
@@ -12,12 +13,14 @@ CPP_SRCS += \
 ../src/recsys/algorithm/MFImplicitModel.cpp \
 ../src/recsys/algorithm/MFVB.cpp \
 ../src/recsys/algorithm/ModelDriver.cpp \
+../src/recsys/algorithm/PopularityModel.cpp \
 ../src/recsys/algorithm/RecEngine.cpp \
 ../src/recsys/algorithm/RecModel.cpp \
 ../src/recsys/algorithm/UserObject.cpp \
 ../src/recsys/algorithm/VLImplicitModel.cpp 
 
 OBJS += \
+./src/recsys/algorithm/AverageRatingModel.o \
 ./src/recsys/algorithm/FeatureObject.o \
 ./src/recsys/algorithm/Feedback.o \
 ./src/recsys/algorithm/HierarchicalHybridMF.o \
@@ -26,12 +29,14 @@ OBJS += \
 ./src/recsys/algorithm/MFImplicitModel.o \
 ./src/recsys/algorithm/MFVB.o \
 ./src/recsys/algorithm/ModelDriver.o \
+./src/recsys/algorithm/PopularityModel.o \
 ./src/recsys/algorithm/RecEngine.o \
 ./src/recsys/algorithm/RecModel.o \
 ./src/recsys/algorithm/UserObject.o \
 ./src/recsys/algorithm/VLImplicitModel.o 
 
 CPP_DEPS += \
+./src/recsys/algorithm/AverageRatingModel.d \
 ./src/recsys/algorithm/FeatureObject.d \
 ./src/recsys/algorithm/Feedback.d \
 ./src/recsys/algorithm/HierarchicalHybridMF.d \
@@ -40,6 +45,7 @@ CPP_DEPS += \
 ./src/recsys/algorithm/MFImplicitModel.d \
 ./src/recsys/algorithm/MFVB.d \
 ./src/recsys/algorithm/ModelDriver.d \
+./src/recsys/algorithm/PopularityModel.d \
 ./src/recsys/algorithm/RecEngine.d \
 ./src/recsys/algorithm/RecModel.d \
 ./src/recsys/algorithm/UserObject.d \

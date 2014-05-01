@@ -130,7 +130,7 @@ public:
 	void test_add_entity_interaction(string const& userName, int const& age, string const& gender) {
 		rt::DataHostClient dataHostClient =
 				m_datahost_client_wrapper_ptr->m_client;
-		int ageI = age / 5;
+		int ageI = age;
 		string ageFeat = "ag_" + lexical_cast<string, int>(ageI);
 		string genderFeat = "gd_" + gender;
 		try {
@@ -293,10 +293,11 @@ int main(int argc, char **argv) {
 	int port = 9090;
 	/// create the handler by passing the command line arguments
 	shared_ptr<RecEngineHandler> handler(new RecEngineHandler(argc, argv));
-	//	handler->test_datahost_client();
+//		handler->test_datahost_client();
 	vector<string> genderVec;
-	genderVec.push_back("Female");
-	int ages[] = {20,30,40,50};
+	genderVec.push_back("male");
+	genderVec.push_back("female");
+	int ages[] = {25,30,40,50};
 	vector<int> ageVec;
 	ageVec.assign(ages,ages + sizeof(ages)/sizeof(ages[0]));
 	for(size_t i = 0; i < genderVec.size(); i++){

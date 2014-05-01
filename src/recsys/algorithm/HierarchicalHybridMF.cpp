@@ -704,7 +704,7 @@ vector<rt::Recommendation> HierarchicalHybridMF::recommend(int64_t const& userId
 	std::sort(recList.begin(),recList.end(),RecommendationComparator());
 	/// only keep the top 20 results
 	vector<rt::Recommendation> topRecList;
-	for(size_t i = 0 ; i < 20 && i < recList.size(); i++){
+	for(size_t i = 0 ; i < 50 && i < recList.size(); i++){
 		topRecList.push_back(recList[i]);
 	}
 	return topRecList;
