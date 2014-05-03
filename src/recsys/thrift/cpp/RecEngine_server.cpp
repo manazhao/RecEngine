@@ -301,6 +301,12 @@ public:
 		for (size_t i = 0; i < origIdVec.size(); i++) {
 			_return[i].id = origIdVec[i];
 		}
+
+		/// also save user's latent profile
+		HierarchicalHybridMF& hhmf = dynamic_cast<HierarchicalHybridMF&>(MODEL_DRIVER);
+		RecModel::ModelParam const& mp = hhmf.get_model_param();
+		string fileName = MODEL_DRIVER.get_model_name() + "-" + (string)mp + "-entity_" + lexical_cast<string>(mappedUserId) + ".vector.txt";
+		hhmf.dump_entity_profile(fileName,mappedUserId);
 	}
 };
 
@@ -309,6 +315,16 @@ int main(int argc, char **argv) {
 	/// create the handler by passing the command line arguments
 	shared_ptr<RecEngineHandler> handler(new RecEngineHandler(argc, argv));
 //		handler->test_datahost_client();
+	ModelDriver& MODEL_DRIVER = ModelDriver::ref();
+	//// cast to HierarchicalHybridMF reference
+	HierarchicalHybridMF& hhmf = dynamic_cast<HierarchicalHybridMF&>(MODEL_DRIVER.get_model_ref());
+
+	/// dump the prior information to text file
+	RecModel::ModelParam const& modelParam = hhmf.get_model_param();
+	string priorFile = MODEL_DRIVER.get_model_name() + "-" + (string)modelParam + ".prior.txt";
+	hhmf.dump_prior_information(priorFile);
+
+	/// generate age and gender combinations
 	const char* genderArr[] = {"", "gd_male","gd_female"};
 	const char* ageArr[] = {"","ag_25","ag_30","ag_40","ag_50"};
 	vector<string> genderVec;
@@ -327,18 +343,11 @@ int main(int argc, char **argv) {
 			vector<rt::Recommendation> recList;
 			handler->get_recommendation(recList, userName);
 			handler->save_recommendation(userName + ".rec.list", recList);
-//			cout << "--------------- recommendation for user:" << userName
-//					<< "--------------------------" << endl;
-//			/// dump the list
-//			for (size_t i = 0; i < recList.size(); i++) {
-//				Recommendation& rec = recList[i];
-//				vector<string> splits;
-//				boost::split(splits, rec.id, boost::is_any_of("_"));
-//				string url = "http://amazon.com/dp/" + splits[1];
-//				cout << "id:" << url << ", score:" << rec.score << endl;
-//			}
+			/// also save the latent profile for each demographic combination
 		}
 	}
+
+
 //	shared_ptr<TProcessor> processor(new RecEngineProcessor(handler));
 //	shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
 //	shared_ptr<TTransportFactory> transportFactory(

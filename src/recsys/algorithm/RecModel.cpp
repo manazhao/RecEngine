@@ -22,14 +22,14 @@ ostream& operator <<(ostream& oss, RecModel::TrainIterLog const& rhs) {
 }
 
 
-RecModel::ModelParams::ModelParams(size_t const& latDim, size_t const& maxIter,
+RecModel::ModelParam::ModelParam(size_t const& latDim, size_t const& maxIter,
 		bool diagCov, bool useFeature) :
 	m_lat_dim(latDim), m_max_iter(maxIter), m_diag_cov(diagCov), m_use_feature(
 			useFeature) {
 
 }
 
-void RecModel::setup_train(ModelParams const& modelParam, shared_ptr<
+void RecModel::setup_train(ModelParam const& modelParam, shared_ptr<
 		DatasetManager> datasetManager){
 	m_model_param = modelParam;
 	m_dataset_manager = datasetManager;
@@ -76,7 +76,7 @@ float RecModel::_dataset_rmse(DatasetExt& dataset){
 	return sqrt(rmse/numRating);
 }
 
-RecModel::ModelParams::ModelParams(int argc, char** argv) :
+RecModel::ModelParam::ModelParam(int argc, char** argv) :
 	m_lat_dim(5), m_max_iter(10), m_diag_cov(true), m_use_feature(true) {
 	/// parse model parameters from the command line
 	po::options_description desc(
@@ -103,7 +103,7 @@ RecModel::ModelParams::ModelParams(int argc, char** argv) :
 	}
 }
 
-ostream& operator <<(ostream& oss, RecModel::ModelParams const& rhs) {
+ostream& operator <<(ostream& oss, RecModel::ModelParam const& rhs) {
 	oss << "------------ Model Parameters ------------" << endl;
 	oss << "latent dimension:" << rhs.m_lat_dim << ", number of iterations:"
 			<< rhs.m_max_iter << ",is diagonal:" << rhs.m_diag_cov

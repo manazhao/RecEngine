@@ -91,6 +91,10 @@ public:
 		return *(m_models[m_model_name]);
 	}
 
+	string const& get_model_name() const{
+		return m_model_name;
+	}
+
 	/// get model reference
 	RecModel const& get_model_ref() const{
 		return *(m_models.at(m_model_name));

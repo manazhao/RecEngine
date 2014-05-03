@@ -32,7 +32,7 @@ namespace recsys {
 class RecModel {
 	friend class ModelDriver;
 public:
-	struct ModelParams {
+	struct ModelParam {
 	private:
 		friend class boost::serialization::access;
 		template<class Archive>
@@ -48,10 +48,10 @@ public:
 		bool m_diag_cov;
 		// whether use feature
 		bool m_use_feature;
-		ModelParams(size_t const& latDim = 10, size_t const& maxIter = 10,
+		ModelParam(size_t const& latDim = 10, size_t const& maxIter = 10,
 				bool diagCov = true, bool useFeature = true);
-		ModelParams(int argc, char** argv);
-		operator string() {
+		ModelParam(int argc, char** argv);
+		operator string() const {
 			stringstream ss;
 			ss << "d_" << m_lat_dim << "-f" << "_" << m_use_feature;
 			return ss.str();
@@ -77,10 +77,7 @@ public:
 	};
 
 protected:
-//	size_t m_num_users;
-//	size_t m_num_items;
-//	size_t m_num_features;
-	ModelParams m_model_param;
+	ModelParam m_model_param;
 	DatasetExt m_active_dataset;
 	shared_ptr<DatasetManager> m_dataset_manager;
 	bool m_model_selection;
@@ -102,7 +99,7 @@ protected:
 	float _dataset_rmse(DatasetExt& dataset);
 public:
 	RecModel();
-	void setup_train(ModelParams const& modelParam,
+	void setup_train(ModelParam const& modelParam,
 			shared_ptr<DatasetManager> datasetManager);
 	virtual vector<rt::Recommendation> recommend(int64_t const& userId,
 			map<int8_t, vector<rt::Interact> >& userInteracts) = 0;
@@ -123,6 +120,9 @@ public:
 	DatasetExt& get_ds() {
 		return m_dataset_manager->dataset(rt::DSType::DS_ALL);
 	}
+	ModelParam const& get_model_param() const{
+		return m_model_param;
+	}
 	virtual ~RecModel();
 };
 
@@ -133,7 +133,7 @@ struct RecommendationComparator {
 	}
 };
 
-ostream& operator <<(ostream& oss, RecModel::ModelParams const& param);
+ostream& operator <<(ostream& oss, RecModel::ModelParam const& param);
 ostream& operator <<(ostream& oss, RecModel::TrainIterLog const& rhs);
 
 } /* namespace recsys */

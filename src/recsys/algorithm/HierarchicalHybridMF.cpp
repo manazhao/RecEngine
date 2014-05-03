@@ -16,6 +16,8 @@
 #include <fstream>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <vb/prob/ArmadilloSerialization.h>
 
 namespace bf = boost::filesystem;
 namespace po = boost::program_options;
@@ -665,6 +667,42 @@ string HierarchicalHybridMF::model_summary(){
 	ss << "rmse on the training dataset:" << rmse << "\n";
 	return ss.str();
 }
+
+void HierarchicalHybridMF::dump_prior_information(string const& fileName){
+	/// dump prior information to text file
+	ofstream ofs;
+	ofs.open(fileName.c_str(),std::ofstream::out);
+	assert(ofs.good());
+	{
+		cout << ">>> dump prior information to: " << fileName << endl;
+		boost::archive::text_oarchive oa(ofs);
+		vec userPriorMean = m_user_prior_mean.moment(1).m_vec;
+		oa & userPriorMean;
+		vec itemPriorMean = m_item_prior_mean.moment(1).m_vec;
+		oa & itemPriorMean;
+		vec featurePriorMean = m_feature_prior_mean.moment(1);
+		oa & featurePriorMean;
+		cout << ">>> done!" << endl;
+	}
+	ofs.close();
+}
+
+void HierarchicalHybridMF::dump_entity_profile(string const& fileName, int64_t const& entityId){
+	/// dump prior information to text file
+	ofstream ofs;
+	ofs.open(fileName.c_str(),std::ofstream::out);
+	assert(ofs.good());
+	{
+		cout << "dump the latent vector of entity -[" << entityId << "] to file: " << fileName << endl;
+		boost::archive::text_oarchive oa(ofs);
+		vec userLatMean = m_entity[entityId].moment(1).m_vec;
+		oa & userLatMean;
+		cout << ">>> done!" << endl;
+	}
+	ofs.close();
+}
+
+
 vector<rt::Recommendation> HierarchicalHybridMF::recommend(int64_t const& userId, map<
 		int8_t, vector<rt::Interact> >& userInteracts) {
 	/// note: not consider new items

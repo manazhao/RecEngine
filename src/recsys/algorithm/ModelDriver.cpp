@@ -61,7 +61,7 @@ void ModelDriver::run_from_cmd(int argc, char** argv) {
 	//// for local loader
 	string userFile, itemFile, ratingFile;
 	/// parameters
-	RecModel::ModelParams modelParams;
+	RecModel::ModelParam modelParams;
 	po::options_description desc(
 			"choose data loader based on the command line arguments");
 	desc.add_options()

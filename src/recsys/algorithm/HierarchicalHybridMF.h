@@ -87,9 +87,11 @@ protected:
 	void _get_entity_feature_cnt();
 	virtual void _add_new_entity(int64_t const& entityId, int8_t const& entityType);
 public:
-	HierarchicalHybridMF(ModelParams const& modelParam, shared_ptr<DatasetManager> datasetManager);
+	HierarchicalHybridMF(ModelParam const& modelParam, shared_ptr<DatasetManager> datasetManager);
 	HierarchicalHybridMF();
 	virtual string model_summary();
+	void dump_prior_information(string const& fileName);
+	void dump_entity_profile(string const& fileName, int64_t const& entityId);
 	virtual vector<rt::Recommendation> recommend(int64_t const& userId, map<int8_t, vector<rt::Interact> >& userInteracts);
 	virtual ~HierarchicalHybridMF();
 protected:
