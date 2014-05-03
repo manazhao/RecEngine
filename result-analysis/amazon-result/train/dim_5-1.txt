@@ -1,0 +1,80 @@
+############## retrieve datasets from data host  ##############
+---------- dataset ----------
+# of users:74263
+# of items:298147
+# of features:35462
+
+---------- train dataset ----------
+# of users:55697
+# of items:149145
+# of features:20442
+
+---------- test dataset ----------
+# of users:55697
+# of items:88982
+# of features:15351
+
+---------- coldstart dataset ----------
+# of users:18566
+# of items:96566
+# of features:15861
+
+>>>>>>>>>>>>>> Time elapsed:4.77 >>>>>>>>>>>>>>
+>>> initialize training environment
+------------ Model Parameters ------------
+latent dimension:5, number of iterations:50,is diagonal:1,use feature:1
+
+
+>>> start model optimization
+iteration:1,time:18.84,train rmse:0.908574,test rmse:0.995365,cs rmse:0.987045
+iteration:2,time:18.81,train rmse:0.903428,test rmse:0.969679,cs rmse:0.986756
+iteration:3,time:18.7,train rmse:0.849535,test rmse:0.946262,cs rmse:0.986336
+iteration:4,time:18.69,train rmse:0.828958,test rmse:0.935372,cs rmse:0.985505
+iteration:5,time:18.7,train rmse:0.820602,test rmse:0.927047,cs rmse:0.984239
+iteration:6,time:18.68,train rmse:0.817827,test rmse:0.921154,cs rmse:0.982642
+iteration:7,time:18.55,train rmse:0.818294,test rmse:0.917581,cs rmse:0.980854
+iteration:8,time:18.47,train rmse:0.819825,test rmse:0.915081,cs rmse:0.978978
+iteration:9,time:18.48,train rmse:0.821472,test rmse:0.913091,cs rmse:0.977085
+iteration:10,time:18.48,train rmse:0.822968,test rmse:0.911445,cs rmse:0.975236
+iteration:11,time:18.48,train rmse:0.824265,test rmse:0.9101,cs rmse:0.973474
+iteration:12,time:18.5,train rmse:0.825343,test rmse:0.908987,cs rmse:0.971817
+iteration:13,time:18.48,train rmse:0.826164,test rmse:0.908039,cs rmse:0.970283
+iteration:14,time:18.48,train rmse:0.826859,test rmse:0.90731,cs rmse:0.968908
+iteration:15,time:18.46,train rmse:0.827485,test rmse:0.906792,cs rmse:0.967682
+iteration:16,time:18.46,train rmse:0.828022,test rmse:0.906424,cs rmse:0.966595
+iteration:17,time:18.47,train rmse:0.828436,test rmse:0.906158,cs rmse:0.965644
+iteration:18,time:18.48,train rmse:0.82868,test rmse:0.905912,cs rmse:0.964812
+iteration:19,time:18.5,train rmse:0.828742,test rmse:0.905648,cs rmse:0.964084
+iteration:20,time:18.48,train rmse:0.828653,test rmse:0.905388,cs rmse:0.963449
+iteration:21,time:18.46,train rmse:0.828445,test rmse:0.905106,cs rmse:0.962897
+iteration:22,time:18.46,train rmse:0.828107,test rmse:0.904792,cs rmse:0.962416
+iteration:23,time:18.46,train rmse:0.827654,test rmse:0.904432,cs rmse:0.961999
+iteration:24,time:18.5,train rmse:0.827144,test rmse:0.904099,cs rmse:0.961634
+iteration:25,time:18.49,train rmse:0.826627,test rmse:0.90383,cs rmse:0.961319
+iteration:26,time:18.47,train rmse:0.826077,test rmse:0.903596,cs rmse:0.961043
+iteration:27,time:18.52,train rmse:0.825515,test rmse:0.903383,cs rmse:0.960803
+iteration:28,time:18.49,train rmse:0.824956,test rmse:0.903198,cs rmse:0.960597
+iteration:29,time:18.49,train rmse:0.824404,test rmse:0.903035,cs rmse:0.960416
+iteration:30,time:18.48,train rmse:0.823851,test rmse:0.902882,cs rmse:0.960262
+iteration:31,time:18.5,train rmse:0.823298,test rmse:0.902723,cs rmse:0.960134
+iteration:32,time:18.47,train rmse:0.82274,test rmse:0.902555,cs rmse:0.960023
+iteration:33,time:18.49,train rmse:0.822156,test rmse:0.902366,cs rmse:0.959925
+iteration:34,time:18.45,train rmse:0.821556,test rmse:0.902154,cs rmse:0.959846
+iteration:35,time:18.45,train rmse:0.820938,test rmse:0.901926,cs rmse:0.959779
+iteration:36,time:18.45,train rmse:0.820325,test rmse:0.901688,cs rmse:0.959725
+iteration:37,time:18.47,train rmse:0.819731,test rmse:0.901456,cs rmse:0.959681
+iteration:38,time:18.45,train rmse:0.819149,test rmse:0.901236,cs rmse:0.959645
+iteration:39,time:18.45,train rmse:0.818568,test rmse:0.901009,cs rmse:0.959622
+iteration:40,time:18.46,train rmse:0.817989,test rmse:0.900779,cs rmse:0.959605
+iteration:41,time:18.45,train rmse:0.817389,test rmse:0.90054,cs rmse:0.959604
+iteration:42,time:18.45,train rmse:0.816753,test rmse:0.900263,cs rmse:0.959611
+iteration:43,time:18.46,train rmse:0.816019,test rmse:0.899898,cs rmse:0.959642
+iteration:44,time:18.46,train rmse:0.815089,test rmse:0.899356,cs rmse:0.959709
+iteration:45,time:18.46,train rmse:0.813965,test rmse:0.898623,cs rmse:0.959812
+iteration:46,time:18.47,train rmse:0.813092,test rmse:0.898122,cs rmse:0.959887
+iteration:47,time:18.58,train rmse:0.812439,test rmse:0.897823,cs rmse:0.959937
+iteration:48,time:18.51,train rmse:0.811865,test rmse:0.897603,cs rmse:0.959973
+iteration:49,time:18.51,train rmse:0.811347,test rmse:0.897425,cs rmse:0.960004
+iteration:50,time:18.6,train rmse:0.810876,test rmse:0.897282,cs rmse:0.960032
+>>> start to write the model to file: /home/qzhao2/git/RecEngine/HHMF-d_5-f_1-model[SEL].bin
+done!

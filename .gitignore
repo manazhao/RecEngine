@@ -24,7 +24,4 @@ RecAlgorithmReleaseBuild/
 RecAlgorithmDebugBuild/
 DataHostReleaseBuild/
 DataHostDebugBuild/
-result/
 model-result/
-movielens-result/
-amazon-result
