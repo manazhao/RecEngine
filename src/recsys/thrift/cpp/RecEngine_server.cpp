@@ -264,6 +264,7 @@ public:
 	void get_recommendation(std::vector<Recommendation> & _return,
 			const std::string& userId) {
 		// Your implementation goes here
+		printf("get_recommendation\n");
 		/// first get all the interactions about the user
 		map<int8_t, vector<Interact> > entityInteracts;
 		int64_t mappedUserId;
@@ -279,7 +280,6 @@ public:
 		} catch (TException &tx) {
 			printf("ERROR: %s\n", tx.what());
 		}
-		printf("get_recommendation\n");
 		/// make recommendations
 		ModelDriver& MODEL_DRIVER = ModelDriver::ref();
 		RecModel& recModel = MODEL_DRIVER.get_model_ref();
@@ -301,12 +301,12 @@ public:
 		for (size_t i = 0; i < origIdVec.size(); i++) {
 			_return[i].id = origIdVec[i];
 		}
-
 		/// also save user's latent profile
-		HierarchicalHybridMF& hhmf = dynamic_cast<HierarchicalHybridMF&>(MODEL_DRIVER);
+		HierarchicalHybridMF& hhmf = dynamic_cast<HierarchicalHybridMF&>(MODEL_DRIVER.get_model_ref());
 		RecModel::ModelParam const& mp = hhmf.get_model_param();
-		string fileName = MODEL_DRIVER.get_model_name() + "-" + (string)mp + "-entity_" + lexical_cast<string>(mappedUserId) + ".vector.txt";
-		hhmf.dump_entity_profile(fileName,mappedUserId);
+		/// dump the recommended item profile
+		string fileName = MODEL_DRIVER.get_model_name() + "-" + (string)mp + "-entity-" + userId + ".json";
+		hhmf.dump_recommendation_json(fileName,mappedUserId,entityInteracts[EntityInteraction::ADD_FEATURE],idVec);
 	}
 };
 
@@ -323,7 +323,6 @@ int main(int argc, char **argv) {
 	RecModel::ModelParam const& modelParam = hhmf.get_model_param();
 	string priorFile = MODEL_DRIVER.get_model_name() + "-" + (string)modelParam + ".prior.txt";
 	hhmf.dump_prior_information(priorFile);
-
 	/// generate age and gender combinations
 	const char* genderArr[] = {"", "gd_male","gd_female"};
 	const char* ageArr[] = {"","ag_25","ag_30","ag_40","ag_50"};
@@ -343,10 +342,11 @@ int main(int argc, char **argv) {
 			vector<rt::Recommendation> recList;
 			handler->get_recommendation(recList, userName);
 			handler->save_recommendation(userName + ".rec.list", recList);
-			/// also save the latent profile for each demographic combination
 		}
 	}
-
+	//// dump the entity profile
+	string profileFile = MODEL_DRIVER.get_model_name() + "-" + (string)modelParam + ".latent.txt";
+	hhmf.dump_model_profile(profileFile);
 
 //	shared_ptr<TProcessor> processor(new RecEngineProcessor(handler));
 //	shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
