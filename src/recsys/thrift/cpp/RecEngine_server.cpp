@@ -127,21 +127,21 @@ public:
 		_init_from_cmd(argc, argv);
 	}
 
-	void test_add_entity_interaction(string const& userName, int const& age, string const& gender) {
+	void test_index_user(string const& userName, map<string,int>& profile){
 		rt::DataHostClient dataHostClient =
 				m_datahost_client_wrapper_ptr->m_client;
-		int ageI = age;
-		string ageFeat = "ag_" + lexical_cast<string, int>(ageI);
-		string genderFeat = "gd_" + gender;
 		try {
 			m_datahost_client_wrapper_ptr->m_transport->open();
 			rt::Response response;
-			dataHostClient.index_interaction(response, userName,
-					Entity::ENT_USER, ageFeat, Entity::ENT_FEATURE,
-					EntityInteraction::ADD_FEATURE, 1.0);
-			dataHostClient.index_interaction(response, userName,
-					Entity::ENT_USER, genderFeat, Entity::ENT_FEATURE,
-					EntityInteraction::ADD_FEATURE, 1.0);
+			/// first index the user entity
+			dataHostClient.index_interaction(response,userName,Entity::ENT_USER,"",Entity::ENT_DEFAULT,EntityInteraction::ADD_FEATURE,1);
+			/// add features to the user entity
+			for(map<string,int>::iterator iter = profile.begin(); iter != profile.end(); ++iter){
+				string featureName = iter->first;
+				dataHostClient.index_interaction(response, userName,
+						Entity::ENT_USER, featureName, Entity::ENT_FEATURE,
+						EntityInteraction::ADD_FEATURE, 1.0);
+			}
 			int64_t userId = dataHostClient.query_entity_id(userName,
 					Entity::ENT_USER);
 			/// now retrieve user entity interactions
@@ -165,8 +165,8 @@ public:
 		} catch (TException &tx) {
 			printf("ERROR: %s\n", tx.what());
 		}
-
 	}
+
 	void test_datahost_client() {
 		/// make some queries to the datahost server to see whether the response looks normal
 		ModelDriver& MODEL_DRIVER = ModelDriver::ref();
@@ -246,6 +246,21 @@ public:
 		}
 	}
 
+	void save_recommendation(string const& file, vector<Recommendation> const& recList){
+		ofstream ofs;
+		ofs.open(file.c_str());
+		assert(ofs.good());
+		/// write the result to the file
+		for(vector<Recommendation>::const_iterator iter = recList.begin(); iter < recList.end(); ++iter){
+			Recommendation const& rec = *iter;
+			vector<string> splits;
+			boost::split(splits, rec.id, boost::is_any_of("_"));
+			string url = "http://amazon.com/dp/" + splits[1];
+			ofs << "id:" << url << ", score:" << rec.score << endl;
+		}
+		ofs.close();
+	}
+
 	void get_recommendation(std::vector<Recommendation> & _return,
 			const std::string& userId) {
 		// Your implementation goes here
@@ -290,33 +305,38 @@ public:
 };
 
 int main(int argc, char **argv) {
-	int port = 9090;
+//	int port = 9090;
 	/// create the handler by passing the command line arguments
 	shared_ptr<RecEngineHandler> handler(new RecEngineHandler(argc, argv));
 //		handler->test_datahost_client();
+	const char* genderArr[] = {"", "gd_male","gd_female"};
+	const char* ageArr[] = {"","ag_25","ag_30","ag_40","ag_50"};
 	vector<string> genderVec;
-	genderVec.push_back("male");
-	genderVec.push_back("female");
-	int ages[] = {25,30,40,50};
-	vector<int> ageVec;
-	ageVec.assign(ages,ages + sizeof(ages)/sizeof(ages[0]));
-	for(size_t i = 0; i < genderVec.size(); i++){
-		string gender = genderVec[i];
-		for(size_t j = 0; j < ageVec.size(); j++){
-			int age = ageVec[j];
-			string userName = "test_user_" + gender + "_" + lexical_cast<string,int>(age);
-			handler->test_add_entity_interaction(userName, age, gender);
+	genderVec.assign(genderArr,genderArr + sizeof(genderArr)/sizeof(genderArr[0]));
+	vector<string> ageVec;
+	ageVec.assign(ageArr,ageArr + sizeof(ageArr)/sizeof(ageArr[0]));
+	for (size_t i = 0; i < genderVec.size(); i++) {
+		string gender = genderArr[i];
+		for (size_t j = 0; j < ageVec.size() ; j++) {
+			string age = ageVec[j];
+			string userName = "testuser-" + gender + "-" + age;
+			map<string,int> profile;
+			profile[gender] = 1;
+			profile[age] = 1;
+			handler->test_index_user(userName,profile);
 			vector<rt::Recommendation> recList;
 			handler->get_recommendation(recList, userName);
-			cout << "--------------- recommendation for user:" << userName << "--------------------------" << endl;
-			/// dump the list
-			for(size_t i = 0; i < recList.size(); i++){
-				Recommendation& rec = recList[i];
-				vector<string> splits;
-				boost::split(splits,rec.id,boost::is_any_of("_"));
-				string url = "http://amazon.com/dp/" + splits[1];
-				cout << "id:" << url << ", score:" << rec.score << endl;
-			}
+			handler->save_recommendation(userName + ".rec.list", recList);
+//			cout << "--------------- recommendation for user:" << userName
+//					<< "--------------------------" << endl;
+//			/// dump the list
+//			for (size_t i = 0; i < recList.size(); i++) {
+//				Recommendation& rec = recList[i];
+//				vector<string> splits;
+//				boost::split(splits, rec.id, boost::is_any_of("_"));
+//				string url = "http://amazon.com/dp/" + splits[1];
+//				cout << "id:" << url << ", score:" << rec.score << endl;
+//			}
 		}
 	}
 //	shared_ptr<TProcessor> processor(new RecEngineProcessor(handler));

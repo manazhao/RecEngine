@@ -57,21 +57,25 @@ public:
 	void index_interaction(Response& _return, const std::string& fromId,
 			const int8_t fromType, const std::string& toId,
 			const int8_t toType, const int8_t type, const double val) {
-		// Your implementation goes here
-		EntityInteraction interaction(type, val);
-		/// index the from and to entities
+		/// index from entity
 		Entity fromEntity(fromId, fromType);
 		Entity::entity_ptr fromEntityPtr = fromEntity.index_if_not_exist();
-		Entity toEntity(toId, toType);
-		Entity::entity_ptr toEntityPtr = toEntity.index_if_not_exist();
-		/// attach the entiy pointers to the interaction object
-		interaction.set_from_entity(fromEntityPtr);
-		interaction.set_to_entity(toEntityPtr);
-		EntityInteraction::entity_interact_ptr interactPtr =
-				interaction.index_if_not_exist();
-		cout << "add interaction from: [" << fromId << "-"
-				<< fromEntityPtr->get_mapped_id() << "] to [" << toId << "-"
-				<< toEntityPtr->get_mapped_id() << "]" << endl;
+
+		/// if the toId is empty, it means only adding the from entity
+		if(!toId.empty()){
+			Entity toEntity(toId, toType);
+			Entity::entity_ptr toEntityPtr = toEntity.index_if_not_exist();
+
+			/// attach the entity pointers to the interaction object
+			EntityInteraction interaction(type, val);
+			interaction.set_from_entity(fromEntityPtr);
+			interaction.set_to_entity(toEntityPtr);
+			EntityInteraction::entity_interact_ptr interactPtr =
+					interaction.index_if_not_exist();
+			cout << "add interaction from: [" << fromId << "-"
+					<< fromEntityPtr->get_mapped_id() << "] to [" << toId << "-"
+					<< toEntityPtr->get_mapped_id() << "]" << endl;
+		}
 		_return.status = StatusCode::SC_SUCCESS;
 	}
 
