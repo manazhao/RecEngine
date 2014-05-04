@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-my $result_dir = "../amazon/amazon-result";
+my $result_dir = "../amazon/amazon-result-nf/rec";
 
 chdir $result_dir;
 # process each result file

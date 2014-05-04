@@ -8,10 +8,10 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include subdir.mk
 -include src/recsys/thrift/cpp/subdir.mk
 -include src/recsys/data/subdir.mk
 -include src/recsys/algorithm/subdir.mk
--include subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -43,13 +43,13 @@ endif
 all: RecEngineThrift
 
 dependents:
-	-cd /home/qzhao2/git/BayesianNetwork/LibRelease && $(MAKE) all
+	-cd /home/manazhao/git/BayesianNetwork/LibRelease && $(MAKE) clean all
 
 # Tool invocations
-RecEngineThrift: $(OBJS) $(USER_OBJS) /home/qzhao2/git/BayesianNetwork/LibRelease/libBayesianNetwork.a
+RecEngineThrift: $(OBJS) $(USER_OBJS) /home/manazhao/git/BayesianNetwork/LibRelease/libBayesianNetwork.a
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L"/home/qzhao2/git/BayesianNetwork/LibDebug" -L"/home/qzhao2/git/BayesianNetwork/LibRelease" -o "RecEngineThrift" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L"/home/manazhao/git/BayesianNetwork/LibDebug" -L"/home/manazhao/git/BayesianNetwork/LibRelease" -o"RecEngineThrift" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -60,6 +60,6 @@ clean:
 
 .PHONY: all clean dependents
 .SECONDARY:
-/home/qzhao2/git/BayesianNetwork/LibRelease/libBayesianNetwork.a:
+/home/manazhao/git/BayesianNetwork/LibRelease/libBayesianNetwork.a:
 
 -include ../makefile.targets

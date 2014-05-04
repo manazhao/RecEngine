@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-my $rec_folder = "amazon-rec";
+my $rec_folder = "amazon-result-nf/rec";
 chdir $rec_folder;
 
 my $file_list = `ls test*.list`;

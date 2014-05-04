@@ -1,9 +1,6 @@
 # use json library to parse the recommendation result
 library(rjson)
 setwd("~/git/RecEngine/result-analysis")
-# entity profile
-entity.latent.file <- "amazon-result/rec/HHMF-d_5-f_1.latent.txt"
-
 
 analyze.user.rec <- function(user.json.file, entity.latent){
   user.rec.obj <- fromJSON(file = user.json.file)
@@ -16,9 +13,12 @@ analyze.user.rec <- function(user.json.file, entity.latent){
   user.rec.obj
 }
 
+
+# entity profile
+# entity.latent.file <- "amazon-result/rec/HHMF-d_5-f_1.latent.txt"
 # entity.latent <- read.csv(file = entity.latent.file, sep=",", header=F)
 
 # read user recommendation
-user.rec.file <- "amazon-result/rec/HHMF-d_5-f_1-entity-testuser-gd_female-ag_30.json"
+user.rec.file <- "amazon-result/rec/HHMF-d_5-f_1-entity-testuser-gd_male-ag_30.json"
 user.rec.obj <- analyze.user.rec(user.rec.file,entity.latent)
 

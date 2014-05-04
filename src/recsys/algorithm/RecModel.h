@@ -49,7 +49,7 @@ public:
 		// whether use feature
 		bool m_use_feature;
 		ModelParam(size_t const& latDim = 10, size_t const& maxIter = 10,
-				bool diagCov = true, bool useFeature = true);
+				bool diagCov = true, bool useFeature = false);
 		ModelParam(int argc, char** argv);
 		operator string() const {
 			stringstream ss;
