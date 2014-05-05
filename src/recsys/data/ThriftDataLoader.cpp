@@ -37,6 +37,8 @@ ThriftDataLoader::ThriftDataLoader(string const& host, int port) :
 			m_client.get_cv_test(m_dataset_manager->cv_dataset(i).m_test, i);
 			m_dataset_manager->cv_dataset(i).m_train.prepare_id_type_map();
 			m_dataset_manager->cv_dataset(i).m_test.prepare_id_type_map();
+//			m_dataset_manager->cv_dataset(i).m_train.dump_rating_interact();
+//			m_dataset_manager->cv_dataset(i).m_test.dump_rating_interact();
 		}
 
 		cout << "---------- dataset ----------" << endl;

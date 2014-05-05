@@ -6,7 +6,7 @@ use JSON;
 
 # generate JSON objects for user feature
 #
-my $data_root = "/home/qzhao2/data/ml-1m";
+my $data_root = "/home/manazhao/data/ml-1m";
 my $user_file = $data_root . "/users.dat";
 my $user_json_file = $data_root . "/users.json";
 open USER_FILE, "<", $user_file or die $!;

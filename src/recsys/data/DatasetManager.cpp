@@ -16,14 +16,9 @@ void DatasetManager::generate_cv_datasets() {
 	vector<Interact*> allRatingInteracts;
 	vector<size_t> allRatingUsers;
 	DatasetExt& completeDataset = m_datasets[rt::DSType::DS_ALL];
-	for (size_t i = 0; i < m_cv_folds; i++) {
-		m_cv_datasets[i].m_train = DatasetExt(completeDataset.ent_type_interacts.size());
-		m_cv_datasets[i].m_test = DatasetExt(completeDataset.ent_type_interacts.size());
-	}
-
+	size_t numOfEntity = completeDataset.ent_type_interacts.size();
 	/// allocate space for cv datasets
-	m_cv_datasets.resize(m_cv_folds,
-			TrainTestPair(completeDataset.ent_type_interacts.size()));
+	m_cv_datasets = vector<TrainTestPair>(m_cv_folds,TrainTestPair(numOfEntity) );
 	set<int64_t> userIds = completeDataset.type_ent_ids[Entity::ENT_USER];
 
 	for (set<int64_t>::iterator iter = userIds.begin(); iter != userIds.end();
@@ -48,7 +43,6 @@ void DatasetManager::generate_cv_datasets() {
 	for (size_t i = 0; i < numOfRatings; i++) {
 		size_t ratingIdx = ratingIdxVec[i];
 		size_t foldIdx = ratingIdx % m_cv_folds;
-		TrainTestPair& fold = m_cv_datasets[foldIdx];
 		Interact ratingInteract = *(allRatingInteracts[ratingIdx]);
 		int64_t userIdx = allRatingUsers[ratingIdx];
 		int64_t itemIdx = ratingInteract.ent_id;
@@ -68,10 +62,13 @@ void DatasetManager::generate_cv_datasets() {
 					ratingInteract);
 		}
 	}
+	cout << "dump ratings\n";
 	/// now add the feature interactions back
 	for(size_t i = 0; i < m_cv_datasets.size(); i++){
 		_add_feature_interactions(m_cv_datasets[i].m_train,completeDataset);
 		_add_feature_interactions(m_cv_datasets[i].m_test,completeDataset);
+		m_cv_datasets[i].m_train.dump_rating_interact();
+		m_cv_datasets[i].m_test.dump_rating_interact();
 	}
 	cout << ">>> done!" << endl;
 }

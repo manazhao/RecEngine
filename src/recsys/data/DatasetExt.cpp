@@ -28,6 +28,20 @@ void DatasetExt::prepare_id_type_map(){
 	}
 }
 
+void DatasetExt::dump_rating_interact(){
+	set<int64_t>& userIds = type_ent_ids[Entity::ENT_USER];
+	for(set<int64_t>::iterator iter = userIds.begin(); iter != userIds.end(); ++iter){
+		int64_t userId = *iter;
+		cout << "user id:" << userId << " - ";
+		vector<Interact>& ratingInteracts = ent_type_interacts[userId][EntityInteraction::RATE_ITEM];
+		for(vector<Interact>::iterator iter1 = ratingInteracts.begin(); iter1 < ratingInteracts.end(); ++iter1){
+			cout  << iter1->ent_id << ",";
+		}
+		cout << "\n";
+		break;
+	}
+}
+
 void DatasetExt::verify_interaction(){
 	/// check whether the user id and item id are different
 	/// very basic checking
@@ -41,27 +55,27 @@ void DatasetExt::verify_interaction(){
 		}
 	}
 }
-
-void DatasetExt::filter_entity_interactions(
-		vector<map<int8_t, vector<Interact> > > const& entTypeInteractions) {
-	/// only keep those interactions the both entities of which are in the entity id set
-	for (set<int64_t>::iterator iter = ent_ids.begin(); iter
-			!= ent_ids.end(); ++iter) {
-		/// get the interactions
-		int64_t fromEntId = *iter;
-		map<int8_t, vector<Interact> > const& tmpTypeInteracts =
-				entTypeInteractions[*iter];
-		for (map<int8_t, vector<Interact> >::const_iterator iter1 =
-				tmpTypeInteracts.begin(); iter1 != tmpTypeInteracts.end(); ++iter1) {
-			int8_t intType = iter1->first;
-			for (vector<Interact>::const_iterator iter2 = iter1->second.begin(); iter2
-					< iter1->second.end(); ++iter2) {
-				_filter_entity_interaction_helper(intType, fromEntId,
-						*iter2);
-			}
-		}
-	}
-}
+//
+//void DatasetExt::filter_entity_interactions(
+//		vector<map<int8_t, vector<Interact> > > const& entTypeInteractions) {
+//	/// only keep those interactions the both entities of which are in the entity id set
+//	for (set<int64_t>::iterator iter = ent_ids.begin(); iter
+//			!= ent_ids.end(); ++iter) {
+//		/// get the interactions
+//		int64_t fromEntId = *iter;
+//		map<int8_t, vector<Interact> > const& tmpTypeInteracts =
+//				entTypeInteractions[*iter];
+//		for (map<int8_t, vector<Interact> >::const_iterator iter1 =
+//				tmpTypeInteracts.begin(); iter1 != tmpTypeInteracts.end(); ++iter1) {
+//			int8_t intType = iter1->first;
+//			for (vector<Interact>::const_iterator iter2 = iter1->second.begin(); iter2
+//					< iter1->second.end(); ++iter2) {
+//				_filter_entity_interaction_helper(intType, fromEntId,
+//						*iter2);
+//			}
+//		}
+//	}
+//}
 
 void DatasetExt::_filter_entity_interaction_helper(int8_t const& type,
 		int64_t const& from_ent_id, Interact const& interact) {

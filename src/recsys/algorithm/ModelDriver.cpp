@@ -130,7 +130,7 @@ void ModelDriver::run_from_cmd(int argc, char** argv) {
 			/// running model selection
 //			modelRef.train(modelRef.get_train_ds(),modelRef.get_test_ds(),modelRef.get_cs_ds());
 			cout << ">>> evaluate model by cross validation\n" << endl;
-			for(size_t i = 0; i < 5; i++){
+			for(size_t i = 1; i < 5; i++){
 				cout << ">>> cv fold: " << i << endl;
 				DatasetExt& cvTrain = dataLoaderPtr->get_dataset_manager()->cv_dataset(i).m_train;
 				DatasetExt& cvTest = dataLoaderPtr->get_dataset_manager()->cv_dataset(i).m_test;

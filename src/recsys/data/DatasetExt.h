@@ -55,10 +55,11 @@ public:
 	inline bool empty() {
 		return m_id_type_map.empty();
 	}
+	void dump_rating_interact();
 	void prepare_id_type_map();
 	void verify_interaction();
-	void filter_entity_interactions(
-			vector<map<int8_t, vector<Interact> > > const& entTypeInteractions);
+//	void filter_entity_interactions(
+//			vector<map<int8_t, vector<Interact> > > const& entTypeInteractions);
 	virtual ~DatasetExt() throw () {
 	}
 };

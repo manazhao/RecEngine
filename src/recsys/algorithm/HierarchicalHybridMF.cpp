@@ -256,6 +256,7 @@ void HierarchicalHybridMF::_update_entity(int64_t const& entityId,
 	/// first reset the natural parameter of user vector
 	m_entity[entityId].reset();
 	_update_entity_from_ratings(entityId, typeInteracts);
+//	m_entity[entityId].moment(1).m_vec.print(cout);
 	_update_entity_from_prior(entityId, entityType);
 }
 
@@ -299,6 +300,7 @@ vec HierarchicalHybridMF::_entity_feature_cov_sum(int64_t const& entityId) {
 }
 
 void HierarchicalHybridMF::_get_entity_feature_cnt() {
+	m_feat_cnt_map.clear();
 	set<int64_t> & userIds = m_active_dataset.type_ent_ids[Entity::ENT_USER];
 	set<int64_t> & itemIds = m_active_dataset.type_ent_ids[Entity::ENT_ITEM];
 	vector<int64_t> mergedIds;
@@ -538,11 +540,15 @@ float HierarchicalHybridMF::_pred_error(int64_t const& userId, DatasetExt& datas
 		}
 	}
 	DiagMVGaussian& userLat = m_entity[userId];
+//	vec userMean = userLat.moment(1).m_vec;
+//	userMean.print(cout);
 	for (vector<Interact>::iterator iter = ratingInteracts.begin();
 			iter < ratingInteracts.end(); ++iter) {
 		float ratingVal = iter->ent_val;
 		int64_t itemId = iter->ent_id;
 		DiagMVGaussian& itemLat = m_entity[itemId];
+//		vec itemMean = itemLat.moment(1).m_vec;
+//		itemMean.print(cout);
 		float predRating = accu(
 				itemLat.moment(1).m_vec % userLat.moment(1).m_vec)
 				+ (float) m_bias.moment(1);
