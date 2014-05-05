@@ -9,6 +9,7 @@
 #define DATALOADERSWITCHER_H_
 #include "recsys/data/JSONDataLoader.h"
 #include "recsys/data/AmazonParser.h"
+#include "recsys/data/MovieLensParser.h"
 #include "recsys/data/ThriftDataLoader.h"
 
 namespace recsys {

@@ -506,6 +506,52 @@ void HierarchicalHybridMF::_update_feature_prior() {
 	_update_feature_prior_cov();
 }
 
+float HierarchicalHybridMF::_pred_error(int64_t const& userId, DatasetExt& dataset){
+	float rmse = 0;
+	vector<Interact>& userFeatureInteracts = dataset.ent_type_interacts[userId][EntityInteraction::ADD_FEATURE];
+	for (vector<Interact>::iterator iter = userFeatureInteracts.begin();
+			iter < userFeatureInteracts.end(); ++iter) {
+		int64_t entityId = iter->ent_id;
+		if (m_active_dataset.ent_ids.find(entityId)
+				== m_active_dataset.ent_ids.end()) {
+			m_entity[entityId].reset();
+			_update_feature_from_prior(entityId);
+		}
+	}
+	if (m_active_dataset.ent_ids.find(userId)
+			== m_active_dataset.ent_ids.end()) {
+		m_entity[userId].reset();
+		_update_entity_from_prior_helper(userId,Entity::ENT_USER,userFeatureInteracts);
+		//// the following update from prior only applies to entities in the training dataset
+//		_update_entity_from_prior(userId, Entity::ENT_USER);
+	}
+	vector<Interact>& ratingInteracts = dataset.ent_type_interacts[userId][EntityInteraction::RATE_ITEM];
+	for (vector<Interact>::iterator iter = ratingInteracts.begin();
+			iter < ratingInteracts.end(); ++iter) {
+		int64_t itemId = iter->ent_id;
+		if (m_active_dataset.ent_ids.find(itemId)
+				== m_active_dataset.ent_ids.end()) {
+			m_entity[itemId].reset();
+			vector<Interact>& itemFeatureInteracts = dataset.ent_type_interacts[itemId][EntityInteraction::RATE_ITEM];
+			_update_entity_from_prior_helper(itemId,Entity::ENT_ITEM,itemFeatureInteracts);
+//			_update_entity_from_prior(itemId, Entity::ENT_ITEM);
+		}
+	}
+	DiagMVGaussian& userLat = m_entity[userId];
+	for (vector<Interact>::iterator iter = ratingInteracts.begin();
+			iter < ratingInteracts.end(); ++iter) {
+		float ratingVal = iter->ent_val;
+		int64_t itemId = iter->ent_id;
+		DiagMVGaussian& itemLat = m_entity[itemId];
+		float predRating = accu(
+				itemLat.moment(1).m_vec % userLat.moment(1).m_vec)
+				+ (float) m_bias.moment(1);
+		float diff = predRating - ratingVal;
+		rmse += (diff * diff);
+	}
+	return rmse;
+}
+
 float HierarchicalHybridMF::_pred_error(int64_t const& userId,
 		map<int8_t, vector<Interact> >& entityInteractMap) {
 	/// evaluate the RMSE over the training dataset
@@ -524,7 +570,9 @@ float HierarchicalHybridMF::_pred_error(int64_t const& userId,
 	if (m_active_dataset.ent_ids.find(userId)
 			== m_active_dataset.ent_ids.end()) {
 		m_entity[userId].reset();
-		_update_entity_from_prior(userId, Entity::ENT_USER);
+		_update_entity_from_prior_helper(userId,Entity::ENT_USER,featureInteracts);
+		//// the following update from prior only applies to entities in the training dataset
+//		_update_entity_from_prior(userId, Entity::ENT_USER);
 	}
 	vector<Interact>& ratingInteracts =
 			entityInteractMap[EntityInteraction::RATE_ITEM];
@@ -534,7 +582,8 @@ float HierarchicalHybridMF::_pred_error(int64_t const& userId,
 		if (m_active_dataset.ent_ids.find(itemId)
 				== m_active_dataset.ent_ids.end()) {
 			m_entity[itemId].reset();
-			_update_entity_from_prior(itemId, Entity::ENT_ITEM);
+			_update_entity_from_prior_helper(userId,Entity::ENT_USER,featureInteracts);
+//			_update_entity_from_prior(itemId, Entity::ENT_ITEM);
 		}
 	}
 	DiagMVGaussian& userLat = m_entity[userId];

@@ -69,7 +69,8 @@ float RecModel::_dataset_rmse(DatasetExt& dataset){
 		map<int8_t,vector<Interact> >& userInteracts = dataset.ent_type_interacts[userId];
 		size_t userNumRating =  userInteracts[EntityInteraction::RATE_ITEM].size();
 		/// evaluate the prediction error
-		float userError = _pred_error(userId, userInteracts);
+//		float userError = _pred_error(userId, userInteracts);
+		float userError = _pred_error(userId,dataset);
 		rmse += userError;
 		numRating += userNumRating;
 	}

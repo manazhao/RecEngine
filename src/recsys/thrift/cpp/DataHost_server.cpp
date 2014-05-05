@@ -50,19 +50,19 @@ public:
 		m_entity_type_map["feature"] = Entity::ENT_FEATURE;
 	}
 	DataHostHandler(DataLoader& dataLoader) :
-		m_data_loader(dataLoader) {
+			m_data_loader(dataLoader) {
 		// Your initialization goes here
 	}
 
 	void index_interaction(Response& _return, const std::string& fromId,
-			const int8_t fromType, const std::string& toId,
-			const int8_t toType, const int8_t type, const double val) {
+			const int8_t fromType, const std::string& toId, const int8_t toType,
+			const int8_t type, const double val) {
 		/// index from entity
 		Entity fromEntity(fromId, fromType);
 		Entity::entity_ptr fromEntityPtr = fromEntity.index_if_not_exist();
 
 		/// if the toId is empty, it means only adding the from entity
-		if(!toId.empty()){
+		if (!toId.empty()) {
 			Entity toEntity(toId, toType);
 			Entity::entity_ptr toEntityPtr = toEntity.index_if_not_exist();
 
@@ -84,11 +84,14 @@ public:
 			const int64_t id) {
 		// Your implementation goes here
 		printf("query_entity_interacts\n");
-		EntityInteraction::type_interact_map result = EntityInteraction::m_entity_type_interact_map[id];
+		EntityInteraction::type_interact_map result =
+				EntityInteraction::m_entity_type_interact_map[id];
 		/// convert the result to _return
-		for(EntityInteraction::type_interact_map::iterator iter = result.begin(); iter != result.end(); ++iter){
+		for (EntityInteraction::type_interact_map::iterator iter =
+				result.begin(); iter != result.end(); ++iter) {
 			EntityInteraction::entity_interact_vec& vec = *(iter->second);
-			for(EntityInteraction::entity_interact_vec::iterator iter1 = vec.begin(); iter1 < vec.end(); ++iter1){
+			for (EntityInteraction::entity_interact_vec::iterator iter1 =
+					vec.begin(); iter1 < vec.end(); ++iter1) {
 				EntityInteraction& tmpInteract = **iter1;
 				rt::Interact tmpInteract1;
 				tmpInteract1.ent_id = tmpInteract.m_to_entity->m_mapped_id;
@@ -110,8 +113,8 @@ public:
 			const std::vector<int64_t> & idList) {
 		// Your implementation goes here
 		printf("query_entity_names\n");
-		for (std::vector<int64_t>::const_iterator iter = idList.begin(); iter
-				< idList.end(); ++iter) {
+		for (std::vector<int64_t>::const_iterator iter = idList.begin();
+				iter < idList.end(); ++iter) {
 			string name = "";
 			if (Entity::m_id_name_map.find(*iter)
 					!= Entity::m_id_name_map.end()) {
@@ -138,6 +141,17 @@ public:
 		printf("get_dataset\n");
 		_return = m_data_loader.dataset(dsType);
 	}
+	void get_cv_train(Dataset& _return, const int8_t foldIdx) {
+		// Your implementation goes here
+		printf("get_cv_train\n");
+		_return = m_data_loader.get_dataset_manager()->cv_dataset(foldIdx).m_train;
+	}
+
+	void get_cv_test(Dataset& _return, const int8_t foldIdx) {
+		// Your implementation goes here
+		printf("get_cv_test\n");
+		_return = m_data_loader.get_dataset_manager()->cv_dataset(foldIdx).m_test;
+	}
 
 };
 
@@ -148,9 +162,8 @@ map<string, Entity::ENTITY_TYPE> DataHostHandler::m_entity_type_map;
 /// parse commandline arguments
 void parse_app_args(int argc, char** argv, string& datasetName,
 		string& userFile, string& itemFile, string& ratingFile) {
-	po::options_description
-			desc(
-					"Load dataset into main memory and share with other applications through thrift interface");
+	po::options_description desc(
+			"Load dataset into main memory and share with other applications through thrift interface");
 	desc.add_options()("help", "help message on use this application")(
 			"user-file,u", po::value<string>(&userFile), "user profile file")(
 			"item-file,i", po::value<string>(&itemFile), "item profile file")(

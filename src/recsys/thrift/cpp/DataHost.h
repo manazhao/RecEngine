@@ -21,6 +21,8 @@ class DataHostIf {
   virtual void query_entity_names(std::vector<std::string> & _return, const std::vector<int64_t> & idList) = 0;
   virtual int64_t query_entity_id(const std::string& name, const int8_t type) = 0;
   virtual void get_dataset(Dataset& _return, const DSType::type dsType) = 0;
+  virtual void get_cv_train(Dataset& _return, const int8_t foldIdx) = 0;
+  virtual void get_cv_test(Dataset& _return, const int8_t foldIdx) = 0;
 };
 
 class DataHostIfFactory {
@@ -67,6 +69,12 @@ class DataHostNull : virtual public DataHostIf {
     return _return;
   }
   void get_dataset(Dataset& /* _return */, const DSType::type /* dsType */) {
+    return;
+  }
+  void get_cv_train(Dataset& /* _return */, const int8_t /* foldIdx */) {
+    return;
+  }
+  void get_cv_test(Dataset& /* _return */, const int8_t /* foldIdx */) {
     return;
   }
 };
@@ -845,6 +853,246 @@ class DataHost_get_dataset_presult {
 
 };
 
+typedef struct _DataHost_get_cv_train_args__isset {
+  _DataHost_get_cv_train_args__isset() : foldIdx(false) {}
+  bool foldIdx;
+} _DataHost_get_cv_train_args__isset;
+
+class DataHost_get_cv_train_args {
+ public:
+
+  static const char* ascii_fingerprint; // = "A7D440367E85134EBDBAA7BCA01056D0";
+  static const uint8_t binary_fingerprint[16]; // = {0xA7,0xD4,0x40,0x36,0x7E,0x85,0x13,0x4E,0xBD,0xBA,0xA7,0xBC,0xA0,0x10,0x56,0xD0};
+
+  DataHost_get_cv_train_args() : foldIdx(0) {
+  }
+
+  virtual ~DataHost_get_cv_train_args() throw() {}
+
+  int8_t foldIdx;
+
+  _DataHost_get_cv_train_args__isset __isset;
+
+  void __set_foldIdx(const int8_t val) {
+    foldIdx = val;
+  }
+
+  bool operator == (const DataHost_get_cv_train_args & rhs) const
+  {
+    if (!(foldIdx == rhs.foldIdx))
+      return false;
+    return true;
+  }
+  bool operator != (const DataHost_get_cv_train_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const DataHost_get_cv_train_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class DataHost_get_cv_train_pargs {
+ public:
+
+  static const char* ascii_fingerprint; // = "A7D440367E85134EBDBAA7BCA01056D0";
+  static const uint8_t binary_fingerprint[16]; // = {0xA7,0xD4,0x40,0x36,0x7E,0x85,0x13,0x4E,0xBD,0xBA,0xA7,0xBC,0xA0,0x10,0x56,0xD0};
+
+
+  virtual ~DataHost_get_cv_train_pargs() throw() {}
+
+  const int8_t* foldIdx;
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _DataHost_get_cv_train_result__isset {
+  _DataHost_get_cv_train_result__isset() : success(false) {}
+  bool success;
+} _DataHost_get_cv_train_result__isset;
+
+class DataHost_get_cv_train_result {
+ public:
+
+  static const char* ascii_fingerprint; // = "9474DE59E738FA6F126A024D54BE68F9";
+  static const uint8_t binary_fingerprint[16]; // = {0x94,0x74,0xDE,0x59,0xE7,0x38,0xFA,0x6F,0x12,0x6A,0x02,0x4D,0x54,0xBE,0x68,0xF9};
+
+  DataHost_get_cv_train_result() {
+  }
+
+  virtual ~DataHost_get_cv_train_result() throw() {}
+
+  Dataset success;
+
+  _DataHost_get_cv_train_result__isset __isset;
+
+  void __set_success(const Dataset& val) {
+    success = val;
+  }
+
+  bool operator == (const DataHost_get_cv_train_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    return true;
+  }
+  bool operator != (const DataHost_get_cv_train_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const DataHost_get_cv_train_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _DataHost_get_cv_train_presult__isset {
+  _DataHost_get_cv_train_presult__isset() : success(false) {}
+  bool success;
+} _DataHost_get_cv_train_presult__isset;
+
+class DataHost_get_cv_train_presult {
+ public:
+
+  static const char* ascii_fingerprint; // = "9474DE59E738FA6F126A024D54BE68F9";
+  static const uint8_t binary_fingerprint[16]; // = {0x94,0x74,0xDE,0x59,0xE7,0x38,0xFA,0x6F,0x12,0x6A,0x02,0x4D,0x54,0xBE,0x68,0xF9};
+
+
+  virtual ~DataHost_get_cv_train_presult() throw() {}
+
+  Dataset* success;
+
+  _DataHost_get_cv_train_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
+typedef struct _DataHost_get_cv_test_args__isset {
+  _DataHost_get_cv_test_args__isset() : foldIdx(false) {}
+  bool foldIdx;
+} _DataHost_get_cv_test_args__isset;
+
+class DataHost_get_cv_test_args {
+ public:
+
+  static const char* ascii_fingerprint; // = "A7D440367E85134EBDBAA7BCA01056D0";
+  static const uint8_t binary_fingerprint[16]; // = {0xA7,0xD4,0x40,0x36,0x7E,0x85,0x13,0x4E,0xBD,0xBA,0xA7,0xBC,0xA0,0x10,0x56,0xD0};
+
+  DataHost_get_cv_test_args() : foldIdx(0) {
+  }
+
+  virtual ~DataHost_get_cv_test_args() throw() {}
+
+  int8_t foldIdx;
+
+  _DataHost_get_cv_test_args__isset __isset;
+
+  void __set_foldIdx(const int8_t val) {
+    foldIdx = val;
+  }
+
+  bool operator == (const DataHost_get_cv_test_args & rhs) const
+  {
+    if (!(foldIdx == rhs.foldIdx))
+      return false;
+    return true;
+  }
+  bool operator != (const DataHost_get_cv_test_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const DataHost_get_cv_test_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class DataHost_get_cv_test_pargs {
+ public:
+
+  static const char* ascii_fingerprint; // = "A7D440367E85134EBDBAA7BCA01056D0";
+  static const uint8_t binary_fingerprint[16]; // = {0xA7,0xD4,0x40,0x36,0x7E,0x85,0x13,0x4E,0xBD,0xBA,0xA7,0xBC,0xA0,0x10,0x56,0xD0};
+
+
+  virtual ~DataHost_get_cv_test_pargs() throw() {}
+
+  const int8_t* foldIdx;
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _DataHost_get_cv_test_result__isset {
+  _DataHost_get_cv_test_result__isset() : success(false) {}
+  bool success;
+} _DataHost_get_cv_test_result__isset;
+
+class DataHost_get_cv_test_result {
+ public:
+
+  static const char* ascii_fingerprint; // = "9474DE59E738FA6F126A024D54BE68F9";
+  static const uint8_t binary_fingerprint[16]; // = {0x94,0x74,0xDE,0x59,0xE7,0x38,0xFA,0x6F,0x12,0x6A,0x02,0x4D,0x54,0xBE,0x68,0xF9};
+
+  DataHost_get_cv_test_result() {
+  }
+
+  virtual ~DataHost_get_cv_test_result() throw() {}
+
+  Dataset success;
+
+  _DataHost_get_cv_test_result__isset __isset;
+
+  void __set_success(const Dataset& val) {
+    success = val;
+  }
+
+  bool operator == (const DataHost_get_cv_test_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    return true;
+  }
+  bool operator != (const DataHost_get_cv_test_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const DataHost_get_cv_test_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _DataHost_get_cv_test_presult__isset {
+  _DataHost_get_cv_test_presult__isset() : success(false) {}
+  bool success;
+} _DataHost_get_cv_test_presult__isset;
+
+class DataHost_get_cv_test_presult {
+ public:
+
+  static const char* ascii_fingerprint; // = "9474DE59E738FA6F126A024D54BE68F9";
+  static const uint8_t binary_fingerprint[16]; // = {0x94,0x74,0xDE,0x59,0xE7,0x38,0xFA,0x6F,0x12,0x6A,0x02,0x4D,0x54,0xBE,0x68,0xF9};
+
+
+  virtual ~DataHost_get_cv_test_presult() throw() {}
+
+  Dataset* success;
+
+  _DataHost_get_cv_test_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
 class DataHostClient : virtual public DataHostIf {
  public:
   DataHostClient(boost::shared_ptr< ::apache::thrift::protocol::TProtocol> prot) {
@@ -888,6 +1136,12 @@ class DataHostClient : virtual public DataHostIf {
   void get_dataset(Dataset& _return, const DSType::type dsType);
   void send_get_dataset(const DSType::type dsType);
   void recv_get_dataset(Dataset& _return);
+  void get_cv_train(Dataset& _return, const int8_t foldIdx);
+  void send_get_cv_train(const int8_t foldIdx);
+  void recv_get_cv_train(Dataset& _return);
+  void get_cv_test(Dataset& _return, const int8_t foldIdx);
+  void send_get_cv_test(const int8_t foldIdx);
+  void recv_get_cv_test(Dataset& _return);
  protected:
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> piprot_;
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> poprot_;
@@ -909,6 +1163,8 @@ class DataHostProcessor : public ::apache::thrift::TDispatchProcessor {
   void process_query_entity_names(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_query_entity_id(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_get_dataset(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_get_cv_train(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_get_cv_test(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
  public:
   DataHostProcessor(boost::shared_ptr<DataHostIf> iface) :
     iface_(iface) {
@@ -918,6 +1174,8 @@ class DataHostProcessor : public ::apache::thrift::TDispatchProcessor {
     processMap_["query_entity_names"] = &DataHostProcessor::process_query_entity_names;
     processMap_["query_entity_id"] = &DataHostProcessor::process_query_entity_id;
     processMap_["get_dataset"] = &DataHostProcessor::process_get_dataset;
+    processMap_["get_cv_train"] = &DataHostProcessor::process_get_cv_train;
+    processMap_["get_cv_test"] = &DataHostProcessor::process_get_cv_test;
   }
 
   virtual ~DataHostProcessor() {}
@@ -1002,6 +1260,26 @@ class DataHostMultiface : virtual public DataHostIf {
       ifaces_[i]->get_dataset(_return, dsType);
     }
     ifaces_[i]->get_dataset(_return, dsType);
+    return;
+  }
+
+  void get_cv_train(Dataset& _return, const int8_t foldIdx) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->get_cv_train(_return, foldIdx);
+    }
+    ifaces_[i]->get_cv_train(_return, foldIdx);
+    return;
+  }
+
+  void get_cv_test(Dataset& _return, const int8_t foldIdx) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->get_cv_test(_return, foldIdx);
+    }
+    ifaces_[i]->get_cv_test(_return, foldIdx);
     return;
   }
 

@@ -49,6 +49,8 @@ string query_entity_name(1:i64 id), /// used by web server: get the original ent
 list<string> query_entity_names(1:list<i64> idList), /// the same purpose as above function, except in batch mode
 i64 query_entity_id(1:string name, 2:byte type),
 Dataset get_dataset(1:DSType dsType),
+Dataset get_cv_train(1:byte foldIdx),
+Dataset get_cv_test(1:byte foldIdx)
 }
 
 service RecEngine{

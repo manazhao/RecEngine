@@ -92,6 +92,7 @@ private:
 protected:
 	virtual void _init_training() = 0;
 	virtual TrainIterLog _train_update() = 0;
+	virtual float _pred_error(int64_t const& userId, DatasetExt& dataset) = 0;
 	virtual float _pred_error(int64_t const& entityId,
 			map<int8_t, vector<Interact> >& entityInteractMap) = 0;
 	virtual void _add_new_entity(int64_t const& entityId,

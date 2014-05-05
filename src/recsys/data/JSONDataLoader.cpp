@@ -95,7 +95,9 @@ void JSONDataLoader::load_user_item_rating(string const& file) {
 
 void JSONDataLoader::prepare_datasets() {
 	// Your implementation goes here
+	m_dataset_manager->init_complete_dataset();
 	m_dataset_manager->generate_datasets();
+	m_dataset_manager->generate_cv_datasets();
 }
 
 JSONDataLoader::~JSONDataLoader() {

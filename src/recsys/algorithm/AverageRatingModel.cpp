@@ -33,6 +33,19 @@ RecModel::TrainIterLog AverageRatingModel::_train_update() {
 	return RecModel::TrainIterLog();
 }
 
+float AverageRatingModel::_pred_error(int64_t const& userId, DatasetExt& dataset){
+	float error = 0;
+	vector<Interact>& ratingInteracts =
+			dataset.ent_type_interacts[userId][EntityInteraction::RATE_ITEM];
+	for (vector<Interact>::iterator iter = ratingInteracts.begin();
+			iter < ratingInteracts.end(); ++iter) {
+		float rating = iter->ent_val;
+		float diff = rating - m_avg_rating;
+		error += (diff * diff);
+	}
+	return error;
+}
+
 float AverageRatingModel::_pred_error(int64_t const& entityId,
 		map<int8_t, vector<Interact> >& entityInteractMap) {
 	float error = 0;

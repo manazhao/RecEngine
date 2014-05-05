@@ -78,7 +78,7 @@ void ModelDriver::run_from_cmd(int argc, char** argv) {
 			("use-feature", po::value<bool>(&(modelParams.m_use_feature)), "integrate content feature as prior")
 			("model-file", po::value<string>(&m_model_file), "file storing the model training result, must be specified for model training")
 			("model", po::value<string>(&m_model_name)->required(), "the name of the model: must be one of [HHMF,AVG,POP]")
-			("model-sel", "training the model on the training dataset and evaluate the performance on testing and coldstart datasets");
+			("cross-validation", "run cross validation on the dataset");
 
 	po::variables_map vm;
 	try {
@@ -108,7 +108,7 @@ void ModelDriver::run_from_cmd(int argc, char** argv) {
 		cout << "---------------------------------------------" << endl;
 	}
 	else{
-		if(vm.count("model-sel")){
+		if(vm.count("cross-validation")){
 			modelSelection = true;
 		}
 		/// The presence of rating file implies local data loader
@@ -128,7 +128,15 @@ void ModelDriver::run_from_cmd(int argc, char** argv) {
 		modelRef.setup_train(modelParams,dataLoaderPtr->get_dataset_manager());
 		if(modelSelection){
 			/// running model selection
-			modelRef.train(modelRef.get_train_ds(),modelRef.get_test_ds(),modelRef.get_cs_ds());
+//			modelRef.train(modelRef.get_train_ds(),modelRef.get_test_ds(),modelRef.get_cs_ds());
+			cout << ">>> evaluate model by cross validation\n" << endl;
+			for(size_t i = 0; i < 5; i++){
+				cout << ">>> cv fold: " << i << endl;
+				DatasetExt& cvTrain = dataLoaderPtr->get_dataset_manager()->cv_dataset(i).m_train;
+				DatasetExt& cvTest = dataLoaderPtr->get_dataset_manager()->cv_dataset(i).m_test;
+				DatasetExt dummyDataset;
+				modelRef.train(cvTrain,cvTest,dummyDataset);
+			}
 		}else{
 			/// train model using entire dataset
 			DatasetExt dummyDataset;

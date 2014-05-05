@@ -40,6 +40,10 @@ PopularityModel::TrainIterLog PopularityModel::_train_update(){
 	return TrainIterLog();
 }
 
+
+float PopularityModel::_pred_error(int64_t const& userId, DatasetExt& dataset){
+	return 0;
+}
 float PopularityModel::_pred_error(int64_t const& entityId,
 		map<int8_t, vector<Interact> >& entityInteractMap){
 	return 0;

@@ -314,39 +314,39 @@ int main(int argc, char **argv) {
 //	int port = 9090;
 	/// create the handler by passing the command line arguments
 	shared_ptr<RecEngineHandler> handler(new RecEngineHandler(argc, argv));
-//		handler->test_datahost_client();
-	ModelDriver& MODEL_DRIVER = ModelDriver::ref();
-	//// cast to HierarchicalHybridMF reference
-	HierarchicalHybridMF& hhmf = dynamic_cast<HierarchicalHybridMF&>(MODEL_DRIVER.get_model_ref());
-
-	/// dump the prior information to text file
-	RecModel::ModelParam const& modelParam = hhmf.get_model_param();
-	string priorFile = MODEL_DRIVER.get_model_name() + "-" + (string)modelParam + ".prior.txt";
-	hhmf.dump_prior_information(priorFile);
-	/// generate age and gender combinations
-	const char* genderArr[] = {"", "gd_male","gd_female"};
-	const char* ageArr[] = {"","ag_25","ag_30","ag_40","ag_50"};
-	vector<string> genderVec;
-	genderVec.assign(genderArr,genderArr + sizeof(genderArr)/sizeof(genderArr[0]));
-	vector<string> ageVec;
-	ageVec.assign(ageArr,ageArr + sizeof(ageArr)/sizeof(ageArr[0]));
-	for (size_t i = 0; i < genderVec.size(); i++) {
-		string gender = genderArr[i];
-		for (size_t j = 0; j < ageVec.size() ; j++) {
-			string age = ageVec[j];
-			string userName = "testuser-" + gender + "-" + age;
-			map<string,int> profile;
-			profile[gender] = 1;
-			profile[age] = 1;
-			handler->test_index_user(userName,profile);
-			vector<rt::Recommendation> recList;
-			handler->get_recommendation(recList, userName);
-			handler->save_recommendation(userName + ".rec.list", recList);
-		}
-	}
-	//// dump the entity profile
-	string profileFile = MODEL_DRIVER.get_model_name() + "-" + (string)modelParam + ".latent.txt";
-	hhmf.dump_model_profile(profileFile);
+		handler->test_datahost_client();
+//	ModelDriver& MODEL_DRIVER = ModelDriver::ref();
+//	//// cast to HierarchicalHybridMF reference
+//	HierarchicalHybridMF& hhmf = dynamic_cast<HierarchicalHybridMF&>(MODEL_DRIVER.get_model_ref());
+//
+//	/// dump the prior information to text file
+//	RecModel::ModelParam const& modelParam = hhmf.get_model_param();
+//	string priorFile = MODEL_DRIVER.get_model_name() + "-" + (string)modelParam + ".prior.txt";
+//	hhmf.dump_prior_information(priorFile);
+//	/// generate age and gender combinations
+//	const char* genderArr[] = {"", "gd_male","gd_female"};
+//	const char* ageArr[] = {"","ag_25","ag_30","ag_40","ag_50"};
+//	vector<string> genderVec;
+//	genderVec.assign(genderArr,genderArr + sizeof(genderArr)/sizeof(genderArr[0]));
+//	vector<string> ageVec;
+//	ageVec.assign(ageArr,ageArr + sizeof(ageArr)/sizeof(ageArr[0]));
+//	for (size_t i = 0; i < genderVec.size(); i++) {
+//		string gender = genderArr[i];
+//		for (size_t j = 0; j < ageVec.size() ; j++) {
+//			string age = ageVec[j];
+//			string userName = "testuser-" + gender + "-" + age;
+//			map<string,int> profile;
+//			profile[gender] = 1;
+//			profile[age] = 1;
+//			handler->test_index_user(userName,profile);
+//			vector<rt::Recommendation> recList;
+//			handler->get_recommendation(recList, userName);
+//			handler->save_recommendation(userName + ".rec.list", recList);
+//		}
+//	}
+//	//// dump the entity profile
+//	string profileFile = MODEL_DRIVER.get_model_name() + "-" + (string)modelParam + ".latent.txt";
+//	hhmf.dump_model_profile(profileFile);
 
 //	shared_ptr<TProcessor> processor(new RecEngineProcessor(handler));
 //	shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
