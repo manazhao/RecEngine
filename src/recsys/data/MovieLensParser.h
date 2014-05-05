@@ -18,6 +18,8 @@ protected:
 			vector<Entity>& entityFeatures) {
 		js::String userId = jsObj["id"];
 		entity = Entity(userId.Value(), Entity::ENT_USER);
+		/// erase the id field
+		jsObj.Erase(jsObj.Find("id"));
 		js::Object::const_iterator beginIter(jsObj.Begin()), endIter(jsObj.End());
 		for(; beginIter != endIter; ++beginIter){
 			string featureName = beginIter->name;
@@ -41,6 +43,8 @@ protected:
 		objDesc["name"] = jsObj["name"];
 		entity = Entity(itemId.Value(), Entity::ENT_ITEM,objDesc);
 		js::Object::const_iterator beginIter(jsObj.Begin()), endIter(jsObj.End());
+		jsObj.Erase(jsObj.Find("name"));
+		jsObj.Erase(jsObj.Find("id"));
 		for(;beginIter != endIter; ++beginIter){
 			string featureName = beginIter->name;
 			if(featureName == "genres"){

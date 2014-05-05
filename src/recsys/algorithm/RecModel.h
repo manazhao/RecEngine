@@ -105,7 +105,7 @@ public:
 	virtual vector<rt::Recommendation> recommend(int64_t const& userId,
 			map<int8_t, vector<rt::Interact> >& userInteracts) = 0;
 	virtual string model_summary() = 0;
-	void train(DatasetExt& trainSet, DatasetExt& testSet, DatasetExt& csSet);
+	TrainIterLog train(DatasetExt& trainSet, DatasetExt& testSet, DatasetExt& csSet);
 	DatasetExt& get_active_ds() {
 		return m_active_dataset;
 	}

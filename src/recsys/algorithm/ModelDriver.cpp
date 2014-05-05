@@ -26,7 +26,7 @@ void ModelDriver::_save_model(){
 	if(m_model_file.empty()){
 		/// generate a file name
 		stringstream ss;
-		ss << m_model_name << "-" << (string)(get_model_ref().m_model_param) << "-model" << (get_model_ref().m_model_selection ? "[SEL]": "") << ".bin";
+		ss << m_dataset_name << "-" <<  m_model_name << "-" << (string)(get_model_ref().m_model_param) << "-model" << (get_model_ref().m_model_selection ? "[SEL]": "") << ".bin";
 		string fileName = ss.str();
 		/// get working directory
 		boost::filesystem::path cwd(boost::filesystem::current_path());
@@ -71,7 +71,7 @@ void ModelDriver::run_from_cmd(int argc, char** argv) {
 			("user-file", po::value<string>(&userFile),"user profile file")
 			("item-file", po::value<string>(&itemFile), "item profile file")
 			("rating-file", po::value<string>(&ratingFile),"rating file")
-			("dataset-name", po::value<string>(&datasetName)->required(),"dataset name: should be one of [amazon,movielens]")
+			("dataset-name", po::value<string>(&m_dataset_name)->required(),"dataset name: should be one of [amazon,movielens]")
 			("lat-dim", po::value<size_t>(&(modelParams.m_lat_dim)), "latent dimension")
 			("diag-cov", po::value<bool>(&(modelParams.m_diag_cov)),"diagonal multivariate Gaussian")
 			("max-iter", po::value<size_t>(&(modelParams.m_max_iter)), "maximum number of iterations")
@@ -128,15 +128,26 @@ void ModelDriver::run_from_cmd(int argc, char** argv) {
 		modelRef.setup_train(modelParams,dataLoaderPtr->get_dataset_manager());
 		if(modelSelection){
 			/// running model selection
-//			modelRef.train(modelRef.get_train_ds(),modelRef.get_test_ds(),modelRef.get_cs_ds());
-			cout << ">>> evaluate model by cross validation\n" << endl;
-			for(size_t i = 1; i < 5; i++){
-				cout << ">>> cv fold: " << i << endl;
+			cout << ">>>>>>>>>>>>>> evaluate model by cross validation\n\n";
+			RecModel::TrainIterLog averageResult;
+			for(size_t i = 0; i < 5; i++){
+				cout << "--------------- cv fold: " << i << "---------------" << endl;
 				DatasetExt& cvTrain = dataLoaderPtr->get_dataset_manager()->cv_dataset(i).m_train;
 				DatasetExt& cvTest = dataLoaderPtr->get_dataset_manager()->cv_dataset(i).m_test;
 				DatasetExt dummyDataset;
-				modelRef.train(cvTrain,cvTest,dummyDataset);
+				RecModel::TrainIterLog cvResult = modelRef.train(cvTrain,cvTest,dummyDataset);
+				averageResult.m_train_rmse += cvResult.m_train_rmse;
+				averageResult.m_test_rmse += cvResult.m_test_rmse;
+				averageResult.m_cs_rmse += cvResult.m_cs_rmse;
+				cout << "\n\n";
 			}
+			//// write the average precision
+			averageResult.m_train_rmse /= 5;
+			averageResult.m_test_rmse /= 5;
+			averageResult.m_cs_rmse /= 5;
+			cout << "--------------- Result Averaged over 5 fold Cross Validation ---------------" << endl;
+			cout << averageResult << endl;
+			cout << endl;
 		}else{
 			/// train model using entire dataset
 			DatasetExt dummyDataset;
@@ -144,7 +155,6 @@ void ModelDriver::run_from_cmd(int argc, char** argv) {
 		}
 		_save_model();
 	}
-
 }
 
 ModelDriver::~ModelDriver() {

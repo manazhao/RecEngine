@@ -35,7 +35,7 @@ void RecModel::setup_train(ModelParam const& modelParam, shared_ptr<
 	m_dataset_manager = datasetManager;
 }
 
-void RecModel::train(DatasetExt& trainSet, DatasetExt& testSet, DatasetExt& csSet){
+RecModel::TrainIterLog RecModel::train(DatasetExt& trainSet, DatasetExt& testSet, DatasetExt& csSet){
 	/// initialize training model
 	/// train the model on the training dataset and evaluate on the testing and coldstart dataset
 	m_active_dataset = trainSet;
@@ -43,9 +43,10 @@ void RecModel::train(DatasetExt& trainSet, DatasetExt& testSet, DatasetExt& csSe
 	_init_training();
 	m_model_selection = !testSet.empty();
 	cout << ">>> start model optimization" << endl;
+	TrainIterLog iterLog;
 	for(size_t iterNum = 1; iterNum <= m_model_param.m_max_iter; iterNum++){
 		timer timer;
-		TrainIterLog iterLog = _train_update();
+		iterLog = _train_update();
 		iterLog.m_train_rmse = _dataset_rmse(trainSet);
 		if(!testSet.empty()){
 			iterLog.m_test_rmse = _dataset_rmse(testSet);
@@ -57,6 +58,8 @@ void RecModel::train(DatasetExt& trainSet, DatasetExt& testSet, DatasetExt& csSe
 		iterLog.m_iter = iterNum;
 		cout << iterLog;
 	}
+	/// return the final result
+	return iterLog;
 }
 
 float RecModel::_dataset_rmse(DatasetExt& dataset){

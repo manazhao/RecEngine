@@ -46,20 +46,21 @@ void DatasetManager::generate_cv_datasets() {
 		Interact ratingInteract = *(allRatingInteracts[ratingIdx]);
 		int64_t userIdx = allRatingUsers[ratingIdx];
 		int64_t itemIdx = ratingInteract.ent_id;
+		Interact ratingInteractRev = ratingInteract;
+		ratingInteractRev.ent_id = userIdx;
 		for (size_t j = 0; j < m_cv_folds; j++) {
 			TrainTestPair& curPair = m_cv_datasets[j];
-			DatasetExt& curDataset = (
-					foldIdx == j ? curPair.m_test : curPair.m_train);
+			DatasetExt* curDataset = (
+					foldIdx == j ? &(curPair.m_test) : &(curPair.m_train));
 			/// add to testing dataset
-			curDataset.add_entity(Entity::ENT_USER, userIdx);
-			curDataset.add_entity(Entity::ENT_ITEM, itemIdx);
+			curDataset->add_entity(Entity::ENT_USER, userIdx);
+			curDataset->add_entity(Entity::ENT_ITEM, itemIdx);
 			/// add the interaction
-			curDataset.ent_type_interacts[userIdx][EntityInteraction::RATE_ITEM].push_back(
+			curDataset->ent_type_interacts[userIdx][EntityInteraction::RATE_ITEM].push_back(
 					ratingInteract);
 			//// change the destination id to user
-			ratingInteract.ent_id = userIdx;
-			curDataset.ent_type_interacts[itemIdx][EntityInteraction::RATE_ITEM].push_back(
-					ratingInteract);
+			curDataset->ent_type_interacts[itemIdx][EntityInteraction::RATE_ITEM].push_back(
+					ratingInteractRev);
 		}
 	}
 	cout << "dump ratings\n";
@@ -67,8 +68,8 @@ void DatasetManager::generate_cv_datasets() {
 	for(size_t i = 0; i < m_cv_datasets.size(); i++){
 		_add_feature_interactions(m_cv_datasets[i].m_train,completeDataset);
 		_add_feature_interactions(m_cv_datasets[i].m_test,completeDataset);
-		m_cv_datasets[i].m_train.dump_rating_interact();
-		m_cv_datasets[i].m_test.dump_rating_interact();
+//		m_cv_datasets[i].m_train.dump_rating_interact();
+//		m_cv_datasets[i].m_test.dump_rating_interact();
 	}
 	cout << ">>> done!" << endl;
 }

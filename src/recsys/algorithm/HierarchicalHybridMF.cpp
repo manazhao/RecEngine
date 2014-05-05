@@ -34,7 +34,7 @@ ostream& operator <<(ostream& oss,
 
 void HierarchicalHybridMF::_init_training() {
 	assert(!m_active_dataset.ent_type_interacts.empty());
-	cout << m_model_param << "\n\n";
+	cout << m_model_param << "\n";
 	if (!m_dataset_manager) {
 		cerr << "dataset manager is not provided" << endl;
 		exit(1);

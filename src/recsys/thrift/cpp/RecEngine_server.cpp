@@ -55,6 +55,8 @@ protected:
 	string m_model_file;
 	string m_model_name;
 	string m_dataset_name;
+public:
+	string m_feature_query_file;
 protected:
 	void _init_datahost_client(string const& host, int port) {
 		cout << ">>> connect to datahost server@" << host << ":" << port
@@ -93,8 +95,9 @@ protected:
 				"data-port", po::value<int>(&port),
 				"port at which the data sharing service is listening at")(
 				"dataset-name", po::value<string>(&m_dataset_name)->required(),
-				"dataset name: should be one of [amazon,movielens]");
-
+				"dataset name: should be one of [amazon,movielens]")
+				("query-file", po::value<string>(&m_feature_query_file)->required(),
+								"user profile file")				;
 		po::variables_map vm;
 		try {
 			po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -127,16 +130,19 @@ public:
 		_init_from_cmd(argc, argv);
 	}
 
-	void test_index_user(string const& userName, map<string,int>& profile){
+	void test_index_user(string const& userName, map<string, int>& profile) {
 		rt::DataHostClient dataHostClient =
 				m_datahost_client_wrapper_ptr->m_client;
 		try {
 			m_datahost_client_wrapper_ptr->m_transport->open();
 			rt::Response response;
 			/// first index the user entity
-			dataHostClient.index_interaction(response,userName,Entity::ENT_USER,"",Entity::ENT_DEFAULT,EntityInteraction::ADD_FEATURE,1);
+			dataHostClient.index_interaction(response, userName,
+					Entity::ENT_USER, "", Entity::ENT_DEFAULT,
+					EntityInteraction::ADD_FEATURE, 1);
 			/// add features to the user entity
-			for(map<string,int>::iterator iter = profile.begin(); iter != profile.end(); ++iter){
+			for (map<string, int>::iterator iter = profile.begin();
+					iter != profile.end(); ++iter) {
 				string featureName = iter->first;
 				dataHostClient.index_interaction(response, userName,
 						Entity::ENT_USER, featureName, Entity::ENT_FEATURE,
@@ -161,6 +167,37 @@ public:
 				cout << featId << "-" << featName << ",";
 			}
 			cout << endl;
+			m_datahost_client_wrapper_ptr->m_transport->close();
+		} catch (TException &tx) {
+			printf("ERROR: %s\n", tx.what());
+		}
+	}
+
+	/// dump feature id <-> feature name
+	void dump_feature_dict() {
+		ModelDriver& MODEL_DRIVER = ModelDriver::ref();
+		RecModel& MODEL = MODEL_DRIVER.get_model_ref();
+		/// get active dataset
+		DatasetExt& activeDataset = MODEL.get_active_ds();
+		/// query user profile
+		set<int64_t>& featIds = activeDataset.type_ent_ids[Entity::ENT_FEATURE];
+		try {
+			m_datahost_client_wrapper_ptr->m_transport->open();
+			vector<int64_t> featIdVec;
+			featIdVec.insert(featIdVec.end(), featIds.begin(), featIds.end());
+			vector<string> featNameVec;
+			rt::DataHostClient dataHostClient =
+					m_datahost_client_wrapper_ptr->m_client;
+			dataHostClient.query_entity_names(featNameVec, featIdVec);
+			/// now dump the result to file
+			string fileName = MODEL_DRIVER.get_dataset_name() + "_feat.csv";
+			ofstream ofs;
+			ofs.open(fileName.c_str(), std::ofstream::out);
+			assert(ofs.good());
+			for (size_t i = 0; i < featNameVec.size(); i++) {
+				ofs << featNameVec[i] << "," << featIdVec[i] << endl;
+			}
+			ofs.close();
 			m_datahost_client_wrapper_ptr->m_transport->close();
 		} catch (TException &tx) {
 			printf("ERROR: %s\n", tx.what());
@@ -246,19 +283,86 @@ public:
 		}
 	}
 
-	void save_recommendation(string const& file, vector<Recommendation> const& recList){
+	void save_recommendation_json(string const& fileName, int64_t const& userId, vector<string> const& featNameVec,
+			vector<int64_t> const& featIdVec, vector<string> const& recNameVec, vector<int64_t> const& recIdVec){
 		ofstream ofs;
-		ofs.open(file.c_str());
+		ofs.open(fileName.c_str(), std::ofstream::out|std::ofstream::app);
 		assert(ofs.good());
-		/// write the result to the file
-		for(vector<Recommendation>::const_iterator iter = recList.begin(); iter < recList.end(); ++iter){
-			Recommendation const& rec = *iter;
-			vector<string> splits;
-			boost::split(splits, rec.id, boost::is_any_of("_"));
-			string url = "http://amazon.com/dp/" + splits[1];
-			ofs << "id:" << url << ", score:" << rec.score << endl;
+		js::Object obj;
+		obj["userId"] = js::String(lexical_cast<string>(userId));
+		js::Array features;
+		js::Array featureNames;
+		for(size_t i = 0; i < featIdVec.size(); i++){
+			features.Insert(js::String(lexical_cast<string>(featIdVec[i])));
+			featureNames.Insert(js::String(featNameVec[i]));
 		}
+		obj["features"] = features;
+		obj["featureNames"] = featureNames;
+
+		/// insert the recommendation list
+		js::Array recNameArr;
+		js::Array recIdArr;
+		for(size_t i = 0; i < recNameVec.size(); i++){
+			recIdArr.Insert(js::String(lexical_cast<string>(recIdVec[i])));
+			recNameArr.Insert(js::String(recNameVec[i]));
+		}
+		obj["recIdList"] = recIdArr;
+		obj["recNameList"] = recNameArr;
+		/// convert to string
+		stringstream ss;
+		js::Writer::Write(obj,ss);
+		string jsonStr = ss.str();
+		jsonStr.erase(
+				std::remove_if(jsonStr.begin(), jsonStr.end(), ::isspace),
+				jsonStr.end());
+		ofs << jsonStr << "\n";
 		ofs.close();
+	}
+
+//	void save_recommendation(string const& file,
+//			vector<Recommendation> const& recList) {
+//		ofstream ofs;
+//		ofs.open(file.c_str());
+//		assert(ofs.good());
+//		/// write the result to the file
+//		for (vector<Recommendation>::const_iterator iter = recList.begin();
+//				iter < recList.end(); ++iter) {
+//			Recommendation const& rec = *iter;
+//			vector<string> splits;
+//			boost::split(splits, rec.id, boost::is_any_of("_"));
+//			string url = "http://amazon.com/dp/" + splits[1];
+//			ofs << "id:" << url << ", score:" << rec.score << endl;
+//		}
+//		ofs.close();
+//	}
+
+	void get_recommendation(string const& userFile) {
+		/// read user profile from a given file
+		ifstream ifs;
+		ifs.open(userFile.c_str());
+		assert(ifs.good());
+		string line;
+		js::Object userObj;
+		while (std::getline(ifs, line)) {
+			stringstream ss;
+			ss << line;
+			js::Object userObj;
+			js::Reader::Read(userObj, ss);
+			js::String userId = userObj["id"];
+			/// put all features in a map
+			js::Array features = userObj["features"];
+			map<string, int> featureMap;
+			for (js::Array::const_iterator iter = features.Begin();
+					iter != features.End(); ++iter) {
+				js::String feature = *iter;
+				featureMap[feature.Value()] = 1;
+			}
+			this->test_index_user(userId.Value(), featureMap);
+			//// now get the recommendation
+			vector<rt::Recommendation> recList;
+			get_recommendation(recList, userId.Value());
+		}
+		ifs.close();
 	}
 
 	void get_recommendation(std::vector<Recommendation> & _return,
@@ -280,33 +384,55 @@ public:
 		} catch (TException &tx) {
 			printf("ERROR: %s\n", tx.what());
 		}
+
 		/// make recommendations
 		ModelDriver& MODEL_DRIVER = ModelDriver::ref();
 		RecModel& recModel = MODEL_DRIVER.get_model_ref();
 		_return = recModel.recommend(mappedUserId, entityInteracts);
+
 		/// convert mapped id to original id
-		/// this looks really ugly
 		vector<int64_t> idVec;
+		/// original item id
+		vector<string> origIdVec;
+		/// also the feature names
+		vector<int64_t> featIdVec;
+		vector<string> featNameVec;
 		for (vector<Recommendation>::iterator iter = _return.begin();
 				iter < _return.end(); ++iter) {
 			int64_t itemId = lexical_cast<int64_t>(iter->id);
 			idVec.push_back(itemId);
 		}
-		vector<string> origIdVec;
-		m_datahost_client_wrapper_ptr->m_transport->open();
-		m_datahost_client_wrapper_ptr->m_client.query_entity_names(origIdVec,
-				idVec);
-		m_datahost_client_wrapper_ptr->m_transport->close();
+		for(vector<Interact>::iterator iter = entityInteracts[EntityInteraction::ADD_FEATURE].begin(); iter < entityInteracts[EntityInteraction::ADD_FEATURE].end(); ++iter){
+			featIdVec.push_back(iter->ent_id);
+		}
+		try{
+			m_datahost_client_wrapper_ptr->m_transport->open();
+			/// get original item id
+			m_datahost_client_wrapper_ptr->m_client.query_entity_names(origIdVec,
+					idVec);
+			/// get feature names given feature ids
+			m_datahost_client_wrapper_ptr->m_client.query_entity_names(featNameVec,
+								featIdVec);
+			m_datahost_client_wrapper_ptr->m_transport->close();
+		}catch (TException &tx) {
+			printf("ERROR: %s\n", tx.what());
+		}
+
 		/// put it back
 		for (size_t i = 0; i < origIdVec.size(); i++) {
 			_return[i].id = origIdVec[i];
 		}
+
+		//// save the result
 		/// also save user's latent profile
-		HierarchicalHybridMF& hhmf = dynamic_cast<HierarchicalHybridMF&>(MODEL_DRIVER.get_model_ref());
+		HierarchicalHybridMF& hhmf =
+				dynamic_cast<HierarchicalHybridMF&>(MODEL_DRIVER.get_model_ref());
 		RecModel::ModelParam const& mp = hhmf.get_model_param();
 		/// dump the recommended item profile
-		string fileName = MODEL_DRIVER.get_model_name() + "-" + (string)mp + "-entity-" + userId + ".json";
-		hhmf.dump_recommendation_json(fileName,mappedUserId,entityInteracts[EntityInteraction::ADD_FEATURE],idVec);
+		string fileName = MODEL_DRIVER.get_model_name() + "-" + (string) mp
+				+ "-entity-" + userId + ".json";
+
+		save_recommendation_json(fileName, mappedUserId, featNameVec, featIdVec, origIdVec, idVec);
 	}
 };
 
@@ -314,39 +440,28 @@ int main(int argc, char **argv) {
 //	int port = 9090;
 	/// create the handler by passing the command line arguments
 	shared_ptr<RecEngineHandler> handler(new RecEngineHandler(argc, argv));
-		handler->test_datahost_client();
-//	ModelDriver& MODEL_DRIVER = ModelDriver::ref();
-//	//// cast to HierarchicalHybridMF reference
-//	HierarchicalHybridMF& hhmf = dynamic_cast<HierarchicalHybridMF&>(MODEL_DRIVER.get_model_ref());
-//
-//	/// dump the prior information to text file
-//	RecModel::ModelParam const& modelParam = hhmf.get_model_param();
-//	string priorFile = MODEL_DRIVER.get_model_name() + "-" + (string)modelParam + ".prior.txt";
-//	hhmf.dump_prior_information(priorFile);
-//	/// generate age and gender combinations
-//	const char* genderArr[] = {"", "gd_male","gd_female"};
-//	const char* ageArr[] = {"","ag_25","ag_30","ag_40","ag_50"};
-//	vector<string> genderVec;
-//	genderVec.assign(genderArr,genderArr + sizeof(genderArr)/sizeof(genderArr[0]));
-//	vector<string> ageVec;
-//	ageVec.assign(ageArr,ageArr + sizeof(ageArr)/sizeof(ageArr[0]));
-//	for (size_t i = 0; i < genderVec.size(); i++) {
-//		string gender = genderArr[i];
-//		for (size_t j = 0; j < ageVec.size() ; j++) {
-//			string age = ageVec[j];
-//			string userName = "testuser-" + gender + "-" + age;
-//			map<string,int> profile;
-//			profile[gender] = 1;
-//			profile[age] = 1;
-//			handler->test_index_user(userName,profile);
-//			vector<rt::Recommendation> recList;
-//			handler->get_recommendation(recList, userName);
-//			handler->save_recommendation(userName + ".rec.list", recList);
-//		}
-//	}
-//	//// dump the entity profile
-//	string profileFile = MODEL_DRIVER.get_model_name() + "-" + (string)modelParam + ".latent.txt";
-//	hhmf.dump_model_profile(profileFile);
+//		handler->test_datahost_client();
+
+	//// dump feature dictionary
+	handler->dump_feature_dict();
+	ModelDriver& MODEL_DRIVER = ModelDriver::ref();
+	//// cast to HierarchicalHybridMF reference
+	HierarchicalHybridMF& hhmf =
+			dynamic_cast<HierarchicalHybridMF&>(MODEL_DRIVER.get_model_ref());
+
+	/// dump the prior information to text file
+	RecModel::ModelParam const& modelParam = hhmf.get_model_param();
+	string priorFile = MODEL_DRIVER.get_model_name() + "-" + (string) modelParam
+			+ ".prior.txt";
+	hhmf.dump_prior_information(priorFile);
+
+	/// make recommendation queries for the given profile
+	handler->get_recommendation(handler->m_feature_query_file);
+
+	/// save the entity profiles
+	string profileFile = MODEL_DRIVER.get_model_name() + "-"
+			+ (string) modelParam + ".latent.txt";
+	hhmf.dump_model_profile(profileFile);
 
 //	shared_ptr<TProcessor> processor(new RecEngineProcessor(handler));
 //	shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));

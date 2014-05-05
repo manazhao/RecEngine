@@ -25,6 +25,7 @@ class ModelDriver {
 public:
 	typedef shared_ptr<RecModel> rec_model_ptr;
 protected:
+	string m_dataset_name;
 	string m_model_name;
 	string m_model_file;
 	map<string,rec_model_ptr > m_models;
@@ -41,7 +42,7 @@ private:
 	friend class boost::serialization::access;
 	template <class Archive>
 	void load(Archive& ar, const unsigned int version ){
-		ar & m_model_name;
+		ar & m_dataset_name & m_model_name;
 		/// generate the Model based on the model name
 		if(m_model_name == "HHMF"){
 			HierarchicalHybridMF& modelRef = dynamic_cast<HierarchicalHybridMF&>(get_model_ref());
@@ -61,7 +62,7 @@ private:
 
 	template <class Archive>
 	void save(Archive& ar, const unsigned int version ) const{
-		ar & m_model_name;
+		ar & m_dataset_name & m_model_name;
 		if(m_model_name == "HHMF"){
 			HierarchicalHybridMF const& modelRef = dynamic_cast<HierarchicalHybridMF const&>(get_model_ref());
 			ar & modelRef;
@@ -95,6 +96,9 @@ public:
 		return m_model_name;
 	}
 
+	string const& get_dataset_name() const{
+		return m_dataset_name;
+	}
 	/// get model reference
 	RecModel const& get_model_ref() const{
 		return *(m_models.at(m_model_name));
