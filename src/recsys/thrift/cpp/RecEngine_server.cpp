@@ -97,7 +97,7 @@ protected:
 				"dataset-name", po::value<string>(&m_dataset_name)->required(),
 				"dataset name: should be one of [amazon,movielens]")
 				("query-file", po::value<string>(&m_feature_query_file)->required(),
-								"user profile file")				;
+								"user profile file");
 		po::variables_map vm;
 		try {
 			po::store(po::parse_command_line(argc, argv, desc), vm);

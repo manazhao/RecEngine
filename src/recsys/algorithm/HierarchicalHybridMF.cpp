@@ -22,6 +22,8 @@
 namespace bf = boost::filesystem;
 namespace po = boost::program_options;
 
+#define __USE_ZERO_MEAN_PRIOR__
+
 namespace recsys {
 
 ostream& operator <<(ostream& oss,
@@ -209,8 +211,12 @@ void HierarchicalHybridMF::_update_feature_from_prior(int64_t const& featId) {
 	DistParamBundle updateMessage(2);
 	/// consider feature prior
 	DistParam featCovSuff2 = m_feature_prior_cov.suff_mean(2);
+#ifndef __USE_ZERO_MEAN_PRIOR__
 	updateMessage[0] = vec(
 			featCovSuff2.m_vec % m_feature_prior_mean.moment(1).m_vec);
+#else
+	updateMessage[0] = vec(m_model_param.m_lat_dim,fill::zeros);
+#endif
 	updateMessage[1] = vec(-0.5 * featCovSuff2.m_vec);
 	/// apply the update
 	m_entity[featId] += updateMessage;
@@ -473,8 +479,13 @@ void HierarchicalHybridMF::_update_feature_prior_cov() {
 		DistParamBundle updateMessage(2);
 		updateMessage[0] = (vec) (-0.5 * numFeats
 				* vec(m_model_param.m_lat_dim, fill::ones));
+#ifndef __USE_ZERO_FEATURE_PRIOR__
 		vec fpm1 = m_feature_prior_mean.moment(1);
 		vec fpm2 = m_feature_prior_mean.moment(2);
+#else
+		vec fpm1(m_model_param.m_lat_dim,fill::zeros);
+		vec fpm2(m_model_param.m_lat_dim,fill::zeros);
+#endif
 		for (set<int64_t>::iterator iter = featIds.begin();
 				iter != featIds.end(); ++iter) {
 			int64_t featId = *iter;
@@ -504,7 +515,9 @@ void HierarchicalHybridMF::_update_item_prior() {
 }
 
 void HierarchicalHybridMF::_update_feature_prior() {
+#ifndef __USE_ZERO_FEATURE_PRIOR__
 	_update_feature_prior_mean();
+#endif
 	_update_feature_prior_cov();
 }
 

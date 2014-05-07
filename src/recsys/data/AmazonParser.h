@@ -21,21 +21,23 @@ protected:
 		/// location is yet normalized, hold up using it.
 //		js::String location = jsObj["l"];
 		/// create user entity
-		if (jsObj.Find("age") != jsObj.End()) {
-			js::String age = jsObj["age"];
-			float ageF = lexical_cast<float>(age.Value());
-			int ageI = (int) (ageF);
-			string featureName = "ag_" + lexical_cast<string,int>(ageI);
-//			cout << featureName << "\n";
-			Entity tmpEntity(featureName,
-					Entity::ENT_FEATURE);
-			entityFeatures.push_back(tmpEntity);
-		}
+
+		/// age feature will be dropped for model diagnosis purpose
+//		if (jsObj.Find("age") != jsObj.End()) {
+//			js::String age = jsObj["age"];
+//			float ageF = lexical_cast<float>(age.Value());
+//			int ageI = (int) (ageF);
+//			string featureName = "ag_" + lexical_cast<string,int>(ageI);
+//			Entity tmpEntity(featureName,
+//					Entity::ENT_FEATURE);
+//			entityFeatures.push_back(tmpEntity);
+//		}
+
 		if (jsObj.Find("gender") != jsObj.End()) {
 			js::String gender = jsObj["gender"];
 			string genderStr = gender.Value();
 			boost::algorithm::to_lower(genderStr);
-			Entity tmpEntity("gd_" + genderStr, Entity::ENT_FEATURE);
+			Entity tmpEntity("gender_" + genderStr, Entity::ENT_FEATURE);
 			entityFeatures.push_back(tmpEntity);
 		}
 	}
