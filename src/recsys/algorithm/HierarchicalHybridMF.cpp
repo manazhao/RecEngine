@@ -69,7 +69,7 @@ void HierarchicalHybridMF::_init_training() {
 	/// rating variance, big variance
 	m_rating_var = InverseGamma(3, 3);
 	/// initialize bias as standard Gaussian
-	m_bias = Gaussian(_get_mean_rating(), 1);
+	m_global_bias = Gaussian(_init_global_bias(), 1);
 	/// get the number of features for each entity
 	_get_entity_feature_cnt();
 }
@@ -125,7 +125,7 @@ RecModel::TrainIterLog HierarchicalHybridMF::_train_update() {
 	}
 	//// update rating variance and global rating bias
 	_update_rating_var();
-	_update_bias();
+	_update_global_bias();
 	return iterLog;
 }
 
@@ -195,7 +195,7 @@ void HierarchicalHybridMF::_update_entity_from_ratings(int64_t const& entityId,
 		float tmpRating = tmpInteract.ent_val;
 		int64_t itemId = tmpInteract.ent_id;
 		DiagMVGaussian & itemLat = m_entity[itemId];
-		float tmpRating1 = tmpRating - m_bias.moment(1);
+		float tmpRating1 = tmpRating - m_global_bias.moment(1);
 		vec itemLatMean = itemLat.moment(1);
 		vec itemLatCov = itemLat.moment(2);
 		vec update1 = (tmpRating1 * rvsuff2 * itemLatMean);
@@ -227,10 +227,11 @@ void HierarchicalHybridMF::_update_feature_from_entities(int64_t const& featId,
 	vector<Interact> const& interacts =
 			typeInteracts[EntityInteraction::ADD_FEATURE];
 	DistParamBundle updateMessage(2);
-	//	DistParam featLatMean = m_entity[featId].moment(1);
 	for (vector<Interact>::const_iterator iter = interacts.begin();
 			iter < interacts.end(); ++iter) {
 		int64_t entityId = iter->ent_id;
+		/// value of the feature, could be +1 or -1 for gender feature
+		int64_t entVal = iter->ent_val;
 		int8_t entityType = m_active_dataset.m_id_type_map[entityId];
 		assert(entityType > 0);
 		DistParam entityCovSuff2 = (
@@ -247,6 +248,8 @@ void HierarchicalHybridMF::_update_feature_from_entities(int64_t const& featId,
 		vec otherFeatureMean = _entity_feature_mean_sum(entityId)
 				- m_entity[featId].moment(1).m_vec;
 		tmpDiff -= (1 / sqrt(numFeats) * otherFeatureMean);
+		// considering the value of the entity interaction.
+		tmpDiff *= (1/entVal);
 		updateMessage[0] +=
 				(1 / sqrt(numFeats) * tmpDiff % entityCovSuff2.m_vec);
 		updateMessage[1] += (-0.5 / (float) numFeats * entityCovSuff2.m_vec);
@@ -278,7 +281,8 @@ vec HierarchicalHybridMF::_entity_feature_mean_sum(
 	for (vector<Interact>::const_iterator iter1 = featureInteracts.begin();
 			iter1 < featureInteracts.end(); ++iter1) {
 		int64_t featId = iter1->ent_id;
-		meanSum += m_entity[featId].moment(1).m_vec;
+		float val = iter1->ent_val;
+		meanSum += (m_entity[featId].moment(1).m_vec * val);
 	}
 	return meanSum;
 }
@@ -290,16 +294,19 @@ vec HierarchicalHybridMF::_entity_feature_cov_sum(int64_t const& entityId) {
 	for (vector<Interact>::const_iterator iter1 = featureInteracts.begin();
 			iter1 < featureInteracts.end(); ++iter1) {
 		int64_t featId = iter1->ent_id;
+		float val = iter1->ent_val;
 		/// second moment calculation is an approximate
-		covSum += m_entity[featId].moment(2).m_vec;
+		covSum += (m_entity[featId].moment(2).m_vec * val * val);
 	}
 	for (size_t i = 0; i < featureInteracts.size(); i++) {
 		int64_t featI = featureInteracts[i].ent_id;
+		float valI = featureInteracts[i].ent_val;
 		vec iMean = m_entity[featI].moment(1);
 		for (size_t j = i + 1; j < featureInteracts.size(); j++) {
 			int64_t featJ = featureInteracts[j].ent_id;
+			float valJ = featureInteracts[j].ent_val;
 			vec jMean = m_entity[featJ].moment(1);
-			covSum += vectorise(iMean * jMean.t() + jMean * iMean.t());
+			covSum += vectorise(iMean * jMean.t() * valI * valJ + jMean * iMean.t() * valI * valJ);
 		}
 	}
 	return covSum;
@@ -564,7 +571,7 @@ float HierarchicalHybridMF::_pred_error(int64_t const& userId, DatasetExt& datas
 //		itemMean.print(cout);
 		float predRating = accu(
 				itemLat.moment(1).m_vec % userLat.moment(1).m_vec)
-				+ (float) m_bias.moment(1);
+				+ (float) m_global_bias.moment(1);
 		float diff = predRating - ratingVal;
 		rmse += (diff * diff);
 	}
@@ -613,7 +620,7 @@ float HierarchicalHybridMF::_pred_error(int64_t const& userId,
 		DiagMVGaussian& itemLat = m_entity[itemId];
 		float predRating = accu(
 				itemLat.moment(1).m_vec % userLat.moment(1).m_vec)
-				+ (float) m_bias.moment(1);
+				+ (float) m_global_bias.moment(1);
 		float diff = predRating - ratingVal;
 		rmse += (diff * diff);
 	}
@@ -639,8 +646,8 @@ void HierarchicalHybridMF::_lat_ip_moments(DiagMVGaussian & lat1,
 
 void HierarchicalHybridMF::_rating_bias_moments(float rating,
 		float & firstMoment, float& secondMoment) {
-	float bias1stMoment = m_bias.moment(1);
-	float bias2ndMoment = m_bias.moment(2);
+	float bias1stMoment = m_global_bias.moment(1);
+	float bias2ndMoment = m_global_bias.moment(2);
 	firstMoment = rating - bias1stMoment;
 	secondMoment = rating * rating - 2 * bias1stMoment * rating + bias2ndMoment;
 }
@@ -678,7 +685,7 @@ void HierarchicalHybridMF::_update_rating_var() {
 	m_rating_var = updateMessage;
 }
 
-float HierarchicalHybridMF::_get_mean_rating() {
+float HierarchicalHybridMF::_init_global_bias() {
 	float avgRating = 0;
 	set<int64_t> &userIds = m_active_dataset.type_ent_ids[Entity::ENT_USER];
 	size_t numRatings = 0;
@@ -694,10 +701,12 @@ float HierarchicalHybridMF::_get_mean_rating() {
 			numRatings++;
 		}
 	}
-	return avgRating / numRatings;
+	avgRating /= numRatings;
+	m_global_bias = Gaussian(avgRating,1.0);
+	return avgRating;
 }
 
-void HierarchicalHybridMF::_update_bias() {
+void HierarchicalHybridMF::_update_global_bias() {
 	float rvSuff2 = (float) m_rating_var.suff_mean(2);
 	DistParamBundle updateMessage(2);
 	updateMessage[0] = updateMessage[1] = (float) 0;
@@ -722,7 +731,7 @@ void HierarchicalHybridMF::_update_bias() {
 	}
 	updateMessage[0].m_vec *= (rvSuff2);
 	updateMessage[1].m_vec = -0.5 * numRatings * rvSuff2;
-	m_bias = updateMessage;
+	m_global_bias = updateMessage;
 }
 
 void HierarchicalHybridMF::_add_new_entity(int64_t const& entityId,
@@ -751,7 +760,7 @@ string HierarchicalHybridMF::model_summary() {
 			<< m_active_dataset.type_ent_ids[Entity::ENT_FEATURE].size()
 			<< "\n";
 	/// dump model information
-	ss << "global rating bias mean:" << (float) m_bias.moment(1) << "\n";
+	ss << "global rating bias mean:" << (float) m_global_bias.moment(1) << "\n";
 	ss << "global rating variance: " << (float) m_rating_var.moment(1) << "\n";
 	float rmse = _dataset_rmse(m_active_dataset);
 	ss << "rmse on the training dataset:" << rmse << "\n";
@@ -892,7 +901,7 @@ vector<rt::Recommendation> HierarchicalHybridMF::recommend(
 		/// calculate the inner product
 		rt::Recommendation rec;
 		rec.score = accu(itemLat.moment(1).m_vec % userLat.moment(1).m_vec)
-				+ (float) m_bias.moment(1);
+				+ (float) m_global_bias.moment(1);
 		rec.id = lexical_cast<string>(*iter);
 		rec.type = 0;
 		recList.push_back(rec);

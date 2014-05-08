@@ -58,8 +58,6 @@ public:
 	void dump_rating_interact();
 	void prepare_id_type_map();
 	void verify_interaction();
-//	void filter_entity_interactions(
-//			vector<map<int8_t, vector<Interact> > > const& entTypeInteractions);
 	virtual ~DatasetExt() throw () {
 	}
 };

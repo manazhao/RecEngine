@@ -45,37 +45,17 @@ void DatasetExt::dump_rating_interact(){
 void DatasetExt::verify_interaction(){
 	/// check whether the user id and item id are different
 	/// very basic checking
-	set<int64_t>& userIds = type_ent_ids[Entity::ENT_USER];
-	for(set<int64_t>::iterator iter = userIds.begin(); iter != userIds.end(); ++iter){
-		int64_t userId = *iter;
-		vector<Interact> &interacts = ent_type_interacts[userId][EntityInteraction::RATE_ITEM];
-		for(vector<Interact>::iterator iter1 = interacts.begin(); iter1 < interacts.end(); ++iter1){
-			int64_t endId = iter1->ent_id;
-			assert(userId != endId);
+	typedef vector<std::map<int8_t, std::vector<Interact> > >::iterator interact_vec_iter;
+	for(interact_vec_iter iter = ent_type_interacts.begin(); iter < ent_type_interacts.end(); ++iter){
+		map<int8_t, std::vector<Interact> >& interactMap = *iter;
+		for(map<int8_t, std::vector<Interact> >::iterator iter1 = interactMap.begin(); iter1 != interactMap.end(); ++iter1){
+			vector<Interact>& interactVec = iter1->second;
+			for(vector<Interact>::iterator iter2 = interactVec.begin(); iter2 < interactVec.end(); ++iter2){
+				assert(iter2->ent_val);
+			}
 		}
 	}
 }
-//
-//void DatasetExt::filter_entity_interactions(
-//		vector<map<int8_t, vector<Interact> > > const& entTypeInteractions) {
-//	/// only keep those interactions the both entities of which are in the entity id set
-//	for (set<int64_t>::iterator iter = ent_ids.begin(); iter
-//			!= ent_ids.end(); ++iter) {
-//		/// get the interactions
-//		int64_t fromEntId = *iter;
-//		map<int8_t, vector<Interact> > const& tmpTypeInteracts =
-//				entTypeInteractions[*iter];
-//		for (map<int8_t, vector<Interact> >::const_iterator iter1 =
-//				tmpTypeInteracts.begin(); iter1 != tmpTypeInteracts.end(); ++iter1) {
-//			int8_t intType = iter1->first;
-//			for (vector<Interact>::const_iterator iter2 = iter1->second.begin(); iter2
-//					< iter1->second.end(); ++iter2) {
-//				_filter_entity_interaction_helper(intType, fromEntId,
-//						*iter2);
-//			}
-//		}
-//	}
-//}
 
 void DatasetExt::_filter_entity_interaction_helper(int8_t const& type,
 		int64_t const& from_ent_id, Interact const& interact) {

@@ -3,11 +3,14 @@
 setwd("~/git/RecEngine/result-analysis")
 
 # load the entity latent file
-entity.latent.file <- "amazon-result-nf4/HHMF-d_5-f_0.latent.txt"
+result.root <- "amazon-result-f1"
+model.file <- "HHMF-d_5-f_1.latent.txt"
+entity.latent.file <- paste(c(result.root, model.file),collapse="/")
 entity.latent <- read.csv(file = entity.latent.file, sep=",", header=F)
 
 # load the feature dictionary
-feat.file <- "amazon-result4/query.features.csv"
+feat.file <- "query.features.csv"
+feat.file <- paste(c(result.root,feat.file),collapse="/")
 feat.id.map <- read.csv(file = feat.file, header = F)
 
 # make query for each of the features

@@ -43,7 +43,7 @@ endif
 all: RecModel
 
 dependents:
-	-cd /home/qzhao2/git/BayesianNetwork/LibDebug && $(MAKE) clean all
+	-cd /home/qzhao2/git/BayesianNetwork/LibDebug && $(MAKE) all
 
 # Tool invocations
 RecModel: $(OBJS) $(USER_OBJS) /home/qzhao2/git/BayesianNetwork/LibDebug/libBayesianNetwork.a

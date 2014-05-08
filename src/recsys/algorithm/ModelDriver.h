@@ -16,6 +16,7 @@
 #include <recsys/algorithm/HierarchicalHybridMF.h>
 #include <recsys/algorithm/AverageRatingModel.h>
 #include <recsys/algorithm/PopularityModel.h>
+#include <recsys/algorithm/HHMFBias.h>
 #include <boost/lexical_cast.hpp>
 using namespace boost;
 
@@ -33,6 +34,7 @@ protected:
 		m_models["HHMF"] = rec_model_ptr(new HierarchicalHybridMF());
 		m_models["AVG"] = rec_model_ptr(new AverageRatingModel());
 		m_models["POP"] = rec_model_ptr(new PopularityModel());
+		m_models["HHMFB"] = rec_model_ptr(new HHMFBias());
 	}
 	ModelDriver& operator=(ModelDriver const& rhs);
 	ModelDriver(ModelDriver const& rhs);
@@ -53,6 +55,9 @@ private:
 		}else if(m_model_name == "POP"){
 			PopularityModel& modelRef = dynamic_cast<PopularityModel&>(get_model_ref());
 			ar & modelRef;
+		}else if(m_model_name == "HHMFB"){
+			HHMFBias& modelRef = dynamic_cast<HHMFBias&>(get_model_ref());
+			ar & modelRef;
 		}
 		else{
 			cerr << "unknown model" << endl;
@@ -71,6 +76,9 @@ private:
 			ar & modelRef;
 		}else if(m_model_name == "POP"){
 			PopularityModel const& modelRef = dynamic_cast<PopularityModel const&>(get_model_ref());
+			ar & modelRef;
+		}else if(m_model_name == "HHMFB"){
+			HHMFBias const& modelRef = dynamic_cast<HHMFBias const&>(get_model_ref());
 			ar & modelRef;
 		}
 		else{

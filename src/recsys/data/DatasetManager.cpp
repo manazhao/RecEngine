@@ -63,7 +63,6 @@ void DatasetManager::generate_cv_datasets() {
 					ratingInteractRev);
 		}
 	}
-	cout << "dump ratings\n";
 	/// now add the feature interactions back
 	for(size_t i = 0; i < m_cv_datasets.size(); i++){
 		_add_feature_interactions(m_cv_datasets[i].m_train,completeDataset);
@@ -115,6 +114,7 @@ void DatasetManager::_add_feature_interactions(DatasetExt& dataset, DatasetExt& 
 			interact.ent_id = entityId;
 			dataset.ent_type_interacts[featId][EntityInteraction::ADD_FEATURE].push_back(
 					interact);
+			assert(interact.ent_val);
 		}
 	}
 
@@ -134,6 +134,10 @@ void DatasetManager::generate_datasets() {
 	cout << ">>> generate training and testing datasets" << endl;
 	_split_by_rating(0.75, tmpDataset, m_datasets[rt::DSType::DS_TRAIN],
 			m_datasets[rt::DSType::DS_TEST]);
+//	completeDataset.verify_interaction();
+//	m_datasets[rt::DSType::DS_TRAIN].verify_interaction();
+//	m_datasets[rt::DSType::DS_TEST].verify_interaction();
+//	m_datasets[rt::DSType::DS_CS].verify_interaction();
 }
 
 void DatasetManager::_get_entity_interacts(
@@ -159,6 +163,7 @@ void DatasetManager::_get_entity_interacts(
 						tmpInteract.m_to_entity->m_mapped_id;
 				resultInteract.ent_id = (fromId == entId ? toId : fromId);
 				resultInteract.ent_val = tmpInteract.m_val;
+				assert(resultInteract.ent_val);
 				_return[intType].push_back(resultInteract);
 			}
 		}
@@ -199,26 +204,7 @@ void DatasetManager::_split_by_rating(float splitRatio,
 	/// now add user/item <-> feature interactions
 	DatasetExt* splits[] = { &subSet1, &subSet2 };
 	for (size_t i = 0; i < 2; i++) {
-		vector<int64_t> userItemIds;
-		userItemIds.insert(userItemIds.end(), splits[i]->ent_ids.begin(),
-				splits[i]->ent_ids.end());
-		for (size_t j = 0; j < userItemIds.size(); j++) {
-			int64_t entityId = userItemIds[j];
-			vector<rt::Interact> const& featureInteracts =
-					inputDataset.ent_type_interacts[entityId][EntityInteraction::ADD_FEATURE];
-			for (vector<rt::Interact>::const_iterator iter =
-					featureInteracts.begin(); iter < featureInteracts.end();
-					iter++) {
-				rt::Interact interact = *iter;
-				int64_t featId = interact.ent_id;
-				splits[i]->add_entity(Entity::ENT_FEATURE, featId);
-				splits[i]->ent_type_interacts[entityId][EntityInteraction::ADD_FEATURE].push_back(
-						interact);
-				interact.ent_id = entityId;
-				splits[i]->ent_type_interacts[featId][EntityInteraction::ADD_FEATURE].push_back(
-						interact);
-			}
-		}
+		_add_feature_interactions(*(splits[i]), inputDataset);
 	}
 }
 
@@ -257,26 +243,7 @@ void DatasetManager::_split_by_user(float splitRatio, DatasetExt & inputDataset,
 	/// now add user/item <-> feature interactions
 	DatasetExt* splits[] = { &subSet1, &subSet2 };
 	for (size_t i = 0; i < 2; i++) {
-		vector<int64_t> userItemIds;
-		userItemIds.insert(userItemIds.end(), splits[i]->ent_ids.begin(),
-				splits[i]->ent_ids.end());
-		for (size_t j = 0; j < userItemIds.size(); j++) {
-			int64_t entityId = userItemIds[j];
-			vector<rt::Interact> const& featureInteracts =
-					inputDataset.ent_type_interacts[entityId][EntityInteraction::ADD_FEATURE];
-			for (vector<rt::Interact>::const_iterator iter =
-					featureInteracts.begin(); iter < featureInteracts.end();
-					iter++) {
-				Interact interact = *iter;
-				int64_t featId = interact.ent_id;
-				splits[i]->add_entity(Entity::ENT_FEATURE, featId);
-				splits[i]->ent_type_interacts[entityId][EntityInteraction::ADD_FEATURE].push_back(
-						interact);
-				interact.ent_id = entityId;
-				splits[i]->ent_type_interacts[featId][EntityInteraction::ADD_FEATURE].push_back(
-						interact);
-			}
-		}
+		_add_feature_interactions(*(splits[i]),inputDataset);
 	}
 }
 

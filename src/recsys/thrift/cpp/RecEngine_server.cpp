@@ -456,7 +456,7 @@ int main(int argc, char **argv) {
 	hhmf.dump_prior_information(priorFile);
 
 	/// make recommendation queries for the given profile
-	handler->get_recommendation(handler->m_feature_query_file);
+//	handler->get_recommendation(handler->m_feature_query_file);
 
 	/// save the entity profiles
 	string profileFile = MODEL_DRIVER.get_model_name() + "-"

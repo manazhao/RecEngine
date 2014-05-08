@@ -10,12 +10,15 @@
 
 #include "JSONDataLoader.h"
 #include <boost/algorithm/string.hpp>
+
+//#define __ONE_DIM_GENDER__
+
 namespace recsys {
 namespace amazon {
 class UserEntityParser: public recsys::EntityParser {
 protected:
 	virtual void _parse_helper(js::Object& jsObj, Entity& entity,
-			vector<Entity>& entityFeatures) {
+			vector<Entity>& entityFeatures,vector<float>& featValVec) {
 		js::String userId = jsObj["id"];
 		entity = Entity(userId.Value(), Entity::ENT_USER);
 		/// location is yet normalized, hold up using it.
@@ -37,7 +40,17 @@ protected:
 			js::String gender = jsObj["gender"];
 			string genderStr = gender.Value();
 			boost::algorithm::to_lower(genderStr);
-			Entity tmpEntity("gender_" + genderStr, Entity::ENT_FEATURE);
+//			string featureKey = "gender_" + genderStr;
+			/// use one feature for gender and female and male take +1 and -1 values
+#ifdef __ONE_DIM_GENDER__
+			string featureKey = "gender_";
+			float featVal = (genderStr == "female" ? 1 : -1);
+#else
+			string featureKey = "gender_" + genderStr;
+			float featVal = 1;
+#endif
+			Entity tmpEntity(featureKey, Entity::ENT_FEATURE);
+			featValVec.push_back(featVal);
 			entityFeatures.push_back(tmpEntity);
 		}
 	}
@@ -72,7 +85,7 @@ protected:
 	}
 
 	virtual void _parse_helper(js::Object& jsObj, Entity& entity,
-			vector<Entity>& entityFeatures) {
+			vector<Entity>& entityFeatures,vector<float>& featValVec) {
 		/// extract the category fields and merchant fields
 		js::String itemId = jsObj["id"];
 		js::String itemCats = jsObj["c"];
@@ -84,6 +97,7 @@ protected:
 			Entity tmpFeatEntity("m_" + itemMerchant.Value(),
 					Entity::ENT_FEATURE, JSObjectWrapper().add("t", "c"));
 			entityFeatures.push_back(tmpFeatEntity);
+			featValVec.push_back(1);
 		}
 		/// create the item - category interactions
 		for (str_set::iterator iter = itemCatNodes->begin();
@@ -91,6 +105,7 @@ protected:
 			string catFeature = "c_" + *iter;
 			Entity tmpFeatEntity(catFeature, Entity::ENT_FEATURE);
 			entityFeatures.push_back(tmpFeatEntity);
+			featValVec.push_back(1);
 		}
 	}
 };

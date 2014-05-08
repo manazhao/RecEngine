@@ -153,6 +153,7 @@ EntityInteraction::entity_interact_ptr EntityInteraction::index_if_not_exist() {
 	assert(m_from_entity && m_to_entity);
 	///create the entity
 	entity_interact_ptr entityInteractPtr(new EntityInteraction(*this));
+	assert(entityInteractPtr->m_val);
 	bool fromExist = entity_interact_exist(m_from_entity->m_mapped_id,
 			m_to_entity->m_mapped_id,m_memory_mode);
 	bool toExist = entity_interact_exist(m_to_entity->m_mapped_id,

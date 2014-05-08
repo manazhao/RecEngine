@@ -23,15 +23,17 @@ void EntityParser::parse(string const& line) {
 	/// parse the json object to get entity and its features
 	Entity entity;
 	vector<Entity> features;
-	_parse_helper(entityObj, entity, features);
+	vector<float> featVals;
+	_parse_helper(entityObj, entity, features,featVals);
 	/// index the entity and the features
 	Entity::entity_ptr entityPtr = entity.index_if_not_exist();
 	/// index the features and link entity and feature
-	for (vector<Entity>::iterator iter = features.begin();
-			iter < features.end(); ++iter) {
-		Entity::entity_ptr featurePtr = iter->index_if_not_exist();
-		EntityInteraction tmpEI(EntityInteraction::ADD_FEATURE,
-				JSObjectWrapper().add("v", 1));
+	for(size_t i = 0; i < features.size(); i++){
+		Entity& feature = features[i];
+		Entity::entity_ptr featurePtr = feature.index_if_not_exist();
+		float featVal = featVals[i];
+		EntityInteraction tmpEI(EntityInteraction::ADD_FEATURE, featVal);
+//		cout << "entity interaction value:" << tmpEI.m_val << endl;
 		tmpEI.set_from_entity(entityPtr);
 		tmpEI.set_to_entity(featurePtr);
 		tmpEI.index_if_not_exist();

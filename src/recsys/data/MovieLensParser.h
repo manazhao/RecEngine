@@ -15,7 +15,7 @@ namespace movieLens {
 class UserEntityParser: public recsys::EntityParser {
 protected:
 	virtual void _parse_helper(js::Object& jsObj, Entity& entity,
-			vector<Entity>& entityFeatures) {
+			vector<Entity>& entityFeatures,vector<float>& featValVec) {
 		js::String userId = jsObj["id"];
 		entity = Entity(userId.Value(), Entity::ENT_USER);
 		/// erase the id field
@@ -26,8 +26,14 @@ protected:
 			/// generate the feature
 			js::String featureValue = beginIter->element;
 			string compositeFeature = featureName + "_" + featureValue.Value();
+			float val = 1;
+			if(featureName == "gender"){
+				compositeFeature = featureName + "_";
+				val = (featureValue.Value() == "female" ? -1 : 1);
+			}
 			Entity tmpEntity(compositeFeature,Entity::ENT_FEATURE);
 			entityFeatures.push_back(tmpEntity);
+			featValVec.push_back(val);
 		}
 	}
 };
@@ -35,7 +41,7 @@ protected:
 class ItemEntityParser: public recsys::EntityParser {
 protected:
 	virtual void _parse_helper(js::Object& jsObj, Entity& entity,
-			vector<Entity>& entityFeatures) {
+			vector<Entity>& entityFeatures,vector<float>& featValVec) {
 		/// extract the category fields and merchant fields
 		js::String itemId = jsObj["id"];
 		/// add item Entity
@@ -55,6 +61,7 @@ protected:
 					string featureName = "genre_" + tmpGenre.Value();
 					Entity tmpEntity(featureName, Entity::ENT_FEATURE);
 					entityFeatures.push_back(tmpEntity);
+					featValVec.push_back(1.0);
 				}
 			}
 		}

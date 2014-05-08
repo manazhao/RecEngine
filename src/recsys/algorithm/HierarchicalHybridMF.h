@@ -72,8 +72,8 @@ protected:
 	void _update_item_prior();
 	void _update_feature_prior();
 	void _update_rating_var();
-	void _update_bias();
-	float _get_mean_rating();
+	void _update_global_bias();
+	float _init_global_bias();
 	void _update_entity_from_prior_helper(int64_t const& entityId, int8_t entityType, vector<Interact>& featureInteracts);
 	void _update_entity_from_prior(int64_t const& entityId, int8_t entityType);
 
@@ -114,7 +114,7 @@ protected:
 	/// rating variance
 	InverseGamma m_rating_var;
 	/// assume bias prior is diffuse
-	Gaussian m_bias;
+	Gaussian m_global_bias;
 	map<int64_t,size_t> m_feat_cnt_map;
 private:
 	friend class boost::serialization::access;
@@ -122,7 +122,7 @@ private:
 	void serialize(Archive& ar, const unsigned int version ){
 		ar & boost::serialization::base_object<RecModel>(*this);
 		ar & m_entity & m_user_prior_mean & m_user_prior_cov & m_item_prior_mean & m_item_prior_cov & m_feature_prior_mean & m_feature_prior_cov
-		& m_rating_var & m_bias  & m_feat_cnt_map;
+		& m_rating_var & m_global_bias  & m_feat_cnt_map;
 	}
 };
 

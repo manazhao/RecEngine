@@ -19,7 +19,7 @@ namespace recsys {
 class EntityParser{
 	friend class JSONDataLoader;
 protected:
-	virtual void _parse_helper(js::Object& jsObj, Entity& entity, vector<Entity>& entityFeatures)  = 0;
+	virtual void _parse_helper(js::Object& jsObj, Entity& entity, vector<Entity>& entityFeatures,vector<float>& featValVec)  = 0;
 public:
 	EntityParser();
 	void parse(string const& line);

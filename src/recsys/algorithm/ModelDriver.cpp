@@ -77,7 +77,7 @@ void ModelDriver::run_from_cmd(int argc, char** argv) {
 			("max-iter", po::value<size_t>(&(modelParams.m_max_iter)), "maximum number of iterations")
 			("use-feature", po::value<bool>(&(modelParams.m_use_feature)), "integrate content feature as prior")
 			("model-file", po::value<string>(&m_model_file), "file storing the model training result, must be specified for model training")
-			("model", po::value<string>(&m_model_name)->required(), "the name of the model: must be one of [HHMF,AVG,POP]")
+			("model", po::value<string>(&m_model_name)->required(), "the name of the model: must be one of [HHMF,HHMFB,AVG,POP]")
 			("cross-validation", "run cross validation on the dataset");
 
 	po::variables_map vm;
