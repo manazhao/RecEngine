@@ -71,12 +71,11 @@ protected:
 	void _update_user_prior();
 	void _update_item_prior();
 	void _update_feature_prior();
-	void _update_rating_var();
-	void _update_global_bias();
-	float _init_global_bias();
 	void _update_entity_from_prior_helper(int64_t const& entityId, int8_t entityType, vector<Interact>& featureInteracts);
 	void _update_entity_from_prior(int64_t const& entityId, int8_t entityType);
-
+	float _init_global_bias();
+	void _update_rating_var();
+	void _update_global_bias();
 	void _update_feature_from_prior(int64_t const& entityId);
 	void _update_entity_from_ratings(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _update_feature_from_entities(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
@@ -103,11 +102,11 @@ protected:
 	/// user, item and feature latent variables
 	vector<DiagMVGaussian> m_entity;
 	/// user prior
-	DiagMVGaussian m_user_prior_mean;
-	MVInverseGamma m_user_prior_cov;
+	DiagMVGaussian m_user_mean_prior;
+	MVInverseGamma m_user_cov_prior;
 	/// item prior
-	MVInverseGamma m_item_prior_cov;
-	DiagMVGaussian m_item_prior_mean;
+	MVInverseGamma m_item_cov_prior;
+	DiagMVGaussian m_item_mean_prior;
 	/// feature prior
 	DiagMVGaussian m_feature_prior_mean;
 	MVInverseGamma m_feature_prior_cov;
@@ -121,7 +120,7 @@ private:
 	template <class Archive>
 	void serialize(Archive& ar, const unsigned int version ){
 		ar & boost::serialization::base_object<RecModel>(*this);
-		ar & m_entity & m_user_prior_mean & m_user_prior_cov & m_item_prior_mean & m_item_prior_cov & m_feature_prior_mean & m_feature_prior_cov
+		ar & m_entity & m_user_mean_prior & m_user_cov_prior & m_item_mean_prior & m_item_cov_prior & m_feature_prior_mean & m_feature_prior_cov
 		& m_rating_var & m_global_bias  & m_feat_cnt_map;
 	}
 };

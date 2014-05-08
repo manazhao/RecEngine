@@ -55,16 +55,16 @@ void HierarchicalHybridMF::_init_training() {
 						true));
 	}
 	/// initialize prior variables
-	m_user_prior_mean = DiagMVGaussian(
+	m_user_mean_prior = DiagMVGaussian(
 			vec(m_model_param.m_lat_dim, fill::zeros),
 			(vec(m_model_param.m_lat_dim, fill::ones)), false, true);
-	m_user_prior_cov = MVInverseGamma(
+	m_user_cov_prior = MVInverseGamma(
 			vec(m_model_param.m_lat_dim, fill::ones) * 3,
 			vec(m_model_param.m_lat_dim, fill::ones) * 3);
-	m_item_prior_mean = m_user_prior_mean;
-	m_item_prior_cov = m_user_prior_cov;
-	m_feature_prior_mean = m_user_prior_mean;
-	m_feature_prior_cov = m_user_prior_cov;
+	m_item_mean_prior = m_user_mean_prior;
+	m_item_cov_prior = m_user_cov_prior;
+	m_feature_prior_mean = m_user_mean_prior;
+	m_feature_prior_cov = m_user_cov_prior;
 
 	/// rating variance, big variance
 	m_rating_var = InverseGamma(3, 3);
@@ -134,12 +134,12 @@ void HierarchicalHybridMF::_update_entity_from_prior(int64_t const& entityId,
 	DistParamBundle message(2);
 	DistParam upCovSuff2 = (
 			entityType == Entity::ENT_USER ?
-					m_user_prior_cov.suff_mean(2) :
-					m_item_prior_cov.suff_mean(2));
+					m_user_cov_prior.suff_mean(2) :
+					m_item_cov_prior.suff_mean(2));
 	vec entityLatMean = (
 			entityType == Entity::ENT_USER ?
-					m_user_prior_mean.moment(1).m_vec :
-					m_item_prior_mean.moment(1).m_vec);
+					m_user_mean_prior.moment(1).m_vec :
+					m_item_mean_prior.moment(1).m_vec);
 	/// number of content features for current entity
 	size_t entityFeatCnt = m_feat_cnt_map[entityId];
 	/// add content feature prior information
@@ -159,12 +159,12 @@ void HierarchicalHybridMF::_update_entity_from_prior_helper(
 	DistParamBundle message(2);
 	DistParam upCovSuff2 = (
 			entityType == Entity::ENT_USER ?
-					m_user_prior_cov.suff_mean(2) :
-					m_item_prior_cov.suff_mean(2));
+					m_user_cov_prior.suff_mean(2) :
+					m_item_cov_prior.suff_mean(2));
 	vec entityLatMean = (
 			entityType == Entity::ENT_USER ?
-					m_user_prior_mean.moment(1).m_vec :
-					m_item_prior_mean.moment(1).m_vec);
+					m_user_mean_prior.moment(1).m_vec :
+					m_item_mean_prior.moment(1).m_vec);
 	/// number of content features for current entity
 	size_t entityFeatCnt = featureInteracts.size();
 	/// add content feature prior information
@@ -236,15 +236,15 @@ void HierarchicalHybridMF::_update_feature_from_entities(int64_t const& featId,
 		assert(entityType > 0);
 		DistParam entityCovSuff2 = (
 				entityType == Entity::ENT_USER ?
-						m_user_prior_cov.suff_mean(2) :
-						m_item_prior_cov.suff_mean(2));
+						m_user_cov_prior.suff_mean(2) :
+						m_item_cov_prior.suff_mean(2));
 		size_t numFeats = m_feat_cnt_map[entityId];
 		DiagMVGaussian & entityLat = m_entity[entityId];
 		///
 		vec tmpDiff = entityLat.moment(1).m_vec
 				- (entityType == Entity::ENT_USER ?
-						m_user_prior_mean.moment(1).m_vec :
-						m_item_prior_mean.moment(1).m_vec);
+						m_user_mean_prior.moment(1).m_vec :
+						m_item_mean_prior.moment(1).m_vec);
 		vec otherFeatureMean = _entity_feature_mean_sum(entityId)
 				- m_entity[featId].moment(1).m_vec;
 		tmpDiff -= (1 / sqrt(numFeats) * otherFeatureMean);
@@ -339,7 +339,7 @@ void HierarchicalHybridMF::_update_user_prior_mean() {
 	size_t numUsers = userIds.size();
 	/// update user prior mean and covariance matrix
 	DistParamBundle userPriorUpdateMessage(2);
-	vec covSuff2 = m_user_prior_cov.suff_mean(2);
+	vec covSuff2 = m_user_cov_prior.suff_mean(2);
 	userPriorUpdateMessage[1] = vec(-0.5 * numUsers * covSuff2);
 	for (set<int64_t>::iterator iter = userIds.begin(); iter != userIds.end();
 			++iter) {
@@ -356,7 +356,7 @@ void HierarchicalHybridMF::_update_user_prior_mean() {
 		userPriorUpdateMessage[0] += (userLatMean);
 	}
 	userPriorUpdateMessage[0].m_vec %= covSuff2;
-	m_user_prior_mean = userPriorUpdateMessage;
+	m_user_mean_prior = userPriorUpdateMessage;
 }
 
 void HierarchicalHybridMF::_update_user_prior_cov() {
@@ -366,8 +366,8 @@ void HierarchicalHybridMF::_update_user_prior_cov() {
 	DistParamBundle userCovUpdateMessage(2);
 	userCovUpdateMessage[0].m_vec = vec(m_model_param.m_lat_dim, fill::ones)
 			* (-0.5 * numUsers);
-	vec upm1 = m_user_prior_mean.moment(1);
-	vec upm2 = m_user_prior_mean.moment(2);
+	vec upm1 = m_user_mean_prior.moment(1);
+	vec upm2 = m_user_mean_prior.moment(2);
 	for (set<int64_t>::iterator iter = userIds.begin(); iter != userIds.end();
 			++iter) {
 		int64_t userId = *iter;
@@ -394,14 +394,14 @@ void HierarchicalHybridMF::_update_user_prior_cov() {
 		userCovUpdateMessage[1] += (covMat.diag());
 	}
 	userCovUpdateMessage[1].m_vec *= (-0.5);
-	m_user_prior_cov = userCovUpdateMessage;
+	m_user_cov_prior = userCovUpdateMessage;
 }
 
 void HierarchicalHybridMF::_update_item_prior_mean() {
 	set<int64_t> & itemIds = m_active_dataset.type_ent_ids[Entity::ENT_ITEM];
 	size_t numItems = itemIds.size();
 	DistParamBundle itemPriorUpdateMessage(2);
-	vec covSuff2 = m_item_prior_cov.suff_mean(2);
+	vec covSuff2 = m_item_cov_prior.suff_mean(2);
 	itemPriorUpdateMessage[1] = vec(-0.5 * numItems * covSuff2);
 	for (set<int64_t>::iterator iter = itemIds.begin(); iter != itemIds.end();
 			++iter) {
@@ -417,7 +417,7 @@ void HierarchicalHybridMF::_update_item_prior_mean() {
 		itemPriorUpdateMessage[0] += itemLatMean;
 	}
 	itemPriorUpdateMessage[0].m_vec %= covSuff2;
-	m_item_prior_mean = itemPriorUpdateMessage;
+	m_item_mean_prior = itemPriorUpdateMessage;
 }
 
 void HierarchicalHybridMF::_update_item_prior_cov() {
@@ -426,8 +426,8 @@ void HierarchicalHybridMF::_update_item_prior_cov() {
 	DistParamBundle itemCovUpdateMessage(2);
 	itemCovUpdateMessage[0].m_vec = (vec(m_model_param.m_lat_dim, fill::ones)
 			* (-0.5) * numItems);
-	vec ipm1 = m_item_prior_mean.moment(1);
-	vec ipm2 = m_item_prior_mean.moment(2);
+	vec ipm1 = m_item_mean_prior.moment(1);
+	vec ipm2 = m_item_mean_prior.moment(2);
 	for (set<int64_t>::iterator iter = itemIds.begin(); iter != itemIds.end();
 			++iter) {
 		int64_t itemId = *iter;
@@ -454,7 +454,7 @@ void HierarchicalHybridMF::_update_item_prior_cov() {
 		itemCovUpdateMessage[1] += (covMat.diag());
 	}
 	itemCovUpdateMessage[1].m_vec *= (-0.5);
-	m_item_prior_cov = itemCovUpdateMessage;
+	m_item_cov_prior = itemCovUpdateMessage;
 }
 
 void HierarchicalHybridMF::_update_feature_prior_mean() {
@@ -773,9 +773,9 @@ void HierarchicalHybridMF::dump_prior_information(string const& fileName) {
 	ofs.open(fileName.c_str(), std::ofstream::out);
 	assert(ofs.good());
 	cout << ">>> dump prior information to: " << fileName << endl;
-	vec userPriorMean = m_user_prior_mean.moment(1).m_vec;
+	vec userPriorMean = m_user_mean_prior.moment(1).m_vec;
 	dump_vec_tsv(ofs, userPriorMean);
-	vec itemPriorMean = m_item_prior_mean.moment(1).m_vec;
+	vec itemPriorMean = m_item_mean_prior.moment(1).m_vec;
 	dump_vec_tsv(ofs, itemPriorMean);
 	vec featurePriorMean = m_feature_prior_mean.moment(1);
 	dump_vec_tsv(ofs, featurePriorMean);
