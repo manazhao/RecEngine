@@ -16,6 +16,7 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 
+
 namespace po = boost::program_options;
 namespace bf = boost::filesystem;
 
@@ -319,23 +320,6 @@ public:
 		ofs.close();
 	}
 
-//	void save_recommendation(string const& file,
-//			vector<Recommendation> const& recList) {
-//		ofstream ofs;
-//		ofs.open(file.c_str());
-//		assert(ofs.good());
-//		/// write the result to the file
-//		for (vector<Recommendation>::const_iterator iter = recList.begin();
-//				iter < recList.end(); ++iter) {
-//			Recommendation const& rec = *iter;
-//			vector<string> splits;
-//			boost::split(splits, rec.id, boost::is_any_of("_"));
-//			string url = "http://amazon.com/dp/" + splits[1];
-//			ofs << "id:" << url << ", score:" << rec.score << endl;
-//		}
-//		ofs.close();
-//	}
-
 	void get_recommendation(string const& userFile) {
 		/// read user profile from a given file
 		ifstream ifs;
@@ -445,9 +429,10 @@ int main(int argc, char **argv) {
 	//// dump feature dictionary
 	handler->dump_feature_dict();
 	ModelDriver& MODEL_DRIVER = ModelDriver::ref();
+
 	//// cast to HierarchicalHybridMF reference
-	HierarchicalHybridMF& hhmf =
-			dynamic_cast<HierarchicalHybridMF&>(MODEL_DRIVER.get_model_ref());
+	HHMFBias& hhmf =
+			dynamic_cast<HHMFBias&>(MODEL_DRIVER.get_model_ref());
 
 	/// dump the prior information to text file
 	RecModel::ModelParam const& modelParam = hhmf.get_model_param();
@@ -456,14 +441,19 @@ int main(int argc, char **argv) {
 	hhmf.dump_prior_information(priorFile);
 
 	/// make recommendation queries for the given profile
-//	handler->get_recommendation(handler->m_feature_query_file);
+	handler->get_recommendation(handler->m_feature_query_file);
 
 	/// save the entity profiles
 	string profileFile = MODEL_DRIVER.get_model_name() + "-"
 			+ (string) modelParam + ".latent.txt";
-	hhmf.dump_model_profile(profileFile);
+	hhmf.dump_latent_information(profileFile);
 
-//	shared_ptr<TProcessor> processor(new RecEngineProcessor(handler));
+	string userBiasFile= MODEL_DRIVER.get_model_name() + "-" + (string)modelParam + ".user.bias.txt";
+	hhmf.dump_user_bias(userBiasFile);
+
+	string itemBiasFile= MODEL_DRIVER.get_model_name() + "-" + (string)modelParam + ".item.bias.txt";
+	hhmf.dump_item_bias(itemBiasFile);
+	//	shared_ptr<TProcessor> processor(new RecEngineProcessor(handler));
 //	shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
 //	shared_ptr<TTransportFactory> transportFactory(
 //			new TBufferedTransportFactory());

@@ -7,6 +7,8 @@ CPP_SRCS += \
 ../src/recsys/algorithm/AverageRatingModel.cpp \
 ../src/recsys/algorithm/FeatureObject.cpp \
 ../src/recsys/algorithm/Feedback.cpp \
+../src/recsys/algorithm/HHMFBias.cpp \
+../src/recsys/algorithm/HHMFBias_test.cpp \
 ../src/recsys/algorithm/HierarchicalHybridMF.cpp \
 ../src/recsys/algorithm/ItemObject.cpp \
 ../src/recsys/algorithm/LatentObject.cpp \
@@ -23,6 +25,8 @@ OBJS += \
 ./src/recsys/algorithm/AverageRatingModel.o \
 ./src/recsys/algorithm/FeatureObject.o \
 ./src/recsys/algorithm/Feedback.o \
+./src/recsys/algorithm/HHMFBias.o \
+./src/recsys/algorithm/HHMFBias_test.o \
 ./src/recsys/algorithm/HierarchicalHybridMF.o \
 ./src/recsys/algorithm/ItemObject.o \
 ./src/recsys/algorithm/LatentObject.o \
@@ -39,6 +43,8 @@ CPP_DEPS += \
 ./src/recsys/algorithm/AverageRatingModel.d \
 ./src/recsys/algorithm/FeatureObject.d \
 ./src/recsys/algorithm/Feedback.d \
+./src/recsys/algorithm/HHMFBias.d \
+./src/recsys/algorithm/HHMFBias_test.d \
 ./src/recsys/algorithm/HierarchicalHybridMF.d \
 ./src/recsys/algorithm/ItemObject.d \
 ./src/recsys/algorithm/LatentObject.d \

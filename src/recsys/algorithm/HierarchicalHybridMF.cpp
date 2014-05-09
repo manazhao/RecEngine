@@ -69,7 +69,7 @@ void HierarchicalHybridMF::_init_training() {
 	/// rating variance, big variance
 	m_rating_var = InverseGamma(3, 3);
 	/// initialize bias as standard Gaussian
-	m_global_bias = Gaussian(_init_global_bias(), 1);
+	_init_global_bias();
 	/// get the number of features for each entity
 	_get_entity_feature_cnt();
 }
@@ -129,29 +129,29 @@ RecModel::TrainIterLog HierarchicalHybridMF::_train_update() {
 	return iterLog;
 }
 
-void HierarchicalHybridMF::_update_entity_from_prior(int64_t const& entityId,
-		int8_t entityType) {
-	DistParamBundle message(2);
-	DistParam upCovSuff2 = (
-			entityType == Entity::ENT_USER ?
-					m_user_cov_prior.suff_mean(2) :
-					m_item_cov_prior.suff_mean(2));
-	vec entityLatMean = (
-			entityType == Entity::ENT_USER ?
-					m_user_mean_prior.moment(1).m_vec :
-					m_item_mean_prior.moment(1).m_vec);
-	/// number of content features for current entity
-	size_t entityFeatCnt = m_feat_cnt_map[entityId];
-	/// add content feature prior information
-	if (m_model_param.m_use_feature && entityFeatCnt > 0) {
-		vec contentFeatPrior = 1 / sqrt(entityFeatCnt)
-				* _entity_feature_mean_sum(entityId);
-		entityLatMean += contentFeatPrior;
-	}
-	message[0] = (vec) (upCovSuff2.m_vec % (entityLatMean));
-	message[1] = (vec) (-0.5 * upCovSuff2.m_vec);
-	m_entity[entityId] += message;
-}
+//void HierarchicalHybridMF::_update_entity_from_prior(int64_t const& entityId,
+//		int8_t entityType) {
+//	DistParamBundle message(2);
+//	DistParam upCovSuff2 = (
+//			entityType == Entity::ENT_USER ?
+//					m_user_cov_prior.suff_mean(2) :
+//					m_item_cov_prior.suff_mean(2));
+//	vec entityLatMean = (
+//			entityType == Entity::ENT_USER ?
+//					m_user_mean_prior.moment(1).m_vec :
+//					m_item_mean_prior.moment(1).m_vec);
+//	/// number of content features for current entity
+//	size_t entityFeatCnt = m_feat_cnt_map[entityId];
+//	/// add content feature prior information
+//	if (m_model_param.m_use_feature && entityFeatCnt > 0) {
+//		vec contentFeatPrior = 1 / sqrt(entityFeatCnt)
+//				* _entity_feature_mean_sum(entityId);
+//		entityLatMean += contentFeatPrior;
+//	}
+//	message[0] = (vec) (upCovSuff2.m_vec % (entityLatMean));
+//	message[1] = (vec) (-0.5 * upCovSuff2.m_vec);
+//	m_entity[entityId] += message;
+//}
 
 void HierarchicalHybridMF::_update_entity_from_prior_helper(
 		int64_t const& entityId, int8_t entityType,
@@ -265,8 +265,8 @@ void HierarchicalHybridMF::_update_entity(int64_t const& entityId,
 	/// first reset the natural parameter of user vector
 	m_entity[entityId].reset();
 	_update_entity_from_ratings(entityId, typeInteracts);
-//	m_entity[entityId].moment(1).m_vec.print(cout);
-	_update_entity_from_prior(entityId, entityType);
+	_update_entity_from_prior_helper(entityId, entityType, typeInteracts[EntityInteraction::ADD_FEATURE]);
+//	_update_entity_from_prior(entityId, entityType);
 }
 
 vec HierarchicalHybridMF::_entity_feature_mean_sum(int64_t const& entityId) {
@@ -544,8 +544,6 @@ float HierarchicalHybridMF::_pred_error(int64_t const& userId, DatasetExt& datas
 			== m_active_dataset.ent_ids.end()) {
 		m_entity[userId].reset();
 		_update_entity_from_prior_helper(userId,Entity::ENT_USER,userFeatureInteracts);
-		//// the following update from prior only applies to entities in the training dataset
-//		_update_entity_from_prior(userId, Entity::ENT_USER);
 	}
 	vector<Interact>& ratingInteracts = dataset.ent_type_interacts[userId][EntityInteraction::RATE_ITEM];
 	for (vector<Interact>::iterator iter = ratingInteracts.begin();
@@ -556,19 +554,14 @@ float HierarchicalHybridMF::_pred_error(int64_t const& userId, DatasetExt& datas
 			m_entity[itemId].reset();
 			vector<Interact>& itemFeatureInteracts = dataset.ent_type_interacts[itemId][EntityInteraction::RATE_ITEM];
 			_update_entity_from_prior_helper(itemId,Entity::ENT_ITEM,itemFeatureInteracts);
-//			_update_entity_from_prior(itemId, Entity::ENT_ITEM);
 		}
 	}
 	DiagMVGaussian& userLat = m_entity[userId];
-//	vec userMean = userLat.moment(1).m_vec;
-//	userMean.print(cout);
 	for (vector<Interact>::iterator iter = ratingInteracts.begin();
 			iter < ratingInteracts.end(); ++iter) {
 		float ratingVal = iter->ent_val;
 		int64_t itemId = iter->ent_id;
 		DiagMVGaussian& itemLat = m_entity[itemId];
-//		vec itemMean = itemLat.moment(1).m_vec;
-//		itemMean.print(cout);
 		float predRating = accu(
 				itemLat.moment(1).m_vec % userLat.moment(1).m_vec)
 				+ (float) m_global_bias.moment(1);
@@ -685,7 +678,7 @@ void HierarchicalHybridMF::_update_rating_var() {
 	m_rating_var = updateMessage;
 }
 
-float HierarchicalHybridMF::_init_global_bias() {
+void HierarchicalHybridMF::_init_global_bias() {
 	float avgRating = 0;
 	set<int64_t> &userIds = m_active_dataset.type_ent_ids[Entity::ENT_USER];
 	size_t numRatings = 0;
@@ -703,7 +696,6 @@ float HierarchicalHybridMF::_init_global_bias() {
 	}
 	avgRating /= numRatings;
 	m_global_bias = Gaussian(avgRating,1.0);
-	return avgRating;
 }
 
 void HierarchicalHybridMF::_update_global_bias() {
@@ -782,37 +774,37 @@ void HierarchicalHybridMF::dump_prior_information(string const& fileName) {
 	ofs.close();
 }
 
-void HierarchicalHybridMF::dump_entity_profile(string const& fileName,
-		int64_t const& entityId) {
-	/// dump prior information to text file
-	ofstream ofs;
-	ofs.open(fileName.c_str(), std::ofstream::out | std::ofstream::app);
-	assert(ofs.good());
-	cout << "dump the latent vector of entity -[" << entityId << "] to file: "
-			<< fileName << endl;
-	/// dump as tab separated fields
-	vec entLatMean = m_entity[entityId].moment(1).m_vec;
-	dump_vec_tsv(ofs, entLatMean);
-	ofs.close();
-	cout << ">>> done!" << endl;
-}
-
-void HierarchicalHybridMF::dump_entity_profile(string const& fileName, vector<int64_t> const& entityIds){
-	/// dump prior information to text file
-	ofstream ofs;
-	ofs.open(fileName.c_str(), std::ofstream::out | std::ofstream::app);
-	assert(ofs.good());
-	cout << "dump the entity latent vectors to file: "
-			<< fileName << endl;
-	/// dump as tab separated fields
-	for(size_t i = 0; i < entityIds.size(); i++){
-		vec entLatMean = m_entity[entityIds[i]].moment(1).m_vec;
-		dump_vec_tsv(ofs, entLatMean);
-	}
-	ofs.close();
-	cout << ">>> done!" << endl;
-}
-
+//void HierarchicalHybridMF::dump_entity_profile(string const& fileName,
+//		int64_t const& entityId) {
+//	/// dump prior information to text file
+//	ofstream ofs;
+//	ofs.open(fileName.c_str(), std::ofstream::out | std::ofstream::app);
+//	assert(ofs.good());
+//	cout << "dump the latent vector of entity -[" << entityId << "] to file: "
+//			<< fileName << endl;
+//	/// dump as tab separated fields
+//	vec entLatMean = m_entity[entityId].moment(1).m_vec;
+//	dump_vec_tsv(ofs, entLatMean);
+//	ofs.close();
+//	cout << ">>> done!" << endl;
+//}
+//
+//void HierarchicalHybridMF::dump_entity_profile(string const& fileName, vector<int64_t> const& entityIds){
+//	/// dump prior information to text file
+//	ofstream ofs;
+//	ofs.open(fileName.c_str(), std::ofstream::out | std::ofstream::app);
+//	assert(ofs.good());
+//	cout << "dump the entity latent vectors to file: "
+//			<< fileName << endl;
+//	/// dump as tab separated fields
+//	for(size_t i = 0; i < entityIds.size(); i++){
+//		vec entLatMean = m_entity[entityIds[i]].moment(1).m_vec;
+//		dump_vec_tsv(ofs, entLatMean);
+//	}
+//	ofs.close();
+//	cout << ">>> done!" << endl;
+//}
+//
 void HierarchicalHybridMF::dump_vec_tsv(ostream& oss, arma::vec const& v) {
 	for (size_t i = 0; i < v.size(); i++) {
 		oss << (i == 0 ? "" : "\t") << v(i);
@@ -820,7 +812,7 @@ void HierarchicalHybridMF::dump_vec_tsv(ostream& oss, arma::vec const& v) {
 	oss << endl;
 }
 
-void HierarchicalHybridMF::dump_model_profile(string const& fileName){
+void HierarchicalHybridMF::dump_latent_information(string const& fileName){
 	/// dump all entity latent mean vectors as csv file
 	ofstream ofs;
 	ofs.open(fileName.c_str(), std::ofstream::out|std::ofstream::app);

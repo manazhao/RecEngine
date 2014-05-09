@@ -43,7 +43,7 @@ endif
 all: RecEngineThrift
 
 dependents:
-	-cd /home/qzhao2/git/BayesianNetwork/LibDebug && $(MAKE) clean all
+	-cd /home/qzhao2/git/BayesianNetwork/LibDebug && $(MAKE) all
 
 # Tool invocations
 RecEngineThrift: $(OBJS) $(USER_OBJS) /home/qzhao2/git/BayesianNetwork/LibDebug/libBayesianNetwork.a
