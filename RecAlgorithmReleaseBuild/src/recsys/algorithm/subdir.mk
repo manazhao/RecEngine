@@ -5,6 +5,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/recsys/algorithm/AverageRatingModel.cpp \
+../src/recsys/algorithm/BayesianBiasModel.cpp \
 ../src/recsys/algorithm/FeatureObject.cpp \
 ../src/recsys/algorithm/Feedback.cpp \
 ../src/recsys/algorithm/HHMFBias.cpp \
@@ -24,6 +25,7 @@ CPP_SRCS += \
 
 OBJS += \
 ./src/recsys/algorithm/AverageRatingModel.o \
+./src/recsys/algorithm/BayesianBiasModel.o \
 ./src/recsys/algorithm/FeatureObject.o \
 ./src/recsys/algorithm/Feedback.o \
 ./src/recsys/algorithm/HHMFBias.o \
@@ -43,6 +45,7 @@ OBJS += \
 
 CPP_DEPS += \
 ./src/recsys/algorithm/AverageRatingModel.d \
+./src/recsys/algorithm/BayesianBiasModel.d \
 ./src/recsys/algorithm/FeatureObject.d \
 ./src/recsys/algorithm/Feedback.d \
 ./src/recsys/algorithm/HHMFBias.d \
@@ -65,7 +68,7 @@ CPP_DEPS += \
 src/recsys/algorithm/%.o: ../src/recsys/algorithm/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -I"/home/qzhao2/git/BayesianNetwork" -I"/home/qzhao2/git/BayesianNetwork/src" -I"/home/qzhao2/git/RecEngine/src" -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -I"/home/manazhao/git/BayesianNetwork" -I"/home/manazhao/git/BayesianNetwork/src" -I"/home/manazhao/git/RecEngine/src" -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

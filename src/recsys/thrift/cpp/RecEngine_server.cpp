@@ -91,7 +91,7 @@ protected:
 				"model-file", po::value<string>(&m_model_file),
 				"file storing the model training result")("model",
 				po::value<string>(&m_model_name)->required(),
-				"the name of the model: must be one of [HHMF]")("data-host",
+				"the name of the model: must be one of [HHMF,HHMFB,AVG,POP,BB]")("data-host",
 				po::value<string>(&host), "host of the data sharing service")(
 				"data-port", po::value<int>(&port),
 				"port at which the data sharing service is listening at")(
@@ -430,29 +430,14 @@ int main(int argc, char **argv) {
 	handler->dump_feature_dict();
 	ModelDriver& MODEL_DRIVER = ModelDriver::ref();
 
-	//// cast to HierarchicalHybridMF reference
-	HHMFBias& hhmf =
-			dynamic_cast<HHMFBias&>(MODEL_DRIVER.get_model_ref());
-
-	/// dump the prior information to text file
-	RecModel::ModelParam const& modelParam = hhmf.get_model_param();
-	string priorFile = MODEL_DRIVER.get_model_name() + "-" + (string) modelParam
-			+ ".prior.txt";
-	hhmf.dump_prior_information(priorFile);
-
 	/// make recommendation queries for the given profile
 	handler->get_recommendation(handler->m_feature_query_file);
 
-	/// save the entity profiles
-	string profileFile = MODEL_DRIVER.get_model_name() + "-"
-			+ (string) modelParam + ".latent.txt";
-	hhmf.dump_latent_information(profileFile);
+	//// dump the model as text
+	RecModel::ModelParam const& modelParam = MODEL_DRIVER.get_model_ref().get_model_param();
+	string filePrefix = MODEL_DRIVER.get_dataset_name() + "-" +  MODEL_DRIVER.get_model_name() + "-" + (string) modelParam;
+	MODEL_DRIVER.get_model_ref().dump_model_text(filePrefix);
 
-	string userBiasFile= MODEL_DRIVER.get_model_name() + "-" + (string)modelParam + ".user.bias.txt";
-	hhmf.dump_user_bias(userBiasFile);
-
-	string itemBiasFile= MODEL_DRIVER.get_model_name() + "-" + (string)modelParam + ".item.bias.txt";
-	hhmf.dump_item_bias(itemBiasFile);
 	//	shared_ptr<TProcessor> processor(new RecEngineProcessor(handler));
 //	shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
 //	shared_ptr<TTransportFactory> transportFactory(

@@ -759,60 +759,37 @@ string HierarchicalHybridMF::model_summary() {
 	return ss.str();
 }
 
-void HierarchicalHybridMF::dump_prior_information(string const& fileName) {
+void HierarchicalHybridMF::_dump_prior_information(string const& fileName) {
 	/// dump prior information to text file
 	ofstream ofs;
 	ofs.open(fileName.c_str(), std::ofstream::out);
 	assert(ofs.good());
 	cout << ">>> dump prior information to: " << fileName << endl;
 	vec userPriorMean = m_user_mean_prior.moment(1).m_vec;
-	dump_vec_tsv(ofs, userPriorMean);
+	_dump_vec_csv(ofs, userPriorMean);
 	vec itemPriorMean = m_item_mean_prior.moment(1).m_vec;
-	dump_vec_tsv(ofs, itemPriorMean);
+	_dump_vec_csv(ofs, itemPriorMean);
 	vec featurePriorMean = m_feature_prior_mean.moment(1);
-	dump_vec_tsv(ofs, featurePriorMean);
+	_dump_vec_csv(ofs, featurePriorMean);
 	ofs.close();
 }
 
-//void HierarchicalHybridMF::dump_entity_profile(string const& fileName,
-//		int64_t const& entityId) {
-//	/// dump prior information to text file
-//	ofstream ofs;
-//	ofs.open(fileName.c_str(), std::ofstream::out | std::ofstream::app);
-//	assert(ofs.good());
-//	cout << "dump the latent vector of entity -[" << entityId << "] to file: "
-//			<< fileName << endl;
-//	/// dump as tab separated fields
-//	vec entLatMean = m_entity[entityId].moment(1).m_vec;
-//	dump_vec_tsv(ofs, entLatMean);
-//	ofs.close();
-//	cout << ">>> done!" << endl;
-//}
-//
-//void HierarchicalHybridMF::dump_entity_profile(string const& fileName, vector<int64_t> const& entityIds){
-//	/// dump prior information to text file
-//	ofstream ofs;
-//	ofs.open(fileName.c_str(), std::ofstream::out | std::ofstream::app);
-//	assert(ofs.good());
-//	cout << "dump the entity latent vectors to file: "
-//			<< fileName << endl;
-//	/// dump as tab separated fields
-//	for(size_t i = 0; i < entityIds.size(); i++){
-//		vec entLatMean = m_entity[entityIds[i]].moment(1).m_vec;
-//		dump_vec_tsv(ofs, entLatMean);
-//	}
-//	ofs.close();
-//	cout << ">>> done!" << endl;
-//}
-//
-void HierarchicalHybridMF::dump_vec_tsv(ostream& oss, arma::vec const& v) {
+void HierarchicalHybridMF::dump_model_text(string const& filePrefix){
+	/// dump prior information
+	_dump_prior_information(filePrefix + ".prior.csv");
+	//// dump user and item latent information
+	_dump_latent_information(filePrefix + ".latent.csv");
+	/// done!
+}
+
+void HierarchicalHybridMF::_dump_vec_csv(ostream& oss, arma::vec const& v) {
 	for (size_t i = 0; i < v.size(); i++) {
-		oss << (i == 0 ? "" : "\t") << v(i);
+		oss << (i == 0 ? "" : ",") << v(i);
 	}
 	oss << endl;
 }
 
-void HierarchicalHybridMF::dump_latent_information(string const& fileName){
+void HierarchicalHybridMF::_dump_latent_information(string const& fileName){
 	/// dump all entity latent mean vectors as csv file
 	ofstream ofs;
 	ofs.open(fileName.c_str(), std::ofstream::out|std::ofstream::app);

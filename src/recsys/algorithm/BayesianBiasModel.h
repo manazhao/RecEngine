@@ -34,6 +34,8 @@ protected:
 	Gaussian m_item_bias_mean_prior;
 	InverseGamma m_item_bias_var_prior;
 	Gaussian m_global_bias;
+	/// rating variance
+	InverseGamma m_rating_var;
 protected:
 	virtual void _init_training();
 	virtual TrainIterLog _train_update();
@@ -49,8 +51,8 @@ protected:
 	void _update_item_bias_prior_var();
 	void _update_user_bias_prior();
 	void _update_item_bias_prior();
-	void _update_user_bias_from_rating(int64_t const& userId, vector<Interact>& ratingInteracts);
-	void _update_item_bias_from_rating(int64_t const& itemId, vector<Interact>& ratingInteracts);
+	void _update_user_bias_from_ratings(int64_t const& userId, vector<Interact>& ratingInteracts);
+	void _update_item_bias_from_ratings(int64_t const& itemId, vector<Interact>& ratingInteracts);
 	void _update_user_bias_from_prior(int64_t const& userId, vector<Interact>& featureInteracts);
 	void _update_item_bias_from_prior(int64_t const& itemId, vector<Interact>& featureInteracts);
 	void _update_user_bias(int64_t const& userId, map<int8_t,vector<Interact> > & typeInteracts);
@@ -60,14 +62,18 @@ protected:
 			float & firstMoment, float& secondMoment);
 	void _update_entity_from_ratings(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	virtual float _pred_error(int64_t const& userId, DatasetExt& dataset);
+	virtual void _add_new_entity(int64_t const& entityId, int8_t const& entityType);
 public:
 	BayesianBiasModel();
+	virtual string model_summary();
+	virtual void dump_model_text(string const& filePrefix = "");
+	virtual vector<rt::Recommendation> recommend(int64_t const& userId, map<int8_t, vector<rt::Interact> >& userInteracts);
 	virtual ~BayesianBiasModel();
 private:
 	friend class boost::serialization::access;
 	template <class Archive>
 	void serialize(Archive& ar, const unsigned int version ){
-		ar & boost::serialization::base_object<HierarchicalHybridMF>(*this);
+		ar & boost::serialization::base_object<RecModel>(*this);
 		ar & m_user_bias & m_item_bias & m_user_bias_mean_prior & m_user_bias_var_prior & m_item_bias_mean_prior & m_item_bias_var_prior
 		& m_global_bias;
 	}

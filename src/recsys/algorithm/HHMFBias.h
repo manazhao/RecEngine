@@ -52,11 +52,13 @@ protected:
 	void _update_item_bias(int64_t const& userId, map<int8_t,vector<Interact> > & typeInteracts);
 	void _rating_bias_moments(float rating,int64_t const& userId, int64_t const& itemId,
 			float & firstMoment, float& secondMoment);
+	void _dump_user_bias(string const& userFile);
+	void _dump_item_bias(string const& itemFile);
+
 public:
 	HHMFBias();
-	void dump_user_bias(string const& userFile);
-	void dump_item_bias(string const& itemFile);
 	virtual string model_summary();
+	virtual void dump_model_text(string const& filePrefix = "");
 	virtual vector<rt::Recommendation> recommend(int64_t const& userId, map<int8_t, vector<rt::Interact> >& userInteracts);
 	virtual ~HHMFBias();
 private:
@@ -68,22 +70,6 @@ private:
 	}
 
 };
-
-/**
- * @brief evaluate the first and second moments for the sum/subtraction of two independent random variables
- *
- * @arguments:
- * x11	first moment of first random variable
- * x12 	second moment of the first random variable
- * x21	first moment of the second random variable
- * x22	second moment of the second random variable
- *
- * r1	first moment of the  sum/subtraction
- * r2	second moment of the  sum/subtraction
- *
- */
-void sum_moments(float  x11, float x12, float x21, float x22, float& r1, float& r2);
-void sub_moments(float  x11, float  x12, float x21, float x22, float& r1, float& r2);
 
 } /* namespace recsys */
 

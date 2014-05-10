@@ -35,6 +35,10 @@ void RecModel::setup_train(ModelParam const& modelParam, shared_ptr<
 	m_dataset_manager = datasetManager;
 }
 
+void RecModel::dump_model_text(string const& filePrefix){
+	/// do nothing
+}
+
 RecModel::TrainIterLog RecModel::train(DatasetExt& trainSet, DatasetExt& testSet, DatasetExt& csSet){
 	/// initialize training model
 	/// train the model on the training dataset and evaluate on the testing and coldstart dataset
@@ -123,6 +127,16 @@ RecModel::RecModel():m_model_selection(false) {
 
 RecModel::~RecModel() {
 	// TODO Auto-generated destructor stub
+}
+
+void sum_moments(float  x11, float x12, float x21, float x22, float& r1, float& r2){
+	r1 = x11 + x21;
+	r2 = x12 + x22 + 2 * x11 * x21;
+}
+
+void sub_moments(float x11, float x12, float  x21, float  x22, float& r1, float& r2){
+	r1 = x11 - x21;
+	r2 = x12 + x22 - 2 * x11 * x21;
 }
 
 } /* namespace recsys */

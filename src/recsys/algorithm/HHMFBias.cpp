@@ -14,7 +14,7 @@ HHMFBias::HHMFBias() {
 
 }
 
-void HHMFBias::dump_user_bias(string const& userFile){
+void HHMFBias::_dump_user_bias(string const& userFile){
 	/// dump user bias information to text file
 	ofstream ofs;
 	ofs.open(userFile.c_str(), std::ofstream::out|std::ofstream::app);
@@ -26,7 +26,7 @@ void HHMFBias::dump_user_bias(string const& userFile){
 	ofs.close();
 }
 
-void HHMFBias::dump_item_bias(string const& itemFile){
+void HHMFBias::_dump_item_bias(string const& itemFile){
 	/// dump user bias information to text file
 	ofstream ofs;
 	ofs.open(itemFile.c_str(), std::ofstream::out|std::ofstream::app);
@@ -717,6 +717,15 @@ string HHMFBias::model_summary(){
 	return ss.str();
 }
 
+void HHMFBias::dump_model_text(string const& filePrefix){
+	/// call parent method
+	HierarchicalHybridMF::dump_model_text(filePrefix);
+	/// dump user bias and item bias
+	_dump_user_bias(filePrefix + ".user.bias.csv");
+	_dump_item_bias(filePrefix + ".item.bias.csv");
+	//// dump prior
+}
+
 void HHMFBias::_init_bias() {
 	/// update global bias term
 	cout << ">>> initialize bias terms through alternative updating" << endl;
@@ -735,16 +744,6 @@ void HHMFBias::_init_bias() {
 
 HHMFBias::~HHMFBias() {
 	// TODO Auto-generated destructor stub
-}
-
-void sum_moments(float  x11, float x12, float x21, float x22, float& r1, float& r2){
-	r1 = x11 + x21;
-	r2 = x12 + x22 + 2 * x11 * x21;
-}
-
-void sub_moments(float x11, float x12, float  x21, float  x22, float& r1, float& r2){
-	r1 = x11 - x21;
-	r2 = x12 + x22 - 2 * x11 * x21;
 }
 
 } /* namespace recsys */

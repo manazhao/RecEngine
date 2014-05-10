@@ -86,15 +86,15 @@ protected:
 	vec _entity_feature_cov_sum(int64_t const& entityId);
 	void _get_entity_feature_cnt();
 	virtual void _add_new_entity(int64_t const& entityId, int8_t const& entityType);
+	void _dump_prior_information(string const& fileName);
+	void _dump_vec_csv(ostream& oss, arma::vec const& v);
+	void _dump_latent_information(string const& fileName);
+
 public:
 	HierarchicalHybridMF(ModelParam const& modelParam, shared_ptr<DatasetManager> datasetManager);
 	HierarchicalHybridMF();
 	virtual string model_summary();
-	void dump_prior_information(string const& fileName);
-//	void dump_entity_profile(string const& fileName, int64_t const& entityId);
-//	void dump_entity_profile(string const& fileName, vector<int64_t> const& entityIds);
-	void dump_vec_tsv(ostream& oss, arma::vec const& v);
-	void dump_latent_information(string const& fileName);
+	virtual void dump_model_text(string const& filePrefix = "");
 	void dump_recommendation_json(string const& fileName, int64_t const& userId, vector<Interact>& featureInteracts, vector<int64_t>& recList);
 	virtual vector<rt::Recommendation> recommend(int64_t const& userId, map<int8_t, vector<rt::Interact> >& userInteracts);
 	virtual ~HierarchicalHybridMF();
