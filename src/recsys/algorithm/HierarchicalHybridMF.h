@@ -59,7 +59,7 @@ protected:
 	virtual void _init_training();
 	virtual TrainIterLog _train_update();
 	virtual float _pred_error(int64_t const& userId, DatasetExt& dataset);
-	virtual float _pred_error(int64_t const& entityId, map<int8_t, vector<Interact> >& entityInteractMap);
+//	virtual float _pred_error(int64_t const& entityId, map<int8_t, vector<Interact> >& entityInteractMap);
 	void _lat_ip_moments(DiagMVGaussian & lat1, DiagMVGaussian & lat2, float & firstMoment, float & secondMoment);
 	void _rating_bias_moments(float rating, float & firstMoment, float& secondMoment);
 	void _update_user_prior_mean();

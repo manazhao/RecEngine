@@ -15,7 +15,7 @@ my %item_id_name_map = ();
 
 while(<ITEM_FILE>){
 	chomp;
-	my($id,$name,$genre_str) = split "\t";
+	my($id,$name,$genre_str) = split '::';
 	# get the year of the movie
 	my $year = "";
 	if($name =~ m/\((\d+)\)/g){

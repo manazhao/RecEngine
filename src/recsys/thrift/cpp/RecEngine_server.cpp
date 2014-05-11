@@ -407,14 +407,11 @@ public:
 			_return[i].id = origIdVec[i];
 		}
 
-		//// save the result
 		/// also save user's latent profile
-		HierarchicalHybridMF& hhmf =
-				dynamic_cast<HierarchicalHybridMF&>(MODEL_DRIVER.get_model_ref());
-		RecModel::ModelParam const& mp = hhmf.get_model_param();
+		RecModel::ModelParam const& mp = MODEL_DRIVER.get_model_ref().get_model_param();
 		/// dump the recommended item profile
-		string fileName = MODEL_DRIVER.get_model_name() + "-" + (string) mp
-				+ "-entity-" + userId + ".json";
+		string fileName = MODEL_DRIVER.get_dataset_name() + "-" +  MODEL_DRIVER.get_model_name() + "-" + (string) mp
+				+ "-user-" + userId + ".json";
 
 		save_recommendation_json(fileName, mappedUserId, featNameVec, featIdVec, origIdVec, idVec);
 	}

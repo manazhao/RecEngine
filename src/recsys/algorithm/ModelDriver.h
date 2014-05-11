@@ -42,6 +42,7 @@ protected:
 	ModelDriver(ModelDriver const& rhs);
 	void _save_model();
 	void _load_model();
+
 private:
 	friend class boost::serialization::access;
 	template <class Archive>
@@ -86,7 +87,7 @@ private:
 			HHMFBias const& modelRef = dynamic_cast<HHMFBias const&>(get_model_ref());
 			ar & modelRef;
 		}else if(m_model_name == "BB"){
-			BayesianBiasModel& modelRef = dynamic_cast<BayesianBiasModel&>(get_model_ref());
+			BayesianBiasModel const& modelRef = dynamic_cast<BayesianBiasModel const&>(get_model_ref());
 			ar & modelRef;
 		}
 		else{
