@@ -20,8 +20,11 @@ tmp*
 *.bin
 RecEngine
 DataHostThrift
+EntityGraph
 RecAlgorithmReleaseBuild/
 RecAlgorithmDebugBuild/
 DataHostReleaseBuild/
 DataHostDebugBuild/
 model-result/
+GraphDebugBuild/
+
