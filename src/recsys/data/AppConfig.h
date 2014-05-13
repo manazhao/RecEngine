@@ -18,11 +18,7 @@ namespace recsys {
  * load from configuration files
  */
 class AppConfig {
-	friend class EntityInteraction;
-	friend class Entity;
-	friend class UserActivity;
-	friend class UserRecommendation;
-protected:
+public:
 	string m_sql_conf;
 	bool m_use_db;
 protected:

@@ -8,16 +8,16 @@
 #ifndef SQLSERIALIZE_H_
 #define SQLSERIALIZE_H_
 
-#include <boost/shared_ptr.hpp>
 #include <string>
 #include <map>
 #include <cppconn/driver.h>
 #include <cppconn/resultset.h>
 #include <cppconn/statement.h>
 #include <cppconn/exception.h>
+#include <cppconn/prepared_statement.h>
+
 using namespace sql;
 using namespace std;
-using namespace boost;
 
 namespace recsys {
 
@@ -26,12 +26,7 @@ namespace recsys {
  * The constructor is protected to achieve this.
  */
 class SQL {
-	friend class Feature;
-	friend class Entity;
-	friend class UserRecommendation;
-	friend class UserActivity;
-	friend class EntityInteraction;
-protected:
+public:
 	string m_host;
 	string m_userName;
 	string m_password;
@@ -53,7 +48,7 @@ public:
 		return ref(confFile);
 	}
 	static SQL& ref(string const& confFile) {
-		static shared_ptr<SQL> instance_ptr;
+		static std::shared_ptr<SQL> instance_ptr;
 		if(!instance_ptr.get() || confFile != instance_ptr->m_conf_file){
 			instance_ptr.reset(new SQL(confFile));
 		}
@@ -62,6 +57,9 @@ public:
 	bool execute(string const& stmtStr);
 	virtual ~SQL();
 };
+
+typedef std::shared_ptr<sql::PreparedStatement> prepared_statement_ptr;
+
 
 } /* namespace recsys */
 

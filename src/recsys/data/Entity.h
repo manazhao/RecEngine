@@ -12,7 +12,6 @@
 #include <string>
 #include <map>
 #include <ostream>
-#include <boost/shared_ptr.hpp>
 #include <recsys/data/json/elements.h>
 #include <recsys/data/json/reader.h>
 #include <recsys/data/json/writer.h>
@@ -54,7 +53,7 @@ string json_to_string(js::Object const& jsObj);
 js::Object string_to_json(string const& jsonStr);
 
 enum FEAT_TYPE {FEAT_CAT,FEAT_REAL};
-typedef shared_ptr<PreparedStatement> prepared_statement_ptr;
+typedef std::shared_ptr<PreparedStatement> prepared_statement_ptr;
 class EntityInteraction;
 class Entity {
 	friend ostream& operator<<(ostream&, EntityInteraction const&);
@@ -74,9 +73,9 @@ public:
 		prepared_statement_ptr m_maxIdStmtPtr;
 	};
 public:
-	typedef shared_ptr<Entity> entity_ptr;
+	typedef std::shared_ptr<Entity> entity_ptr;
 	/// use char_ptr to store all kinds of values, e.g. float, int and etc.
-	typedef shared_ptr<char> char_ptr;
+	typedef std::shared_ptr<char> char_ptr;
 	typedef size_t mapped_id_type;
 	// map internal id to composite entity name (name + type)
 	typedef map<mapped_id_type,string> id_name_map;

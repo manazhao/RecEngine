@@ -59,7 +59,7 @@ protected:
 class ItemEntityParser: public recsys::EntityParser {
 protected:
 	typedef set<string> str_set;
-	typedef shared_ptr<str_set> str_set_ptr;
+	typedef std::shared_ptr<str_set> str_set_ptr;
 protected:
 	str_set_ptr _get_item_cat_nodes(string const& catStr) {
 		str_set_ptr resultSetPtr(new str_set());

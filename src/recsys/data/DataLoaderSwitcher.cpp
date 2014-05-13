@@ -16,7 +16,7 @@ using namespace boost;
 
 namespace recsys {
 
-shared_ptr<DataLoader> DataLoaderSwitcher::get_loader(int argc, char** argv){
+std::shared_ptr<DataLoader> DataLoaderSwitcher::get_loader(int argc, char** argv){
 	/// determine whether it's a local or remote data loader
 	bool localLoader = true;
 	string datasetName;
@@ -59,15 +59,15 @@ shared_ptr<DataLoader> DataLoaderSwitcher::get_loader(int argc, char** argv){
 	}
 }
 
-shared_ptr<DataLoader> DataLoaderSwitcher::get_remote_loader(string const& host, int port){
+std::shared_ptr<DataLoader> DataLoaderSwitcher::get_remote_loader(string const& host, int port){
 	return _create_remote_loader(host,port);
 }
 
-shared_ptr<DataLoader> DataLoaderSwitcher::get_local_loader(string const& datasetName, string const& userFile, string const& itemFile, string const& ratingFile){
+std::shared_ptr<DataLoader> DataLoaderSwitcher::get_local_loader(string const& datasetName, string const& userFile, string const& itemFile, string const& ratingFile){
 	return _create_local_loader(datasetName,userFile,itemFile,ratingFile);
 }
 
-shared_ptr<DataLoader> DataLoaderSwitcher::get_remote_loader(int argc, char** argv){
+std::shared_ptr<DataLoader> DataLoaderSwitcher::get_remote_loader(int argc, char** argv){
 	/// extract host and port for the data sharing service
 	string host;
 	int port;
@@ -95,7 +95,7 @@ shared_ptr<DataLoader> DataLoaderSwitcher::get_remote_loader(int argc, char** ar
 	return _create_remote_loader(host,port);
 }
 
-shared_ptr<DataLoader> DataLoaderSwitcher::get_local_loader(int argc, char** argv){
+std::shared_ptr<DataLoader> DataLoaderSwitcher::get_local_loader(int argc, char** argv){
 	string userFile, itemFile, ratingFile;
 	string datasetName;
 
@@ -135,23 +135,23 @@ DataLoaderSwitcher::DataLoaderSwitcher() {
 
 void DataLoaderSwitcher::_register_entity_parsers(){
 	// TODO Auto-generated constructor stub
-	m_dataset_parser_map["amazon"]["user"] = shared_ptr<EntityParser>(new recsys::amazon::UserEntityParser());
-	m_dataset_parser_map["amazon"]["item"] = shared_ptr<EntityParser>(new recsys::amazon::ItemEntityParser());
-	m_dataset_parser_map["movielens"]["user"] = shared_ptr<EntityParser>(new recsys::movieLens::UserEntityParser());
-	m_dataset_parser_map["movielens"]["item"] = shared_ptr<EntityParser>(new recsys::movieLens::ItemEntityParser());
+	m_dataset_parser_map["amazon"]["user"] = std::shared_ptr<EntityParser>(new recsys::amazon::UserEntityParser());
+	m_dataset_parser_map["amazon"]["item"] = std::shared_ptr<EntityParser>(new recsys::amazon::ItemEntityParser());
+	m_dataset_parser_map["movielens"]["user"] = std::shared_ptr<EntityParser>(new recsys::movieLens::UserEntityParser());
+	m_dataset_parser_map["movielens"]["item"] = std::shared_ptr<EntityParser>(new recsys::movieLens::ItemEntityParser());
 }
 
-shared_ptr<DataLoader> DataLoaderSwitcher::_create_remote_loader(string const& host, int& port){
+std::shared_ptr<DataLoader> DataLoaderSwitcher::_create_remote_loader(string const& host, int& port){
 	if(host.empty() || !port){
 		cerr << "host name and port must be supplied" << endl;
 		exit(1);
 	}
 	/// the data sets will be loaded from network
-	m_data_loader_ptr = shared_ptr<DataLoader>(new ThriftDataLoader(host,port));
+	m_data_loader_ptr = std::shared_ptr<DataLoader>(new ThriftDataLoader(host,port));
 	return m_data_loader_ptr;
 }
 
-shared_ptr<DataLoader> DataLoaderSwitcher::_create_local_loader(string const& datasetName, string const& userFile,
+std::shared_ptr<DataLoader> DataLoaderSwitcher::_create_local_loader(string const& datasetName, string const& userFile,
 		string const& itemFile, string const& ratingFile){
 	/// check the file existence
 	if(!_is_dataset_supported(datasetName)){
@@ -173,7 +173,7 @@ shared_ptr<DataLoader> DataLoaderSwitcher::_create_local_loader(string const& da
 		exit(1);
 	}
 	/// create the dataloader shared pointer
-	m_data_loader_ptr = shared_ptr<DataLoader>(new JSONDataLoader());
+	m_data_loader_ptr = std::shared_ptr<DataLoader>(new JSONDataLoader());
 	JSONDataLoader& loaderRef = dynamic_cast<JSONDataLoader&>(*m_data_loader_ptr);
 	/// now choose the data loader based on dataset name
 	// Your initialization goes here

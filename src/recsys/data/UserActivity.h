@@ -12,7 +12,6 @@
 #include <set>
 #include <vector>
 #include <ostream>
-#include <boost/shared_ptr.hpp>
 #include <cppconn/prepared_statement.h>
 #include "json/reader.h"
 #include "json/writer.h"
@@ -26,7 +25,7 @@ using namespace json;
 
 
 namespace recsys {
-typedef shared_ptr<PreparedStatement> prepared_statement_ptr;
+typedef std::shared_ptr<PreparedStatement> prepared_statement_ptr;
 
 class UserActivity {
 	friend ostream& operator<<(ostream&, UserActivity const&);

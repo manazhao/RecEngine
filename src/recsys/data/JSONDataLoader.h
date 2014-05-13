@@ -9,7 +9,6 @@
 #define JSONDATALOADER_H_
 #include <string>
 #include <set>
-#include <boost/shared_ptr.hpp>
 #include "DataLoader.h"
 using namespace boost;
 using namespace std;
@@ -28,7 +27,7 @@ public:
 class JSONDataLoader : public DataLoader{
 protected:
 	typedef set<string> str_set;
-	typedef shared_ptr<str_set> str_set_ptr;
+	typedef std::shared_ptr<str_set> str_set_ptr;
 protected:
 	void _load_entity_profile(string const& file, EntityParser& parser);
 public:

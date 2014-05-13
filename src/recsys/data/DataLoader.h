@@ -12,13 +12,13 @@ namespace recsys {
 
 class DataLoader {
 protected:
-	shared_ptr<DatasetManager> m_dataset_manager;
+	std::shared_ptr<DatasetManager> m_dataset_manager;
 public:
 	DataLoader();
 	DatasetExt& dataset(rt::DSType::type dsType){
 		return m_dataset_manager->dataset(dsType);
 	}
-	shared_ptr<DatasetManager> get_dataset_manager(){
+	std::shared_ptr<DatasetManager> get_dataset_manager(){
 		return m_dataset_manager;
 	}
 	virtual ~DataLoader();

@@ -9,6 +9,7 @@
 #define ENTITYINTERACTION_H_
 
 #include "Entity.h"
+#include <memory>
 #include <vector>
 using namespace std;
 
@@ -41,11 +42,11 @@ public:
 
 public:
 	/// pointer of EntityInteraction
-	typedef shared_ptr<EntityInteraction> entity_interact_ptr;
-	typedef shared_ptr<char> char_ptr;
+	typedef std::shared_ptr<EntityInteraction> entity_interact_ptr;
+	typedef std::shared_ptr<char> char_ptr;
 	/// index EntityInteraction by entity ids
 	typedef vector<entity_interact_ptr> entity_interact_vec;
-	typedef shared_ptr<entity_interact_vec> entity_interact_vec_ptr;
+	typedef std::shared_ptr<entity_interact_vec> entity_interact_vec_ptr;
 	typedef map<int8_t,entity_interact_vec_ptr> type_interact_map;
 	typedef map<Entity::mapped_id_type,map<int8_t,entity_interact_vec_ptr> > entity_type_interact_map;
 	typedef map<Entity::mapped_id_type,set<Entity::mapped_id_type> > id_id_map;
