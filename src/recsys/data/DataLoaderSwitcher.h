@@ -19,24 +19,24 @@ namespace recsys {
  */
 class DataLoaderSwitcher {
 protected:
-	std::shared_ptr<DataLoader> m_data_loader_ptr;
-	map<string, map<string, std::shared_ptr<EntityParser> > > m_dataset_parser_map;
+	boost::shared_ptr<DataLoader> m_data_loader_ptr;
+	map<string, map<string, boost::shared_ptr<EntityParser> > > m_dataset_parser_map;
 protected:
 	DataLoaderSwitcher();
 	bool _is_dataset_supported(string const& datasetName);
 	void _register_entity_parsers();
-	std::shared_ptr<DataLoader> _create_remote_loader(string const& host, int& port);
-	std::shared_ptr<DataLoader> _create_local_loader(string const& datasetName, string const& userFile,
+	boost::shared_ptr<DataLoader> _create_remote_loader(string const& host, int& port);
+	boost::shared_ptr<DataLoader> _create_local_loader(string const& datasetName, string const& userFile,
 			string const& itemFile, string const& ratingFile);
 public:
 	/**
 	 * @brief get a data loader based on the arguments
 	 */
-	std::shared_ptr<DataLoader> get_loader(int argc, char** argv);
-	std::shared_ptr<DataLoader> get_remote_loader(int argc, char** argv);
-	std::shared_ptr<DataLoader> get_local_loader(int argc, char** argv);
-	std::shared_ptr<DataLoader> get_remote_loader(string const& host, int port);
-	std::shared_ptr<DataLoader> get_local_loader(string const& datasetName, string const& userFile, string const& itemFile, string const& ratingFile);
+	boost::shared_ptr<DataLoader> get_loader(int argc, char** argv);
+	boost::shared_ptr<DataLoader> get_remote_loader(int argc, char** argv);
+	boost::shared_ptr<DataLoader> get_local_loader(int argc, char** argv);
+	boost::shared_ptr<DataLoader> get_remote_loader(string const& host, int port);
+	boost::shared_ptr<DataLoader> get_local_loader(string const& datasetName, string const& userFile, string const& itemFile, string const& ratingFile);
 	static DataLoaderSwitcher& ref(){
 		static DataLoaderSwitcher switcher;
 		return switcher;

@@ -225,7 +225,7 @@ void BayesianBiasModel::_update_user_bias_prior_var(){
 		DistParamBundle updateMessage(2);
 		updateMessage[0] = updateMessage[1] = (float)0.0;
 		/// the second component of sufficient statistics of the InverseGamma distribution
-		updateMessage[1] = -0.5 * numUsers;
+		updateMessage[0] = -0.5 * numUsers;
 		for (set<int64_t>::iterator iter = userIds.begin();
 				iter != userIds.end(); ++iter) {
 			int64_t userId = *iter;
@@ -236,10 +236,10 @@ void BayesianBiasModel::_update_user_bias_prior_var(){
 			/// from user bias mean prior distribution
 			float priorMeanFirstMoment = m_user_bias_mean_prior.moment(1);
 			float priorMeanSecondMoment = m_user_bias_mean_prior.moment(2);
-			updateMessage[0] += (userBiasSecondMoment + priorMeanSecondMoment - 2 * userBiasMeanFirstMoment * priorMeanFirstMoment);
+			updateMessage[1] += (userBiasSecondMoment + priorMeanSecondMoment - 2 * userBiasMeanFirstMoment * priorMeanFirstMoment);
 		}
 		/// don't forget the coefficient -0.5
-		updateMessage[0].m_vec *= (-0.5);
+		updateMessage[1].m_vec *= (-0.5);
 		m_user_bias_var_prior = updateMessage;
 	}
 }
@@ -252,7 +252,7 @@ void BayesianBiasModel::_update_item_bias_prior_var(){
 		updateMessage[0] = updateMessage[1] = (float)0.0;
 
 		/// the second component of sufficient statistics of the InverseGamma distribution
-		updateMessage[1] = -0.5 * numItems;
+		updateMessage[0] = -0.5 * numItems;
 		for (set<int64_t>::iterator iter = itemIds.begin();
 				iter != itemIds.end(); ++iter) {
 			int64_t itemId = *iter;
@@ -263,10 +263,10 @@ void BayesianBiasModel::_update_item_bias_prior_var(){
 			/// from item bias mean prior distribution
 			float priorMeanFirstMoment = m_item_bias_mean_prior.moment(1);
 			float priorMeanSecondMoment = m_item_bias_mean_prior.moment(2);
-			updateMessage[0] += (itemBiasSecondMoment + priorMeanSecondMoment - 2 * itemBiasMeanFirstMoment * priorMeanFirstMoment);
+			updateMessage[1] += (itemBiasSecondMoment + priorMeanSecondMoment - 2 * itemBiasMeanFirstMoment * priorMeanFirstMoment);
 		}
 		/// don't forget the coefficient -0.5
-		updateMessage[0].m_vec *= (-0.5);
+		updateMessage[1].m_vec *= (-0.5);
 		m_item_bias_var_prior = updateMessage;
 	}
 }
@@ -363,7 +363,6 @@ void BayesianBiasModel::_update_item_bias(int64_t const& itemId, map<int8_t, vec
 }
 
 
-//// TODO: not finish yet.
 void BayesianBiasModel::_rating_bias_moments(float rating,int64_t const& userId, int64_t const& itemId,
 		float & firstMoment, float& secondMoment){
 	float rM1 = rating;

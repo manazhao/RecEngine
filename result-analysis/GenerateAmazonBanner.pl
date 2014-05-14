@@ -4,10 +4,10 @@ use strict;
 use warnings;
 use JSON;
 
-my $rec_folder = "amazon-result-nf6";
+my $rec_folder = "amazon-result-bias";
 chdir $rec_folder;
 
-my $file_list = `ls HHMF*.json`;
+my $file_list = `ls amazon-*.json`;
 my @files = split '\s+', $file_list;
 
 foreach(@files){

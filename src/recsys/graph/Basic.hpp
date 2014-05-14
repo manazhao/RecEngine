@@ -72,7 +72,7 @@ ostream& operator << (ostream& oss, Entity_T<DataValueT> const& ent);
 /// adjacent entity list
 typedef vector<Entity::ent_idx_type> adj_id_list;
 typedef const Entity* const_ent_ptr;
-typedef std::shared_ptr<Entity> shared_ent_ptr;
+typedef boost::shared_ptr<Entity> shared_ent_ptr;
 
 /// functor that composes key based on name and type
 class DefaultComposeKey {

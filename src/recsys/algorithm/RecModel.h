@@ -79,7 +79,7 @@ public:
 protected:
 	ModelParam m_model_param;
 	DatasetExt m_active_dataset;
-	std::shared_ptr<DatasetManager> m_dataset_manager;
+	boost::shared_ptr<DatasetManager> m_dataset_manager;
 	bool m_model_selection;
 private:
 	friend class boost::serialization::access;
@@ -101,7 +101,7 @@ protected:
 public:
 	RecModel();
 	void setup_train(ModelParam const& modelParam,
-			std::shared_ptr<DatasetManager> datasetManager);
+			boost::shared_ptr<DatasetManager> datasetManager);
 	virtual vector<rt::Recommendation> recommend(int64_t const& userId,
 			map<int8_t, vector<rt::Interact> >& userInteracts) = 0;
 	virtual string model_summary() = 0;

@@ -14,6 +14,7 @@
 #include <cppconn/resultset.h>
 #include <cppconn/statement.h>
 #include <cppconn/exception.h>
+#include <boost/shared_ptr.hpp>
 #include <cppconn/prepared_statement.h>
 
 using namespace sql;
@@ -48,7 +49,7 @@ public:
 		return ref(confFile);
 	}
 	static SQL& ref(string const& confFile) {
-		static std::shared_ptr<SQL> instance_ptr;
+		static boost::shared_ptr<SQL> instance_ptr;
 		if(!instance_ptr.get() || confFile != instance_ptr->m_conf_file){
 			instance_ptr.reset(new SQL(confFile));
 		}
@@ -58,7 +59,7 @@ public:
 	virtual ~SQL();
 };
 
-typedef std::shared_ptr<sql::PreparedStatement> prepared_statement_ptr;
+typedef boost::shared_ptr<sql::PreparedStatement> prepared_statement_ptr;
 
 
 } /* namespace recsys */

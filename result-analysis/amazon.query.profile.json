@@ -1,0 +1,12 @@
+{"features":["",""],"id":"test_amazon_user_0"}
+{"features":["","age_4"],"id":"test_amazon_user_1"}
+{"features":["","age_6"],"id":"test_amazon_user_2"}
+{"features":["","age_8"],"id":"test_amazon_user_3"}
+{"features":["gender_male",""],"id":"test_amazon_user_4"}
+{"features":["gender_male","age_4"],"id":"test_amazon_user_5"}
+{"features":["gender_male","age_6"],"id":"test_amazon_user_6"}
+{"features":["gender_male","age_8"],"id":"test_amazon_user_7"}
+{"features":["gender_female",""],"id":"test_amazon_user_8"}
+{"features":["gender_female","age_4"],"id":"test_amazon_user_9"}
+{"features":["gender_female","age_6"],"id":"test_amazon_user_10"}
+{"features":["gender_female","age_8"],"id":"test_amazon_user_11"}

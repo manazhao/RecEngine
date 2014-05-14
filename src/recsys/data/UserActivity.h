@@ -25,7 +25,7 @@ using namespace json;
 
 
 namespace recsys {
-typedef std::shared_ptr<PreparedStatement> prepared_statement_ptr;
+typedef boost::shared_ptr<PreparedStatement> prepared_statement_ptr;
 
 class UserActivity {
 	friend ostream& operator<<(ostream&, UserActivity const&);

@@ -10,7 +10,7 @@
 namespace recsys {
 
 DataLoader::DataLoader()
-:m_dataset_manager(std::shared_ptr<DatasetManager>(new DatasetManager())){
+:m_dataset_manager(boost::shared_ptr<DatasetManager>(new DatasetManager())){
 	// TODO Auto-generated constructor stub
 
 }

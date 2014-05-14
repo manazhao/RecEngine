@@ -8,17 +8,18 @@
 #ifndef DATALOADER_H_
 #define DATALOADER_H_
 #include "DatasetManager.h"
+#include <boost/shared_ptr.hpp>
 namespace recsys {
 
 class DataLoader {
 protected:
-	std::shared_ptr<DatasetManager> m_dataset_manager;
+	boost::shared_ptr<DatasetManager> m_dataset_manager;
 public:
 	DataLoader();
 	DatasetExt& dataset(rt::DSType::type dsType){
 		return m_dataset_manager->dataset(dsType);
 	}
-	std::shared_ptr<DatasetManager> get_dataset_manager(){
+	boost::shared_ptr<DatasetManager> get_dataset_manager(){
 		return m_dataset_manager;
 	}
 	virtual ~DataLoader();

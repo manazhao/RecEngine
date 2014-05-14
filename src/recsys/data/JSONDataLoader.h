@@ -27,7 +27,7 @@ public:
 class JSONDataLoader : public DataLoader{
 protected:
 	typedef set<string> str_set;
-	typedef std::shared_ptr<str_set> str_set_ptr;
+	typedef boost::shared_ptr<str_set> str_set_ptr;
 protected:
 	void _load_entity_profile(string const& file, EntityParser& parser);
 public:

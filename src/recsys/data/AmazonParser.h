@@ -10,7 +10,7 @@
 
 #include "JSONDataLoader.h"
 #include <boost/algorithm/string.hpp>
-
+#include <boost/shared_ptr.hpp>
 //#define __ONE_DIM_GENDER__
 
 namespace recsys {
@@ -26,21 +26,21 @@ protected:
 		/// create user entity
 
 		/// age feature will be dropped for model diagnosis purpose
-//		if (jsObj.Find("age") != jsObj.End()) {
-//			js::String age = jsObj["age"];
-//			float ageF = lexical_cast<float>(age.Value());
-//			int ageI = (int) (ageF);
-//			string featureName = "ag_" + lexical_cast<string,int>(ageI);
-//			Entity tmpEntity(featureName,
-//					Entity::ENT_FEATURE);
-//			entityFeatures.push_back(tmpEntity);
-//		}
+		if (jsObj.Find("age") != jsObj.End()) {
+			js::String age = jsObj["age"];
+			float ageF = lexical_cast<float>(age.Value());
+			int ageI = (int) (ageF/5);
+			string featureName = "ag_" + lexical_cast<string,int>(ageI);
+			Entity tmpEntity(featureName,
+					Entity::ENT_FEATURE);
+			entityFeatures.push_back(tmpEntity);
+			featValVec.push_back(1);
+		}
 
 		if (jsObj.Find("gender") != jsObj.End()) {
 			js::String gender = jsObj["gender"];
 			string genderStr = gender.Value();
 			boost::algorithm::to_lower(genderStr);
-//			string featureKey = "gender_" + genderStr;
 			/// use one feature for gender and female and male take +1 and -1 values
 #ifdef __ONE_DIM_GENDER__
 			string featureKey = "gender_";
@@ -59,7 +59,7 @@ protected:
 class ItemEntityParser: public recsys::EntityParser {
 protected:
 	typedef set<string> str_set;
-	typedef std::shared_ptr<str_set> str_set_ptr;
+	typedef boost::shared_ptr<str_set> str_set_ptr;
 protected:
 	str_set_ptr _get_item_cat_nodes(string const& catStr) {
 		str_set_ptr resultSetPtr(new str_set());
