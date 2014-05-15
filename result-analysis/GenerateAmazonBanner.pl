@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use JSON;
 
-my $rec_folder = "amazon-result-bias";
+my $rec_folder = "amazon-result-pop";
 chdir $rec_folder;
 
 my $file_list = `ls amazon-*.json`;

@@ -5,6 +5,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/recsys/algorithm/AverageRatingModel.cpp \
+../src/recsys/algorithm/BayesianBiasModel.cpp \
 ../src/recsys/algorithm/FeatureObject.cpp \
 ../src/recsys/algorithm/Feedback.cpp \
 ../src/recsys/algorithm/HHMFBias.cpp \
@@ -23,6 +24,7 @@ CPP_SRCS += \
 
 OBJS += \
 ./src/recsys/algorithm/AverageRatingModel.o \
+./src/recsys/algorithm/BayesianBiasModel.o \
 ./src/recsys/algorithm/FeatureObject.o \
 ./src/recsys/algorithm/Feedback.o \
 ./src/recsys/algorithm/HHMFBias.o \
@@ -41,6 +43,7 @@ OBJS += \
 
 CPP_DEPS += \
 ./src/recsys/algorithm/AverageRatingModel.d \
+./src/recsys/algorithm/BayesianBiasModel.d \
 ./src/recsys/algorithm/FeatureObject.d \
 ./src/recsys/algorithm/Feedback.d \
 ./src/recsys/algorithm/HHMFBias.d \

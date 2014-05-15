@@ -63,6 +63,7 @@ protected:
 	void _update_entity_from_ratings(int64_t const& entityId, map<int8_t,vector<Interact> > & typeInteracts);
 	virtual float _pred_error(int64_t const& userId, DatasetExt& dataset);
 	virtual void _add_new_entity(int64_t const& entityId, int8_t const& entityType);
+	void _dump_ratings(string const& fileName);
 public:
 	BayesianBiasModel();
 	virtual string model_summary();
@@ -75,7 +76,8 @@ private:
 	void serialize(Archive& ar, const unsigned int version ){
 		ar & boost::serialization::base_object<RecModel>(*this);
 		ar & m_user_bias & m_item_bias & m_user_bias_mean_prior & m_user_bias_var_prior & m_item_bias_mean_prior & m_item_bias_var_prior
-		& m_global_bias;
+		& m_global_bias & m_rating_var;
+//		cout << "serialization, rating var:" << m_rating_var << endl;
 	}
 
 };
