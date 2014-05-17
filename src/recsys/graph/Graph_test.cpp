@@ -5,31 +5,33 @@
  *      Author: qzhao2
  */
 
-#include "All.hpp"
+
+#include "Graph.hpp"
 
 using namespace recsys::graph;
 
 void recsys::graph::test(){
 	/// test graph library
 	recsys::graph::memory_graph g;
-	shared_ent_ptr userPtr = g.index_entity<NullValue>(Entity::ENT_USER,"Qi zhao");
-	shared_ent_ptr itemPtr = g.index_entity<NullValue>(Entity::ENT_ITEM,"amazon item 1");
+	entity_idx_type userIdx = g.index_entity<ENT_USER>("Qi zhao");
+	entity_idx_type itemIdx = g.index_entity<ENT_ITEM>("amazon item 1");
 	/// introduce a rating between user and item
 	DefaultComposeKey keyCompser;
-	shared_ent_ptr ratingPtr = g.index_entity<char>(Entity::ENT_RATING,keyCompser(*userPtr,*itemPtr),1);
+	string ratingKey = keyCompser(userIdx,itemIdx);
+	entity_idx_type ratingIdx = g.index_entity<ENT_RATING>(ratingKey,3);
 	/// now link the entities
 	/// user <-> rating
-	g.link_entity(userPtr,ratingPtr);
-	g.link_entity(itemPtr,ratingPtr);
+	g.link_entity<ENT_USER,ENT_RATING>(userIdx, ratingIdx);
+	g.link_entity<ENT_ITEM,ENT_RATING>(itemIdx,ratingIdx);
 	/// add user feature
-	shared_ent_ptr agePtr = g.index_entity<char>(Entity::ENT_FEATURE,"age_3",1);
-	shared_ent_ptr genderPtr = g.index_entity<char>(Entity::ENT_FEATURE,"gender_male",1);
-	shared_ent_ptr catPtr = g.index_entity<char>(Entity::ENT_FEATURE,"cat_book",1);
-	g.link_entity(userPtr,agePtr);
-	g.link_entity(userPtr,genderPtr);
-	g.link_entity(itemPtr,catPtr);
+	entity_idx_type ageIdx = g.index_entity<ENT_FEATURE>("age_3");
+	entity_idx_type genderIdx = g.index_entity<ENT_FEATURE>("gender_male");
+	entity_idx_type catIdx = g.index_entity<ENT_FEATURE>("cat_book");
+	g.link_entity<ENT_USER,ENT_FEATURE>(userIdx,genderIdx);
+	g.link_entity<ENT_USER,ENT_FEATURE>(userIdx,ageIdx);
+	g.link_entity<ENT_ITEM,ENT_FEATURE>(itemIdx,catIdx);
 	/// dump the graph
-	cout << g << endl;
+//	cout << g << endl;
 }
 
 int main(int argc, char** argv){

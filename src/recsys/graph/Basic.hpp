@@ -20,84 +20,205 @@ using namespace boost;
 namespace recsys {
 namespace graph {
 
-/// forward declaration
-class EntityContainer;
+/**
+ * entity type definition
+ */
+enum ENTITY_TYPE {
+	ENT_DEFAULT, ENT_USER, ENT_ITEM, ENT_FEATURE,ENT_RATING,ENT_RATING_FEATURE,
+};
 
+/**
+ * empty data value
+ */
 class NullValue{
 };
-
 ostream& operator<<(ostream& oss, NullValue const& val);
 
-class Entity {
-	friend class MapEntityContainer;
-	friend class MapEntityRelationContainer;
-public:
-	typedef std::size_t ent_idx_type;
-	enum ENTITY_TYPE {
-		ENT_DEFAULT, ENT_USER, ENT_ITEM, ENT_FEATURE,ENT_RATING,ENT_RATING_FEATURE
-	};
-	typedef ENTITY_TYPE ent_type;
-protected:
-	ent_type m_type;
-	ent_idx_type m_idx;
-protected:
-	/// only the EntityManager is allowed to create the Entity
-	Entity(ent_type const& type, ent_idx_type const& idx);
-public:
-	ent_idx_type const& get_idx() const;
-	ent_type const& get_type() const;
-	virtual ~Entity(){}
+/**
+ * Entity data type traits based on entity type
+ */
+template<ENTITY_TYPE type = ENT_DEFAULT>
+class EntityValueTrait{
+	typedef NullValue value_type;
 };
 
-typedef set<Entity::ent_idx_type> ent_idx_set;
-
-template<typename DataTypeT>
-class Entity_T: public Entity {
-	friend class MapEntityContainer;
-public:
-	typedef DataTypeT ent_value_type;
-protected:
-	Entity_T(Entity::ent_type const& type, Entity::ent_idx_type const& idx,
-			ent_value_type const& value = ent_value_type());
-protected:
-	ent_value_type m_value;
-public:
-	ent_value_type const& get_value() const;
+/**
+ * template specialization based on specific entity type
+ */
+template<>
+struct EntityValueTrait<ENT_USER>{
+	typedef NullValue value_type;
 };
 
-template<typename DataValueT>
-ostream& operator << (ostream& oss, Entity_T<DataValueT> const& ent);
+template<>
+struct EntityValueTrait<ENT_ITEM>{
+	typedef NullValue value_type;
+};
+
+template<>
+struct EntityValueTrait<ENT_FEATURE>{
+	typedef NullValue value_type;
+};
+
+template<>
+struct EntityValueTrait<ENT_RATING_FEATURE>{
+	typedef NullValue value_type;
+};
 
 
-/// adjacent entity list
-typedef vector<Entity::ent_idx_type> adj_id_list;
-typedef const Entity* const_ent_ptr;
-typedef boost::shared_ptr<Entity> shared_ent_ptr;
+template<>
+struct EntityValueTrait<ENT_RATING>{
+	typedef unsigned char value_type;
+};
+
+
+
+///// more specialized templates can be added /////
+///// end of template specialization /////
+
+/**
+ * The value type can be derived by using the EntityValueTrait
+ */
+template <typename ValueType>
+class Entity{
+public:
+	typedef ValueType value_type;
+public:
+	Entity(value_type const& value);
+protected:
+	ValueType m_value;
+};
 
 /// functor that composes key based on name and type
 class DefaultComposeKey {
 public:
-	string operator()(Entity::ent_type const& type, string const& name) const;
-	string operator()(Entity const& ent1, Entity const& ent2) const;
+	string operator()(ENTITY_TYPE const& type, string const& name) const;
+	template<typename T1, typename T2>
+	string operator()(T1 const& t1, T2 const& t2) const;
 };
 
 /// functor that decompose a composite key into type and original name
 class DefaultDecomposeKey {
 public:
-	void operator()(string const& cKey, Entity::ent_type& oType,
+	void operator()(string const& cKey, ENTITY_TYPE& oType,
 			string& oName) const;
+
 };
 
-/// /define interface for entity name <-> id mapper
-typedef map<string, Entity::ent_idx_type> name_idx_map;
-typedef map<Entity::ent_idx_type, string> idx_name_map;
-typedef vector<const_ent_ptr> adj_const_ptr_list;
-typedef vector<shared_ent_ptr> adj_shared_ptr_list;
-typedef map<Entity::ent_type, ent_idx_set> type_adj_set_map;
-typedef map<Entity::ent_idx_type, type_adj_set_map> ent_type_adj_set_map;
-/// implementation of EntityManager through STL map container
-typedef map<Entity::ent_idx_type, shared_ent_ptr> shared_entity_map;
-typedef map<Entity::ent_type, ent_idx_set> type_idx_set_map;
+/**
+ * define interface for entity name <-> internal id container
+ * use CRTP
+ */
+//// internal entity id type
+typedef std::size_t entity_idx_type;
+typedef vector<entity_idx_type> entity_id_vec;
+template <typename DerivedType>
+class NameIdContainer{
+public:
+	typedef DerivedType derived_type;
+public:
+	template <ENTITY_TYPE type,typename KeyComposer>
+	entity_idx_type  add(string const& name, KeyComposer const& keyComposer = KeyComposer()){
+		_cast_to_derive().add<type,keyComposer>(name);
+	}
+
+	template<ENTITY_TYPE type,typename KeyComposer>
+	entity_idx_type retrieve(string const& name, KeyComposer const& keyComposer = KeyComposer()) const{
+		//// generate the composite name
+		string compositeKey = keyComposer(type,name);
+		return _cast_to_derive().retrieve(compositeKey);
+	}
+
+	entity_idx_type retrieve(string const& compName) const{
+		return _cast_to_derive().retrieve(compName);
+	}
+
+	string const& retrieve(entity_idx_type const& idx) const{
+		return _cast_to_derive().retrieve(idx);
+	}
+
+	template<ENTITY_TYPE type, typename KeyComposer>
+	bool exist(string const& name, KeyComposer const& keyComposer = KeyComposer()) const{
+		//// generate the composite name
+		string compositeKey = keyComposer(type,name);
+		return _cast_to_derive().exist(compositeKey);
+	}
+
+	bool exist(string const& compName) const{
+		return _cast_to_derive().exist(compName);
+	}
+
+	bool exist(entity_idx_type const& idx) const{
+		return _cast_to_derive().exist(idx);
+	}
+
+	template<ENTITY_TYPE type>
+	void retrieve(entity_id_vec& entityVec) const{
+		return _cast_to_derive().retrieve<type>(entityVec);
+	}
+
+protected:
+	derived_type& _cast_to_derive(){
+		return static_cast<derived_type&>(*this);
+	}
+};
+
+/**
+ * define base class for entity management
+ */
+template <typename DerivedType>
+class EntityContainer{
+public:
+	typedef DerivedType derived_type;
+public:
+	template<ENTITY_TYPE type>
+	Entity<typename EntityValueTrait<type>::value_type > const& add(entity_idx_type const& idx, typename EntityValueTrait<type>::value_type const& value = EntityValueTrait<type>::value_type() ){
+		return _cast_to_derive().add(idx,value);
+	}
+
+	template<ENTITY_TYPE type>
+	typename EntityValueTrait<type>::value_type const& retrieve(entity_idx_type const& idx) const{
+		return _cast_to_derive().exist(idx);
+	}
+
+	template<ENTITY_TYPE type>
+	bool exist(entity_idx_type const& idx) const{
+		return _cast_to_derive().exist(idx);
+	}
+
+protected:
+	derived_type& _cast_to_derive(){
+		return static_cast<derived_type&>(*this);
+	}
+};
+
+
+/**
+ * define base class for entity relation management
+ *
+ */
+typedef vector<entity_idx_type> adj_id_list;
+
+template <typename DerivedType>
+class ERContainer{
+public:
+	typedef DerivedType derived_type;
+public:
+	template <ENTITY_TYPE T1, ENTITY_TYPE T2>
+	bool link_entity(entity_idx_type const& idx1, entity_idx_type& idx2){
+		_cast_to_derive().link_entity<T1,T2>(idx1,idx2);
+	}
+
+	template<ENTITY_TYPE T1, ENTITY_TYPE T2, typename AdjListType = adj_id_list>
+	void get_adj_list(entity_idx_type const& idx, AdjListType& idList) const{
+		_cast_to_derive().get_adj_list<T1,T2>(idx,idList);
+	}
+
+protected:
+	 derived_type& _cast_to_derive(){
+		return static_cast<derived_type&>(*this);
+	}
+};
 
 
 /// define some testing functions
@@ -106,5 +227,6 @@ void test();
 }
 }
 
+#include "./BasicImpl.inc"
 
 #endif /* INTERFACE_HPP_ */
