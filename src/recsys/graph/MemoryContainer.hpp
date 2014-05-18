@@ -10,6 +10,7 @@
 #include "Basic.hpp"
 #include <map>
 #include <set>
+#include <iostream>
 
 using namespace std;
 
@@ -32,7 +33,8 @@ public:
 		/// check existence
 		entity_idx_type entityIdx = 0;
 		map<string,entity_idx_type>::const_iterator resultIter = m_name_id_map.find(compKey);
-		if(resultIter != m_name_id_map.end()){
+		/// if the entity does not exist yet
+		if(resultIter == m_name_id_map.end()){
 			entity_idx_type nextIdx = _next_entity_idx();
 			m_name_id_map[compKey] = nextIdx;
 			m_id_name_map[nextIdx] = compKey;
@@ -179,26 +181,10 @@ protected:
  *
  */
 
-typedef set<entity_idx_type> entity_set;
-typedef vector<entity_set> entity_list;
-
-template<ENTITY_TYPE t1, ENTITY_TYPE t2>
-struct AdjListType{
-	typedef entity_list type;
-};
-
-template<>
-struct AdjListType<ENT_RATING,ENT_USER>{
-	typedef entity_idx_type type;
-};
-
-template<>
-struct AdjListType<ENT_RATING,ENT_ITEM>{
-	typedef entity_idx_type type;
-};
-
 template<ENTITY_TYPE T1, ENTITY_TYPE T2>
 class MapERContainer{
+	template<ENTITY_TYPE t1, ENTITY_TYPE t2>
+	friend ostream& operator<<(ostream&,MapERContainer<t1,t2> const&);
 public:
 	bool link_entity(entity_idx_type const& fromId, entity_idx_type const& toId){
 		m_adj_set_map[fromId].insert(toId);
@@ -216,6 +202,9 @@ public:
 protected:
 	map<entity_idx_type,entity_set> m_adj_set_map;
 };
+
+template<ENTITY_TYPE t1, ENTITY_TYPE t2>
+ostream& operator<< (ostream& oss, MapERContainer<t1,t2> const& erc);
 
 //// use AdjListIdx[ENT_USER] to retrieve the element of returned adjacent list
 template<ENTITY_TYPE T>
@@ -239,6 +228,7 @@ struct Type2Idx<ENT_ITEM>{
  */
 template <>
 class MapERContainer<ENT_RATING, ENT_USER>{
+	friend ostream& operator<<(ostream&,MapERContainer<ENT_RATING,ENT_USER> const&);
 public:
 	void link_entity(entity_idx_type const& fromId, entity_idx_type const& toId){
 		m_rating_adj_map[fromId] = toId;
@@ -260,15 +250,36 @@ protected:
 
 /// the same thing
 template<>
-class MapERContainer<ENT_RATING,ENT_ITEM> : public MapERContainer<ENT_RATING,ENT_USER>{
+class MapERContainer<ENT_RATING,ENT_ITEM>{
+	friend ostream& operator<<(ostream&,MapERContainer<ENT_RATING,ENT_ITEM> const&);
+public:
+	void link_entity(entity_idx_type const& fromId, entity_idx_type const& toId){
+		m_rating_adj_map[fromId] = toId;
+	}
 
+	void get_adj_list(entity_idx_type const& idx, typename AdjListType<ENT_RATING,ENT_ITEM>::type& toId) const{
+		map<entity_idx_type,entity_idx_type>::const_iterator resultIter = m_rating_adj_map.find(idx);
+		if(resultIter != m_rating_adj_map.end()){
+			//// simply copy the result
+			toId = resultIter->second;
+		}else{
+			toId = 0;
+		}
+	}
+protected:
+	//// hold user and item ids
+	map<entity_idx_type,entity_idx_type> m_rating_adj_map;
 };
 
+ostream& operator<<(ostream& oss, MapERContainer<ENT_RATING,ENT_USER> const& erc);
+ostream& operator<<(ostream& oss, MapERContainer<ENT_RATING,ENT_ITEM> const& erc);
+
 class MemoryERContainer : public ERContainer<MemoryERContainer>{
+	friend ostream& operator<<(ostream&,MemoryERContainer const&);
 protected:
 	class _ContainerAggregator : public MapERContainer<ENT_USER,ENT_FEATURE>, public MapERContainer<ENT_FEATURE,ENT_USER>,
 	public MapERContainer<ENT_ITEM,ENT_FEATURE>, public MapERContainer<ENT_FEATURE,ENT_ITEM>, public MapERContainer<ENT_USER,ENT_RATING>
-	, public MapERContainer<ENT_RATING,ENT_USER>, public MapERContainer<ENT_ITEM,ENT_RATING>, public MapERContainer<ENT_RATING,ENT_ITEM>, public MapERContainer<ENT_RATING,ENT_FEATURE>,
+	, public  MapERContainer<ENT_RATING,ENT_USER>, public MapERContainer<ENT_ITEM,ENT_RATING>, public  MapERContainer<ENT_RATING,ENT_ITEM>, public MapERContainer<ENT_RATING,ENT_FEATURE>,
 	public MapERContainer<ENT_FEATURE,ENT_RATING>{
 
 	};
@@ -278,24 +289,34 @@ protected:
 		return static_cast<MapERContainer<T1,T2>& >(m_aggregated_container);
 	}
 
+	template <ENTITY_TYPE T1, ENTITY_TYPE T2>
+	MapERContainer<T1,T2> const& _cast_to_map_container() const{
+		return static_cast<MapERContainer<T1,T2> const& >(m_aggregated_container);
+	}
+
 public:
 	template <ENTITY_TYPE T1, ENTITY_TYPE T2>
-	bool link_entity(entity_idx_type const& idx1, entity_idx_type const& idx2){
+	void link_entity(entity_idx_type const& idx1, entity_idx_type const& idx2){
 		MapERContainer<T1,T2>& containerRef = _cast_to_map_container<T1,T2>();
-		return containerRef.link_entity(idx1,idx2);
+		containerRef.link_entity(idx1,idx2);
 	}
 
 	template<ENTITY_TYPE T1, ENTITY_TYPE T2>
-	void get_adj_list(entity_idx_type const& idx, typename MapERContainer<T1,T2>::adj_list_type& idList) const{
-		MapERContainer<T1,T2>& containerRef = _cast_to_map_container<T1,T2>();
+	void get_adj_list(entity_idx_type const& idx, typename AdjListType<T1,T2>::type& idList) const{
+		MapERContainer<T1,T2> const& containerRef = _cast_to_map_container<T1,T2>();
 		containerRef.get_adj_list(idx,idList);
 	}
 protected:
 	_ContainerAggregator m_aggregated_container;
 };
 
+
+ostream& operator<<(ostream& oss, MemoryERContainer const& erc);
+
 }
 }
+
+#include "./MemoryContainerImpl.inc"
 
 
 #endif /* MEMORYCONTAINER_HPP_ */

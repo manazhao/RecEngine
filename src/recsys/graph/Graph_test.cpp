@@ -33,14 +33,14 @@ void recsys::graph::test(){
 	g.link_entity<ENT_ITEM,ENT_FEATURE>(itemIdx,catIdx);
 
 	/// retrieve the adjacent list
-	AdjListType<ENT_RATING,ENT_USER> adjList;
+	AdjListType<ENT_RATING,ENT_USER>::type adjList;
 	g.get_adj_list<ENT_RATING,ENT_USER>(ratingIdx,adjList);
 	cout << "user for rating-" << ratingIdx << ":" << adjList << endl;
 
 	g.get_adj_list<ENT_RATING,ENT_ITEM>(ratingIdx,adjList);
 	cout << "item for rating-" << ratingIdx << ":" << adjList << endl;
-
 	///
+	cout << g << endl;
 }
 
 int main(int argc, char** argv){

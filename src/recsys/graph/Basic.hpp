@@ -47,7 +47,7 @@ class Enum2Type {
  */
 class NullValue {
 };
-ostream& operator<<(ostream& oss, NullValue const& val);
+//ostream& operator<<(ostream& oss, NullValue const& val);
 
 /**
  * Entity data type traits based on entity type
@@ -197,6 +197,9 @@ protected:
 	derived_type& _cast_to_derive() {
 		return static_cast<derived_type&> (*this);
 	}
+	derived_type const& _cast_to_derive()const {
+		return static_cast<derived_type const&> (*this);
+	}
 };
 
 /**
@@ -211,8 +214,8 @@ public:
 	void add(
 			entity_idx_type const& idx,
 			typename EntityValueTrait<type>::value_type const& value =
-					EntityValueTrait<type>::value_type()) {
-		 _cast_to_derive().add(idx, value);
+					typename EntityValueTrait<type>::value_type()) {
+		 _cast_to_derive().template add<type>(idx, value);
 	}
 
 	template<ENTITY_TYPE type>
@@ -230,13 +233,34 @@ protected:
 	derived_type& _cast_to_derive() {
 		return static_cast<derived_type&> (*this);
 	}
+
+	derived_type const& _cast_to_derive() const{
+		return static_cast<derived_type const&> (*this);
+	}
+
 };
 
 /**
  * define base class for entity relation management
  *
  */
-typedef vector<entity_idx_type> adj_id_list;
+typedef set<entity_idx_type> entity_set;
+typedef vector<entity_idx_type> entity_list;
+
+template<ENTITY_TYPE t1, ENTITY_TYPE t2>
+struct AdjListType{
+	typedef entity_list type;
+};
+
+template<>
+struct AdjListType<ENT_RATING,ENT_USER>{
+	typedef entity_idx_type type;
+};
+
+template<>
+struct AdjListType<ENT_RATING,ENT_ITEM>{
+	typedef entity_idx_type type;
+};
 
 template<typename DerivedType>
 class ERContainer {
@@ -244,19 +268,24 @@ public:
 	typedef DerivedType derived_type;
 public:
 	template<ENTITY_TYPE t1, ENTITY_TYPE t2>
-	void link_entity(entity_idx_type const& idx1, entity_idx_type& idx2) {
-		return _cast_to_derive().link_entity<t1, t2> (idx1, idx2);
+	void link_entity(entity_idx_type const& idx1, entity_idx_type const& idx2) {
+		return _cast_to_derive().template link_entity<t1, t2> (idx1, idx2);
 	}
 
-	template<ENTITY_TYPE t1, ENTITY_TYPE t2, typename AdjListType>
-	void get_adj_list(entity_idx_type const& idx, AdjListType& idList) const {
-		_cast_to_derive().get_adj_list<t1, t2, AdjListType> (idx, idList);
+	template<ENTITY_TYPE t1, ENTITY_TYPE t2>
+	void get_adj_list(entity_idx_type const& idx, typename AdjListType<t1,t2>::type& idList) const {
+		_cast_to_derive().template get_adj_list<t1, t2> (idx, idList);
 	}
 
 protected:
 	derived_type& _cast_to_derive() {
 		return static_cast<derived_type&> (*this);
 	}
+
+	derived_type const& _cast_to_derive() const {
+		return static_cast<derived_type const&> (*this);
+	}
+
 };
 
 /// define some testing functions
