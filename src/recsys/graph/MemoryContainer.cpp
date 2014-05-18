@@ -5,12 +5,13 @@
  *      Author: manazhao
  */
 
+#include "MemoryContainer.hpp"
 
 namespace recsys{
 namespace graph{
 
 //// initialization of the static NullValue member
-NullValue EntityMapContainer<NullValue>::NULL_VALUE = NullValue();
+NullValue MapEntityContainer<NullValue>::NULL_VALUE = NullValue();
 
 }
 }

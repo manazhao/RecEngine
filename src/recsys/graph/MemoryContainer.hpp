@@ -18,16 +18,17 @@ namespace graph{
 
 typedef set<entity_idx_type> entity_set_type;
 
-class MemoryNameIdContainer : public NameIdContainer{
+class MemoryNameIdContainer : public NameIdContainer<MemoryNameIdContainer>{
 protected:
 	entity_idx_type _next_entity_idx() const{
-		return m_name_id_map.size();
+		return m_name_id_map.size() + 1;
 	}
 public:
-	template <ENTITY_TYPE type,typename KeyComposer>
-	entity_idx_type add(string const& name, KeyComposer const& keyComposer){
+	template <ENTITY_TYPE t>
+	entity_idx_type add(string const& name){
 		/// generate the composite key
-		string compKey = keyComposer(type,name);
+		DefaultComposeKey ck;
+		string compKey = ck(t,name);
 		/// check existence
 		entity_idx_type entityIdx = 0;
 		map<string,entity_idx_type>::const_iterator resultIter = m_name_id_map.find(compKey);
@@ -35,8 +36,8 @@ public:
 			entity_idx_type nextIdx = _next_entity_idx();
 			m_name_id_map[compKey] = nextIdx;
 			m_id_name_map[nextIdx] = compKey;
-			m_id_type_map[nextIdx] = type;
-			m_type_idSet_map[type].insert(nextIdx);
+			m_id_type_map[nextIdx] = t;
+			m_type_idSet_map[t].insert(nextIdx);
 			entityIdx = nextIdx;
 		}else{
 			entityIdx = resultIter->second;
@@ -50,7 +51,7 @@ public:
 	}
 
 	string const& retrieve(entity_idx_type const& idx) const{
-		map<entity_idx_type, string>::const_iterator resultIter = m_id_type_map.find(idx);
+		map<entity_idx_type, string>::const_iterator resultIter = m_id_name_map.find(idx);
 		return resultIter->second;
 	}
 
@@ -62,9 +63,9 @@ public:
 		return m_id_name_map.find(idx) != m_id_name_map.end();
 	}
 
-	template<ENTITY_TYPE type>
+	template<ENTITY_TYPE t>
 	void retrieve(entity_id_vec& entityVec) const{
-		typename map<ENTITY_TYPE,entity_set_type>::const_iterator resultIter = m_type_idSet_map.find(type);
+		typename map<ENTITY_TYPE,entity_set_type>::const_iterator resultIter = m_type_idSet_map.find(t);
 		if(resultIter != m_type_idSet_map.end()){
 			entity_set_type const& idxSet = resultIter->second;
 			entityVec.insert(entityVec.end(),idxSet.begin(),idxSet.end());
@@ -79,13 +80,12 @@ protected:
 };
 
 template <typename EntityValueType>
-class MapContainer{
+class MapEntityContainer{
 public:
 	typedef EntityValueType entity_value_type;
 public:
-	entity_value_type const& add(entity_idx_type const& idx, entity_value_type const& value = entity_value_type()){
+	void  add(entity_idx_type const& idx, entity_value_type const& value = entity_value_type()){
 		m_entity_map[idx] = value;
-		return m_entity_map[idx];
 	}
 
 	entity_value_type const& retrieve(entity_idx_type const& idx) const{
@@ -107,13 +107,12 @@ protected:
  * For NullValue entity value type, only store the entity id.
  */
 template<>
-class MapContainer<NullValue>{
+class MapEntityContainer<NullValue>{
 public:
 	typedef NullValue entity_value_type;
 public:
-	entity_value_type const& add(entity_idx_type const& idx, entity_value_type const& value = entity_value_type()){
+	void  add(entity_idx_type const& idx, entity_value_type const& value = entity_value_type()){
 		m_entity_set.insert(idx);
-		return NULL_VALUE;
 	}
 
 	entity_value_type const& retrieve(entity_idx_type const& idx) const{
@@ -136,29 +135,30 @@ protected:
 class MemoryEntityContainer : public EntityContainer<MemoryEntityContainer>{
 protected:
 	//// aggregate container for different data types
-	class _ContainerAggregator : public MapContainer<unsigned char>, MapContainer<NullValue>, MapContainer<float>{
+	class _ContainerAggregator : public MapEntityContainer<unsigned char>, public  MapEntityContainer<NullValue>, public MapEntityContainer<float>{
 
 	};
+
 	template<typename EntityValueType>
-	MapContainer<EntityValueType>& _cast_map_container(){
-		return static_cast<MapContainer<EntityValueType>& >(m_aggregated_container);
+	MapEntityContainer<EntityValueType>& _cast_map_container(){
+		return static_cast<MapEntityContainer<EntityValueType>& >(m_aggregated_container);
 	}
 
 public:
 	template<ENTITY_TYPE type>
-	Entity<typename EntityValueTrait<type>::value_type > const& add(entity_idx_type const& idx, typename EntityValueTrait<type>::value_type const& value = EntityValueTrait<type>::value_type() ){
+	void  add(entity_idx_type const& idx, typename EntityValueTrait<type>::value_type const& value = typename EntityValueTrait<type>::value_type() ){
 		/// use type information to cast the aggregated container to the desired type
 		typedef typename EntityValueTrait<type>::value_type entity_value_type;
 		/// cast to the appropriate base MapContainer
-		MapContainer<entity_value_type>& mapContainer = _cast_map_container<entity_value_type>();
-		return mapContainer.add(idx,value);
+		MapEntityContainer<entity_value_type>& mapContainer = _cast_map_container<entity_value_type>();
+		mapContainer.add(idx,value);
 	}
 
 	template<ENTITY_TYPE type>
 	typename EntityValueTrait<type>::value_type const& retrieve(entity_idx_type const& idx) const{
 		typedef typename EntityValueTrait<type>::value_type entity_value_type;
 		/// cast to the appropriate base MapContainer
-		MapContainer<entity_value_type>& mapContainer = _cast_map_container<entity_value_type>();
+		MapEntityContainer<entity_value_type>& mapContainer = _cast_map_container<entity_value_type>();
 		return mapContainer.retrieve(idx);
 	}
 
@@ -166,7 +166,7 @@ public:
 	bool exist(entity_idx_type const& idx) const{
 		typedef typename EntityValueTrait<type>::value_type entity_value_type;
 		/// cast to the appropriate base MapContainer
-		MapContainer<entity_value_type>& mapContainer = _cast_map_container<entity_value_type>();
+		MapEntityContainer<entity_value_type>& mapContainer = _cast_map_container<entity_value_type>();
 		return mapContainer.exist(idx);
 	}
 
@@ -180,18 +180,32 @@ protected:
  */
 
 typedef set<entity_idx_type> entity_set;
+typedef vector<entity_set> entity_list;
+
+template<ENTITY_TYPE t1, ENTITY_TYPE t2>
+struct AdjListType{
+	typedef entity_list type;
+};
+
+template<>
+struct AdjListType<ENT_RATING,ENT_USER>{
+	typedef entity_idx_type type;
+};
+
+template<>
+struct AdjListType<ENT_RATING,ENT_ITEM>{
+	typedef entity_idx_type type;
+};
 
 template<ENTITY_TYPE T1, ENTITY_TYPE T2>
 class MapERContainer{
 public:
 	bool link_entity(entity_idx_type const& fromId, entity_idx_type const& toId){
 		m_adj_set_map[fromId].insert(toId);
-		m_adj_set_map[toId].insert(fromId);
 		return true;
 	}
 
-	template<typename AdjListType>
-	void get_adj_list(entity_idx_type const& idx, AdjListType& idList) const{
+	void get_adj_list(entity_idx_type const& idx, typename AdjListType<T1,T2>::type& idList) const{
 		map<entity_idx_type,entity_set>::const_iterator resultIter = m_adj_set_map.find(idx);
 		if(resultIter != m_adj_set_map.end()){
 			entity_set const& adjSet = resultIter->second;
@@ -205,69 +219,75 @@ protected:
 
 //// use AdjListIdx[ENT_USER] to retrieve the element of returned adjacent list
 template<ENTITY_TYPE T>
-struct AdjListIdx{
+struct Type2Idx{
 };
 
 template<>
-struct AdjListIdx<ENT_USER>{
+struct Type2Idx<ENT_USER>{
 	enum { val = 0};
 };
 
 template<>
-struct AdjListIdx<ENT_ITEM>{
+struct Type2Idx<ENT_ITEM>{
 	enum { val = 1 };
 };
 
-/// array containing user and item id
-typedef entity_idx_type UserItemPair[2];
 
 /**
  * specialization with rating entity,
  * T2 could be ENT_USER or ENT_ITEM
  */
-template<ENTITY_TYPE T2>
-class MapERContainer<ENT_RATING, T2>{
+template <>
+class MapERContainer<ENT_RATING, ENT_USER>{
 public:
-	bool link_entity(entity_idx_type const& fromId, entity_idx_type const& toId){
-		m_adj_map[fromId].insert(toId);
-		m_adj_map[toId].insert(fromId);
-		return true;
+	void link_entity(entity_idx_type const& fromId, entity_idx_type const& toId){
+		m_rating_adj_map[fromId] = toId;
 	}
 
-	void get_adj_list(entity_idx_type const& idx, UserItemPair& idList) const{
-		map<entity_idx_type,UserItemPair>::const_iterator resultIter = m_adj_map.find(idx);
-		if(resultIter != m_adj_map.end()){
+	void get_adj_list(entity_idx_type const& idx, typename AdjListType<ENT_RATING,ENT_USER>::type& toId) const{
+		map<entity_idx_type,entity_idx_type>::const_iterator resultIter = m_rating_adj_map.find(idx);
+		if(resultIter != m_rating_adj_map.end()){
 			//// simply copy the result
-			idList = resultIter->second;
+			toId = resultIter->second;
+		}else{
+			toId = 0;
 		}
 	}
 protected:
-	map<entity_idx_type,UserItemPair> m_adj_map;
+	//// hold user and item ids
+	map<entity_idx_type,entity_idx_type> m_rating_adj_map;
 };
 
+/// the same thing
+template<>
+class MapERContainer<ENT_RATING,ENT_ITEM> : public MapERContainer<ENT_RATING,ENT_USER>{
+
+};
 
 class MemoryERContainer : public ERContainer<MemoryERContainer>{
-public:
-	class _ContainerAggregator : public MapERContainer<ENT_USER,ENT_FEATURE>, MapERContainer<ENT_FEATURE,ENT_USER>,
-	MapERContainer<ENT_ITEM,ENT_FEATURE>,MapERContainer<ENT_FEATURE,ENT_ITEM>,MapERContainer<ENT_USER,ENT_RATING>
-	,MapERContainer<ENT_RATING,ENT_USER>,MapERContainer<ENT_ITEM,ENT_RATING>,MapERContainer<ENT_RATING,ENT_ITEM>,MapERContainer<ENT_RATING,ENT_FEATURE>,
-	MapERContainer<ENT_FEATURE,ENT_RATING>{
-	public:
-		template <ENTITY_TYPE T1, ENTITY_TYPE T2>
-		MapERContainer<T1,T2>& cast_to_map_container(){
-			return static_cast<MapERContainer<T1,T2> >(*this);
-		}
+protected:
+	class _ContainerAggregator : public MapERContainer<ENT_USER,ENT_FEATURE>, public MapERContainer<ENT_FEATURE,ENT_USER>,
+	public MapERContainer<ENT_ITEM,ENT_FEATURE>, public MapERContainer<ENT_FEATURE,ENT_ITEM>, public MapERContainer<ENT_USER,ENT_RATING>
+	, public MapERContainer<ENT_RATING,ENT_USER>, public MapERContainer<ENT_ITEM,ENT_RATING>, public MapERContainer<ENT_RATING,ENT_ITEM>, public MapERContainer<ENT_RATING,ENT_FEATURE>,
+	public MapERContainer<ENT_FEATURE,ENT_RATING>{
+
 	};
+
+	template <ENTITY_TYPE T1, ENTITY_TYPE T2>
+	MapERContainer<T1,T2>& _cast_to_map_container(){
+		return static_cast<MapERContainer<T1,T2>& >(m_aggregated_container);
+	}
+
 public:
 	template <ENTITY_TYPE T1, ENTITY_TYPE T2>
-	bool link_entity(entity_idx_type const& idx1, entity_idx_type& idx2){
-		MapERContainer<T1,T2>& containerRef = m_aggregated_container.cast_to_map_container<T1,T2>();
+	bool link_entity(entity_idx_type const& idx1, entity_idx_type const& idx2){
+		MapERContainer<T1,T2>& containerRef = _cast_to_map_container<T1,T2>();
 		return containerRef.link_entity(idx1,idx2);
 	}
 
-	template<ENTITY_TYPE T1, ENTITY_TYPE T2, typename AdjListType>
-	void get_adj_list(entity_idx_type const& idx, AdjListType& idList) const{
-		MapERContainer<T1,T2>& containerRef = m_aggregated_container.cast_to_map_container<T1,T2>();
+	template<ENTITY_TYPE T1, ENTITY_TYPE T2>
+	void get_adj_list(entity_idx_type const& idx, typename MapERContainer<T1,T2>::adj_list_type& idList) const{
+		MapERContainer<T1,T2>& containerRef = _cast_to_map_container<T1,T2>();
 		containerRef.get_adj_list(idx,idList);
 	}
 protected:
@@ -277,6 +297,5 @@ protected:
 }
 }
 
-#include "./MemoryContainerImpl.inc"
 
 #endif /* MEMORYCONTAINER_HPP_ */

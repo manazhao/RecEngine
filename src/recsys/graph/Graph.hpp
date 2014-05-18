@@ -17,28 +17,22 @@ namespace graph{
 /// declare EntityGraph class which puts all components togeter
 template<typename NameIdContainerType = MemoryNameIdContainer,
 		typename EntityContainerType = MemoryEntityContainer,
-		typename EntityRelationContainerType = MemoryERContainer,
-		typename KeyComposerType = DefaultComposeKey,
-		typename KeyDecomposerType = DefaultDecomposeKey>
+		typename EntityRelationContainerType = MemoryERContainer>
 class Graph {
 public:
 	typedef NameIdContainerType name_id_container_type;
 	typedef EntityContainerType entity_container_type;
 	typedef EntityRelationContainerType entity_relation_container_type;
-	typedef KeyComposerType key_composer_type;
-	typedef KeyDecomposerType key_decomposer_type;
 public:
-	Graph(NameIdContainerType const& nameIdContainer = NameIdContainerType(),
-			EntityContainerType const& entityContainer = EntityContainerType(),
-			EntityRelationContainerType const& entityRelationContainer = EntityRelationContainerType());
 
-	template<ENTITY_TYPE type>
-	Entity<typename EntityValueTrait<type>::value_type> const& index_entity(string const& name,  typename EntityValueTrait<type>::value_type const& value =
-			typename EntityValueTrait<type>::value_type()){
+	template<ENTITY_TYPE t>
+	entity_idx_type index_entity(string const& name,  typename EntityValueTrait<t>::value_type const& value =
+			typename EntityValueTrait<t>::value_type()){
 		/// check the existence of the entity
-		entity_idx_type const& idx = m_nameId_container.add<type,key_composer_type>(name);
+		entity_idx_type idx = m_nameId_container.template add<t>(name);
 		/// add the value
-		return m_entity_container.add<type>(idx,value);
+		m_entity_container.template add< t >(idx,value);
+		return idx;
 	}
 
 	template<ENTITY_TYPE type>
@@ -57,7 +51,7 @@ public:
 		m_entity_relation_container.link_entity<T2,T1>(idx2,idx1);
 	}
 
-	template<ENTITY_TYPE T1, ENTITY_TYPE T2, typename AdjListType = adj_id_list>
+	template<ENTITY_TYPE T1, ENTITY_TYPE T2, typename AdjListType>
 	void get_adj_list(entity_idx_type const& idx, AdjListType& idList) const{
 		return m_entity_relation_container.get_adj_list<T1,T2>(idx,idList);
 	}

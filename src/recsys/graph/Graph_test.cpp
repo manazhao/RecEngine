@@ -8,6 +8,7 @@
 
 #include "Graph.hpp"
 
+
 using namespace recsys::graph;
 
 void recsys::graph::test(){
@@ -30,8 +31,16 @@ void recsys::graph::test(){
 	g.link_entity<ENT_USER,ENT_FEATURE>(userIdx,genderIdx);
 	g.link_entity<ENT_USER,ENT_FEATURE>(userIdx,ageIdx);
 	g.link_entity<ENT_ITEM,ENT_FEATURE>(itemIdx,catIdx);
-	/// dump the graph
-//	cout << g << endl;
+
+	/// retrieve the adjacent list
+	AdjListType<ENT_RATING,ENT_USER> adjList;
+	g.get_adj_list<ENT_RATING,ENT_USER>(ratingIdx,adjList);
+	cout << "user for rating-" << ratingIdx << ":" << adjList << endl;
+
+	g.get_adj_list<ENT_RATING,ENT_ITEM>(ratingIdx,adjList);
+	cout << "item for rating-" << ratingIdx << ":" << adjList << endl;
+
+	///
 }
 
 int main(int argc, char** argv){
