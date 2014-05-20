@@ -50,8 +50,8 @@ open OUTPUT_FILE, ">", $output_feature_file or die "failed to open the output fe
 
 my %feature_handler_map = (
     "u" => {
-        "gender" => \&default_feature_handler,
-        "age" => \&user_age_feature_handler
+        "gender" => \&default_feature_handler
+    #  ,    "age" => \&user_age_feature_handler
     },
     "i" => {
         "m" => \&default_feature_handler,
@@ -129,8 +129,9 @@ sub item_category_feature_handler{
         foreach my $cat (@sub_cats){
             my ($cat_id, $cat_name) = split /\-/ , $cat;
             $result_cats{join("_",($type,$feature,$cat_id))} = 1;
-            $i ++;
-            last if $i == 2;
+            # only use the leaf category
+#            $i ++;
+#            last if $i == 2;
         }
     }
     return keys %result_cats;

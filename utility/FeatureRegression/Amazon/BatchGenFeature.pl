@@ -4,7 +4,8 @@ use strict;
 use warnings;
 use File::Basename;
 
-my $root_dir = "/home/qzhao2/Dropbox/data/amazon_book_rating";
+my $home_dir = $ENV{"HOME"};
+my $root_dir = "$home_dir/Dropbox/data/amazon_book_rating";
 my $dict_file = $root_dir . "/feature_dict.csv";
 my $user_json_file = $root_dir . "/author_profile.json";
 my $item_json_file = $root_dir . "/item_profile.json";
