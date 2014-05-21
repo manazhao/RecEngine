@@ -6,8 +6,9 @@ use Getopt::Long;
 
 my $pred_folder;
 my $model_file;
+my $max_result = 100;
 
-GetOptions("pred=s" => \$pred_folder, "model=s" => \$model_file) or die $!;
+GetOptions("pred=s" => \$pred_folder, "model=s" => \$model_file, "max=i" => \$max_result) or die $!;
 
 ($pred_folder and -d $pred_folder) or die $!;
 ($model_file and -f $model_file) or die $!;
@@ -36,7 +37,7 @@ foreach (@pred_files){
     `$cmd`;
     # generate recommendation list as html
     
-    $cmd = "perl GenerateAmazonBanner.pl --pred=$sort_result --max=50";
+    $cmd = "perl GenerateAmazonBanner.pl --pred=$sort_result --max=$max_result";
     print $cmd . "\n";
     `$cmd`;
 }

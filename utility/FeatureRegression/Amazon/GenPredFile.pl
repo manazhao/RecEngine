@@ -19,7 +19,7 @@ GetOptions("dict=s" => \$dict_file, "user=s" => \$user_json_file, "item=s" => \$
  "result=s" => \$result_folder) or die "incorrect command line arguments";
 
 $dict_file or die "dictionary file must be provided";
-$user_json_file or die "user feature file must be provided";
+$user_json_file or die "user json file must be provided";
 $item_feature_file or die "item feature file must be provided";
 $result_folder or die "result folder must be provided";
 
