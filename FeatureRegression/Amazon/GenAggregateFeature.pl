@@ -78,7 +78,8 @@ open RATING_FILE, "<", $rating_file or die "failed to open rating file - $rating
 
 while(<RATING_FILE>){
 	chomp;
-	my($user_id,$item_id,$rating, $ts) = split /\s+/;
+	my $json_obj = decode_json($_);
+	my($user_id,$item_id,$rating, $ts) = @{$json_obj->{("u","i","r","d")}};
 	# get the item features
 	my $item_feats = $item_feature_map{$item_id};
 	# item popularity

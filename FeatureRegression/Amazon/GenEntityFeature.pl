@@ -2,6 +2,7 @@
 use File::Basename;
 use Getopt::Long;
 use JSON qw(decode_json);
+use Data::Dumper;
 # generate user feature given the provided json file
 
 # feature dictionalry file
@@ -50,15 +51,25 @@ open OUTPUT_FILE, ">", $output_feature_file or die "failed to open the output fe
 
 my %feature_handler_map = (
     "u" => {
-        "gender" => \&default_feature_handler
-    #  ,    "age" => \&user_age_feature_handler
+        "gender" => \&default_feature_handler,
+        "age" => \&user_age_feature_handler,
     },
     "i" => {
         "m" => \&default_feature_handler,
-        "c" => \&item_category_feature_handler
-    
+        "c" => \&item_category_feature_handler,
+	"au" => \&default_feature_handler,
+	"p_date" => \&production_date_feature_handler,
     }
 );
+
+my %required_features = (
+	"u" => { "gender" => 1, "age" => 1},
+	"i" => { "m" => 1, "c" => 1, "au" => 1, "p_date" => 1}
+);
+
+print ">>> read input feature file in json format\n";
+
+my $type_required_features = $required_features{$type};
 
 while(<INPUT_FILE>){
     chomp;
@@ -66,29 +77,42 @@ while(<INPUT_FILE>){
     # generate features
     my $entity_id = join("_",($type , $tmp_json->{"id"}));
     my %features = ();
+    my %missing_features = %$type_required_features;
     while(my ($key, $value) = each %{$tmp_json}) {
         if(exists $feature_handler_map{$type}->{$key}){
+	    # remove from the missing feature list
+	    delete $missing_features{$key};
             my $handler_ref = $feature_handler_map{$type}->{$key};
-            my @tmp_features = $handler_ref->($type, $key, $value);
-            @features{@tmp_features} = (1) x @tmp_features;
+	    # the return value of feature handler is array which contains reference to key array and value array
+	    # ($key_arr_ref, $val_arr_ref)
+            my ($feat_names,$feat_vals) = $handler_ref->($type, $key, $value);
+	    @features{@$feat_names} = @$feat_vals;
         }
+    }
+    # generate missing feature if there is any
+    foreach my $mis_feature( keys %missing_features){
+	    my $feat_name = join("_", ($type,$mis_feature,"#miss"));
+	    $features{$feat_name} = 1;
     }
 
     # convert to integers
-    my @feature_ids;
-    foreach my $feature(keys %features){
+    my @feat_names = keys %features;
+    my @feat_ids;
+    my @feat_values = @features{@feat_names};
+
+    foreach my $feature(@feat_names){
         if(exists $feature_idx_map{$feature}){
-            push @feature_ids, $feature_idx_map{$feature};
+            push @feat_ids, $feature_idx_map{$feature};
         }else{
-            push @feature_ids, $max_feature_idx;
+            push @feat_ids, $max_feature_idx;
             $feature_idx_map{$feature} = $max_feature_idx;
             print DICT_FILE join(",", ($feature,$max_feature_idx)) . "\n";
             $max_feature_idx++;
         }
     }
     # generate the user feature ids
-    if(scalar @feature_ids > 0){
-        my $feature_str = join "," , @feature_ids;
+    if(scalar @feat_ids > 0){
+        my $feature_str = join "," , map {$feat_ids[$_] . ":" . $feat_values[$_]} (0 .. $#feat_values);
         print OUTPUT_FILE join(",", ($entity_id, $feature_str)) . "\n";
     }
 }
@@ -98,23 +122,24 @@ close INPUT_FILE;
 close OUTPUT_FILE;
 
 
-
 sub default_feature_handler{
     my($type, $feature, $value) = @_;
-    return (join("_", ($type,$feature,$value)));
+    # remove , from the value
+    $value =~ s/\,//g;
+    return ([join("_", ($type,$feature,$value))],[1]);
 }
 
 sub user_age_feature_handler{
     my($type, $feature, $value) = @_;
     my $age = int $value;
     $age = int ($age / 5);
-    return (join("_", ($type, $feature, $age)));
+    return ([join("_", ($type, $feature, $age))],[1]);
 }
 
 sub item_merchant_feature_handler{
     my($type, $feature, $value) = @_;
     my($name,$id) = split /\,/, $value;
-    return (join("_", ($type,$feature,$name)));
+    return ([join("_", ($type,$feature,$name))],[1]);
 }
 
 sub item_category_feature_handler{
@@ -134,5 +159,16 @@ sub item_category_feature_handler{
 #            last if $i == 2;
         }
     }
-    return keys %result_cats;
+    my @feat_names = keys %result_cats;
+    my @feat_values = @result_cats{@feat_names};
+    return (\@feat_names, \@feat_values);
 }
+
+sub production_date_feature_handler{
+    my($type, $feature, $value) = @_;
+    # split by - and subtract 1900 from the year
+    my($year,$month,$mday) = split /\-/, $value;
+    $year -= 1900;
+    return ([join("_", ($type,$feature,$year))],[1]);
+}
+

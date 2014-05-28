@@ -226,7 +226,8 @@ while(<ITEM_FILE>){
     }
     # generate feature values 
     my @feat_vals = map { join(":",($_ , $item_feat_map{$_})) } keys %item_feat_map;
-    print RESULT_FILE join(",",($item_id,@feat_vals)) . "\n";
+    # write to result file
+    print RESULT_FILE join(",",("i_" . $item_id,@feat_vals)) . "\n";
 }
 
 close RESULT_FILE;

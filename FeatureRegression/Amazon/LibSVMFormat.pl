@@ -18,13 +18,10 @@ open OUTPUT_FILE, ">", $output_file or die $!;
 while(<INPUT_FILE>){
 	chomp;
 	my ($userId,$item_id,$label, @feats) = split /\,/;
-	if($label eq "1"){
-		$label = "+1";
-	}
-	# sort feats in ascending order
-	@feats = sort {$a <=> $b} @feats;
-	my @feat_strs = map {join ":", ($_ + 1,1)} @feats;
-	print OUTPUT_FILE join(" ", ($label, @feat_strs)) . "\n";
+	# feats is array of sparse features which is in the format featId:value
+	# sort feats by featId in ascend order
+	my @feats_sort = sort { my ($id1,$id2) = ((split /\:/, $a)[0],(split /\:/,$b)[0]); $id1 <=> $id2} @feats;
+	print OUTPUT_FILE join(" ", ($label, @feats_sort)) . "\n";
 }
 close OUTPUT_FILE;
 close INPUT_FILE;
