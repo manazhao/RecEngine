@@ -58,6 +58,7 @@ if(-f $feat_dict_file){
     }
     close DICT_FILE;
 }
+$max_feat_id++;
 
 open DICT_FILE, ">>", $feat_dict_file or die $!;
 
@@ -255,10 +256,10 @@ sub get_feature_id{
     my $feat_id = $feat_map{$feat_name};
     if(not defined $feat_id){
         # not exist
-        $max_feat_id++;
         $feat_id = $max_feat_id;
         $feat_map{$feat_name} = $feat_id;
         print DICT_FILE join(",", ($feat_name,$feat_id)) . "\n";
+	$max_feat_id++;
     }
     return $feat_id;
 

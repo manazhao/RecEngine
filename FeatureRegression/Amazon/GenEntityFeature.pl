@@ -41,6 +41,7 @@ if(-f $dict_file){
 	}
 	close DICT_FILE;
 }
+$max_feature_idx++;
 
 # now read the input json file and index features for each user
 # append to existing dictionary file
@@ -57,7 +58,7 @@ my %feature_handler_map = (
     "i" => {
         "m" => \&default_feature_handler,
         "c" => \&item_category_feature_handler,
-	"au" => \&default_feature_handler,
+#"au" => \&item_author_feature_handler, # 
 	"p_date" => \&production_date_feature_handler,
     }
 );
@@ -129,46 +130,59 @@ sub default_feature_handler{
     return ([join("_", ($type,$feature,$value))],[1]);
 }
 
-sub user_age_feature_handler{
+sub item_author_feature_handler{
     my($type, $feature, $value) = @_;
-    my $age = int $value;
-    $age = int ($age / 5);
-    return ([join("_", ($type, $feature, $age))],[1]);
+    # remove , from the value
+    my @authors = ();
+    if(ref $value eq "ARRAY"){
+	    @authors = @$value;
+    }else{
+	    push @authors, $value;
+    }
+    @authors = map {$_ =~ s/\,//g; join("_",($type,$feature,$_));} @authors;
+    return (\@authors, [(1) x scalar @authors]);
+}
+
+sub user_age_feature_handler{
+	my($type, $feature, $value) = @_;
+	my $age = int $value;
+	$age = int ($age / 5);
+	return ([join("_", ($type, $feature, $age))],[1]);
 }
 
 sub item_merchant_feature_handler{
-    my($type, $feature, $value) = @_;
-    my($name,$id) = split /\,/, $value;
-    return ([join("_", ($type,$feature,$name))],[1]);
+	my($type, $feature, $value) = @_;
+	my($name,$id) = split /\,/, $value;
+	return ([join("_", ($type,$feature,$name))],[1]);
 }
 
 sub item_category_feature_handler{
-    my($type, $feature, $value) = @_;
-    # split the category strigns
-    my @cat_strs = split /\|/, $value;
-    my %result_cats = ();
-    foreach my $cat_str(@cat_strs){
-        # further split by /
-        my @sub_cats = split /\//, $cat_str;
-        my $i = 0;
-        foreach my $cat (@sub_cats){
-            my ($cat_id, $cat_name) = split /\-/ , $cat;
-            $result_cats{join("_",($type,$feature,$cat_id))} = 1;
-            # only use the leaf category
+	my($type, $feature, $value) = @_;
+	# split the category strigns
+	my @cat_strs = split /\|/, $value;
+	my %result_cats = ();
+	foreach my $cat_str(@cat_strs){
+		# further split by /
+		my @sub_cats = split /\//, $cat_str;
+		my $i = 0;
+		foreach my $cat (@sub_cats){
+			my ($cat_id, $cat_name) = split /\-/ , $cat;
+			$result_cats{join("_",($type,$feature,$cat_id))} = 1;
+			# only use the leaf category
 #            $i ++;
 #            last if $i == 2;
-        }
-    }
-    my @feat_names = keys %result_cats;
-    my @feat_values = @result_cats{@feat_names};
-    return (\@feat_names, \@feat_values);
+		}
+	}
+	my @feat_names = keys %result_cats;
+	my @feat_values = @result_cats{@feat_names};
+	return (\@feat_names, \@feat_values);
 }
 
 sub production_date_feature_handler{
-    my($type, $feature, $value) = @_;
-    # split by - and subtract 1900 from the year
-    my($year,$month,$mday) = split /\-/, $value;
-    $year -= 1900;
-    return ([join("_", ($type,$feature,$year))],[1]);
+	my($type, $feature, $value) = @_;
+	# split by - and subtract 1900 from the year
+	my($year,$month,$mday) = split /\-/, $value;
+	$year -= 1900;
+	return ([join("_", ($type,$feature,$year))],[1]);
 }
 

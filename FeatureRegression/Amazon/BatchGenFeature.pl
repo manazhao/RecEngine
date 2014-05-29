@@ -57,6 +57,7 @@ $cmd = "perl GenItemAggFeature.pl --agg=$item_agg_dict_file --item=$item_json_fi
 print ">>> " . $cmd . "\n\n";
 `$cmd`;
 
+exit(0);
 # merge the invidual level and aggregation level features for item
 $cmd = "perl MergeFeature.pl $item_feature_file $item_agg_feature_file > $item_merge_feature_file";
 print ">>> " . $cmd . "\n\n";
