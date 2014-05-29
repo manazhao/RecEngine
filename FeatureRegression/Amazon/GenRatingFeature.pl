@@ -84,20 +84,23 @@ while(<RATING_FILE>){
 	# 
 	my %int_feat_names = ();
 	foreach my $tmp_u_feat (@$user_feats){
+                my ($u_fid, $u_fval) = split /\:/, $tmp_u_feat;
 		foreach my $tmp_i_feat (@$item_feats){
-			my $int_feat = join("|", ($tmp_u_feat, $tmp_i_feat));
-			$int_feat_names{$int_feat} = 1;
+                        # note: $tmp_i_feat is string in the format feat:val
+                        my ($i_fid,$i_fval) = split /\:/, $tmp_i_feat;
+			my $int_feat = join("|", ($u_fid, $i_fid));
+			$int_feat_names{$int_feat} = $u_fval * $i_fval;
 		}
 	}
 	my @int_feat_ids = ();
-	foreach my $int_feat_name (keys %int_feat_names){
-		if(exists $feature_idx_map{$int_feat_name}){
-			push @int_feat_ids, $feature_idx_map{$int_feat_name};
+        while(my ($fname,$fval) = each %int_feat_names){
+		if(exists $feature_idx_map{$fname}){
+			push @int_feat_ids, join(":",($feature_idx_map{$fname},$fval));
 		}else{
-			push @int_feat_ids, $max_feature_idx;
-			$feature_idx_map{$int_feat_name} = $max_feature_idx;
-			print DICT_FILE join(",", ($int_feat_name, $max_feature_idx)) . "\n";
-			$max_feature_idx ++;
+                        $max_feature_idx++;
+			push @int_feat_ids, join(":",($max_feature_idx,$fval));
+			$feature_idx_map{$fname} = $max_feature_idx;
+			print DICT_FILE join(",", ($fname, $max_feature_idx)) . "\n";
 		}
 	}
 	my $all_feat_str = join(",", (@$user_feats, @item_feats, @int_feat_ids));
