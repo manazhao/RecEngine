@@ -124,7 +124,9 @@ while(<ITEM_FILE>){
         my $feat_name = "i_ip";
         # normalize the frequency
         my $feat_id = get_feature_id($feat_name);
-        $item_feat_map{$feat_id} =  sprintf("%.5f",$item_pop / $max_ip_freq); 
+        # round to three decimal digits...
+        my $n_freq = sprintf("%.3f",$item_pop / $max_ip_freq);
+        $n_freq > 0 and $item_feat_map{$feat_id} =  $n_freq;
     }else{
         my $mis_feat_name = "i_ip_#miss";
         my $feat_id = get_feature_id($mis_feat_name);
@@ -140,7 +142,8 @@ while(<ITEM_FILE>){
             my $feat_name = "i_ipy_" . $year;
             # normalize the frequency
             my $feat_id = get_feature_id($feat_name);
-            $item_feat_map{$feat_id} = sprintf("%.5f",$freq / $max_ipy);
+            my $n_freq = sprintf("%.3f",$freq / $max_ipy);
+            $n_freq > 0 and $item_feat_map{$feat_id} = $n_freq;
         }
     }else{
         # if this information is missing
@@ -172,7 +175,8 @@ while(<ITEM_FILE>){
                     }
                 }
                 # save the normalized frequency
-                $n_cp_map{"cp_$cat"} = $n_freq == 1? 1 : sprintf("%.5f",$n_freq);
+                $n_freq = $n_freq == 1? 1: sprintf("%.3f",$n_freq);
+                $n_freq > 0 and $n_cp_map{"cp_$cat"} = $n_freq;
             }
             my $feat_name = "i_cp_$cat";
             my $feat_id = get_feature_id($feat_name);
@@ -198,7 +202,8 @@ while(<ITEM_FILE>){
                     }
                     my $feat_name = "i_cpy_$cat". "_$year";
                     my $feat_id = get_feature_id($feat_name);
-                    $item_feat_map{$feat_id} = $n_freq == 1 ? 1 :sprintf("%.5f",$n_freq);
+                $n_freq = $n_freq == 1? 1: sprintf("%.3f",$n_freq);
+                $n_freq > 0 and $item_feat_map{$feat_id} = $n_freq;
                 }
             }
 
@@ -208,7 +213,8 @@ while(<ITEM_FILE>){
                 my $tmp_feat_key = "i_cip_$cat";
                 # normalized category item popularity
                 my $feat_id = get_feature_id($tmp_feat_key);
-                $item_feat_map{$feat_id} = sprintf("%.5f",$cip_freq);
+                $cip_freq = sprintf("%.3f",$cip_freq);
+                $cip_freq > 0 and $item_feat_map{$feat_id} = $cip_freq;
             }
 
             # add item category year popularity feature
@@ -220,7 +226,8 @@ while(<ITEM_FILE>){
                 }
                 my $feat_name = "i_cipy_$cat" . "_$year"; 
                 my $feat_id = get_feature_id($feat_name);
-                $item_feat_map{$feat_id} = $n_freq == 1 ? 1 :  sprintf("%.5f", $n_freq);
+                $n_freq = $n_freq == 1? 1: sprintf("%.3f",$n_freq);
+                $n_freq > 0 and $item_feat_map{$feat_id} = $n_freq;
             }
         }
     }
@@ -242,6 +249,9 @@ sub item_category_feature_handler{
     foreach my $cat_str(@cat_strs){
         # further split by /
         my @sub_cats = split /\//, $cat_str;
+        # up to three level categories 
+        # slice 0..2
+        @sub_cats = @sub_cats[0.. ($#sub_cats < 2? $#sub_cats : 2)];
         foreach(@sub_cats){
             my ($cat_id, $cat_name) = split /\-/ , $_;
             $result_cats{$cat_id} = 1;
