@@ -65,7 +65,6 @@ unless (-f $item_agg_feature_file){
 }
 
 
-exit(0);
 # merge the invidual level and aggregation level features for item
 unless(-f $item_merge_feature_file){
     $cmd = "perl MergeFeature.pl $item_feature_file $item_agg_feature_file > $item_merge_feature_file";
