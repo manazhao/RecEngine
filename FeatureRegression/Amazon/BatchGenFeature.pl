@@ -20,7 +20,7 @@ my $item_cat_tree_file = $input_folder . "/cat_tree.csv";
 # item aggregated feature
 my $item_agg_feature_file = $result_folder . "/item_agg_profile.csv";
 # merge individual feature and aggregated level feature for item
-my $item_merge_feature_file = $result_folder . "/item_merge_profile.csv";
+my $item_merge_feature_file = $result_folder . "/item_merge_profile_filter.csv";
 
 # generate output file
 -d $result_folder or die "result folder - $result_folder does not exist: $!";
