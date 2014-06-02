@@ -37,7 +37,7 @@ foreach (@pred_files){
     `$cmd`;
     # generate recommendation list as html
     
-    $cmd = "perl GenerateAmazonBanner.pl --pred=$sort_result --max=$max_result";
+    $cmd = "perl GenAmazonBanner.pl --pred=$sort_result --max=$max_result";
     print $cmd . "\n";
     `$cmd`;
 }

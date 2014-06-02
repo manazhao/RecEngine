@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 use File::Basename;
 use Getopt::Long;
+use Data::Dumper;
 use JSON qw(decode_json);
 use File::Basename;
 # generate user feature given the provided json file
@@ -90,13 +91,15 @@ while(<USER_FILE>){
     my %user_feat_map = ();
     while(my ($key, $value) = each %$tmp_json){
         if(exists $feature_handler_map{"u"}->{$key}){
-            my @tmp_features = $feature_handler_map{"u"}->{$key}->("u",$key,$value);
-            @user_feat_map{@tmp_features} = (1) x @tmp_features;
+            my ($feat_names, $feat_vals) = $feature_handler_map{"u"}->{$key}->("u",$key,$value);
+            @user_feat_map{@$feat_names} = @$feat_vals;
         }
     }
-    my @user_feats = ();
-    foreach my $tmp_feat (keys %user_feat_map){
-        push @user_feats, $feature_idx_map{$tmp_feat} if exists $feature_idx_map{$tmp_feat};
+    my @feat_names = keys %user_feat_map;
+    my @feat_values = @user_feat_map{@feat_names};
+    my @feat_ids;
+    foreach my $tmp_feat (@feat_names){
+        push @feat_ids, $feature_idx_map{$tmp_feat} if exists $feature_idx_map{$tmp_feat};
     }
 
     # generate interaction features for all items
@@ -104,18 +107,19 @@ while(<USER_FILE>){
     open PRED_FILE , ">", $pred_file or die $!;
     while(my($item_id, $item_feats) = each %item_feature_map){
         my @int_feats = ();
-        foreach my $user_feat (@user_feats){
+        foreach my $i (0 .. $#feat_ids){
+            my $user_feat_id = $feat_ids[$i];
+            my $user_feat_val = $feat_values[$i];
             foreach my $item_feat (@$item_feats){
-                my $int_feat = join("|", ($user_feat, $item_feat));
-                push @int_feats, $feature_idx_map{$int_feat} if exists $feature_idx_map{$int_feat};
+                my ($item_feat_id,$item_feat_val) = split /\:/,$item_feat;
+                my $int_feat = join("|", ($user_feat_id, $item_feat_id));
+                push @int_feats, join(":",($feature_idx_map{$int_feat},$user_feat_val * $item_feat_val)) if exists $feature_idx_map{$int_feat};
             }
         }
-        # merge user feats, item feats and interactive featus
-        my @all_feats = (@user_feats, @$item_feats, @int_feats);
-        # sort in ascend order
-        @all_feats = sort {$a <=> $b} @all_feats;
-        my @all_sp_feats = map {join(":", ($_ + 1, 1))} @all_feats;
-        print PRED_FILE join(" ", (1, @all_sp_feats)) . "\n";
+        # merge user feats, item feats and interactive features
+        my @all_feats = ((map {join(":",($feat_ids[$_],$feat_values[$_]))} (1..$#feat_ids)), @$item_feats, @int_feats);
+	my @all_feats_sort = sort { my ($id1,$id2) = ((split /\:/, $a)[0],(split /\:/,$b)[0]); $id1 <=> $id2} @all_feats;
+        print PRED_FILE join(" ", (1, @all_feats_sort)) . "\n";
     }
     close PRED_FILE;
 }
@@ -123,16 +127,19 @@ while(<USER_FILE>){
 
 close USER_FILE;
 
-# functions for generate feature given entity type, feature name and feature value
-#
+
+
 sub default_feature_handler{
     my($type, $feature, $value) = @_;
-    return (join("_", ($type,$feature,$value)));
+# remove , from the value
+    $value =~ s/\,//g;
+    return ([join("_", ($type,$feature,$value))],[1]);
 }
 
 sub user_age_feature_handler{
-    my($type, $feature, $value) = @_;
+    my($type, $feature, $value) = @_; 
     my $age = int $value;
-    $age = int ($age / 5);
-    return (join("_", ($type, $feature, $age)));
+    $age = int ($age / 5); 
+    return ([join("_", ($type, $feature, $age))],[1]);
 }
+
