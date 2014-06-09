@@ -12,6 +12,6 @@ while(<STDIN>){
 	foreach my $feature (@features){
 		my ($fid,$val) = split /\:/, $feature;
 		exists $feat_map{$fid} and die "duplicate feature - $fid: $!";
-		print $fid . "\n";
+		print join(",",($fid,$val)). "\n";
 	}	
 }
