@@ -6,7 +6,7 @@ use File::Basename;
 
 my $home_dir = $ENV{"HOME"};
 my $input_folder = "$home_dir/Dropbox/data/amazon_book_rating";
-my $result_folder = $input_folder . "/popularity_result";
+my $result_folder = $input_folder . "/popularity_result2";
 my $user_json_file = $input_folder . "/author_profile.json";
 my $item_json_file = $input_folder . "/item_profile.json";
 my $rating_json_file = $input_folder . "/rating.json";
@@ -18,9 +18,9 @@ my $item_agg_dict_file = $input_folder . "/item_agg_feat_dict.csv";
 # category tree
 my $item_cat_tree_file = $input_folder . "/cat_tree.csv";
 # item aggregated feature
-my $item_agg_feature_file = $result_folder . "/item_agg_profile.csv";
+my $item_agg_feature_file = $result_folder . "/item_agg_feat.csv";
 # merge individual feature and aggregated level feature for item
-my $item_merge_feature_file = $result_folder . "/item_merge_profile_filter.csv";
+my $item_merge_feature_file = $result_folder . "/item_merge_feat.csv";
 
 # generate output file
 -d $result_folder or die "result folder - $result_folder does not exist: $!";

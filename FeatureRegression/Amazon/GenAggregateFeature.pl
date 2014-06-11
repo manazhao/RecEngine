@@ -128,12 +128,3 @@ while(my ($key,$freq) = each %feat_freq_map){
 } 
 
 close RESULT_FILE;
-
-
-
-
-
-
-
-
-
