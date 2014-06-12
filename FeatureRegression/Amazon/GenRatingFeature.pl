@@ -103,7 +103,7 @@ while(<RATING_FILE>){
 			print DICT_FILE join(",", ($fname, $max_feature_idx)) . "\n";
 		}
 	}
-	my $all_feat_str = join(",", (@$user_feats, @item_feats, @int_feat_ids));
+	my $all_feat_str = join(",", (@$user_feats, @$item_feats, @int_feat_ids));
 	print OUTPUT_FILE join(",", ($user_id, $item_id, $rating, $all_feat_str)) . "\n";
 }
 
