@@ -22,16 +22,19 @@ my %feature_handler_map = (
         "age" => \&user_age_feature_handler,
     },
     "i" => {
+        # popularity feature
+        "pop" => \&default_feature_handler,
         "m" => \&default_feature_handler,
         "c" => \&item_category_feature_handler,
 #"au" => \&item_author_feature_handler, # 
-	"p_date" => \&production_date_feature_handler,
+	"pdate" => \&item_production_date_feature_handler,
+        "id" => \&default_feature_handler
     }
 );
 
 my %required_features = (
 	"u" => [ "gender", "age"],
-	"i" => [ "m", "c", "au", "p_date"]
+	"i" => [ "m", "c", "au", "pdate","pop","id"]
 );
 
 sub get_feature_handler{
@@ -100,12 +103,13 @@ sub item_category_feature_handler{
 	return (\@feat_names, \@feat_values);
 }
 
-sub production_date_feature_handler{
+sub item_production_date_feature_handler{
 	my($type, $feature, $value) = @_;
 	# split by - and subtract 1900 from the year
 	my($year,$month,$mday) = split /\-/, $value;
 	$year -= 1900;
 	return ([join("_", ($type,$feature,$year))],[1]);
 }
+
 
 1;
