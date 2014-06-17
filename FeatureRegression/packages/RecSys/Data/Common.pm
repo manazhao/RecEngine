@@ -73,6 +73,8 @@ sub generate_entity_feature {
         return \%result_feat_map;
 }
 
+
+
 # convert feature name to integers
 sub index_entity_feature{
     my($feat_dict,$max_feat_id, $entity_feat_map, $dict_fid) = @_;
