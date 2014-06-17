@@ -4,8 +4,8 @@ use strict;
 use warnings;
 use JSON;
 
-my @gender = ("Male","Female");
-my @age = ("");
+my @gender = ("","Male","Female");
+my @age = ("","20","30","40","50","60");
 
 foreach my $gender (@gender){
     foreach my $age (@age){
