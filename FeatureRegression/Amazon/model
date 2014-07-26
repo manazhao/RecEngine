@@ -1,0 +1,11 @@
+iter   1  #CD cycles 1
+iter   2  #CD cycles 1
+iter   3  #CD cycles 1
+iter   4  #CD cycles 1
+iter   5  #CD cycles 1
+iter   6  #CD cycles 3
+iter   7  #CD cycles 1
+=========================
+optimization finished, #iter = 7
+Objective value = 175997.803192
+#nonzeros/#features = 175417/55656046

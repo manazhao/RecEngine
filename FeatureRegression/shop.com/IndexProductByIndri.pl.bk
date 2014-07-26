@@ -1,0 +1,75 @@
+#!/usr/bin/perl
+#
+# identify similar products by text matching
+# package dependence:
+# 1) Lingua::StopwWords - remove stopwords from text
+# 2) Lin
+#
+use strict;
+use warnings;
+use Lingua::StopWords qw(getStopWords);
+use Lingua::EN::Tokenizer::Offsets qw(tokenize get_tokens);
+use Data::Dumper;
+use Lingua::Stem;
+
+my $product_file = '/data/jian-data/shop-data/ProdData.txt';
+-f $product_file or die $!;
+# get stop words list
+my $stopwords = getStopWords('en');
+my $stemmer = Lingua::Stem->new;
+
+open my $product_fh, "<", $product_file or die $!;
+
+my %product_info_map = ();
+my %category_product_map = ();
+
+my $cnt = 0;
+while(<$product_fh>){
+	# ProdID, CatalogName, OrderText, Description , LocalPrice,  Sizes , Colors,  Category ,  Attributes
+	my($pid, $cln, $ot, $d, $lp, $s, $colors, $cat, $attr) = split /\t/;
+	# tokenize order text and description
+	my @title_tokens = tokenize_text($ot);
+	my @desc_tokens = tokenize_text($d);
+	$product_info_map{$pid}->{"desc_tokens"} = \@desc_tokens;
+	$product_info_map{$pid}->{"title_tokens"} = \@title_tokens;
+	$product_info_map{$pid}->{"desc"} = $d;
+	$product_info_map{$pid}->{"title"} = $ot;
+	# get the attributes
+	my @attr_strs = split /\|/, $attr;
+	foreach(@attr_strs){
+		my ($name,$value) = split /\:/, $_;
+		next if !$name or $name eq '';
+		next if !$value or $value eq '';
+		$name =~ s/(^\s+)|(\s+$)//g;
+		$name =~ s/\s[2,]/ /g;
+		$value =~ s/(^\s+)|(\s+$)//g;
+		$value =~ s/\s[2,]/ /g;
+		$product_info_map{$pid}->{"attrs"}->{lc $name} = lc $value;
+	}
+#	print Dumper($product_info_map{$pid});	
+	$cnt++;
+	last if $cnt >= 500;
+}
+
+
+sub tokenize_text{
+	my($text) = @_;
+	$text = lc $text;
+	#t tokenize the original text
+	my $tokens = get_tokens($text);
+	# remove punctions
+	my @tokens1 = grep { not $_ =~ m/^[^\d\w]+$/} @$tokens;
+	@tokens1 = remove_stopwords(\@tokens1);
+	# stem the words
+	return $stemmer->stem_in_place(@tokens1);	
+}
+
+
+
+sub remove_stopwords{
+	# word array reference
+	my ($words) = @_;
+	return grep {!$stopwords->{$_}} @$words;
+}
+
+
