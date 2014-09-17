@@ -23,9 +23,8 @@ my %feature_handler_map = (
     },
     "i" => {
         "m" => \&default_feature_handler,
-        "c" => \&item_category_feature_handler,
-#"au" => \&item_author_feature_handler, # 
-	"p_date" => \&production_date_feature_handler,
+	"br" => \%default_feature_handler, # brand
+	"dt" => \&production_date_feature_handler, # release date
     }
 );
 

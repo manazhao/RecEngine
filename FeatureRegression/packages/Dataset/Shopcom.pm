@@ -443,6 +443,7 @@ sub _load_train_or_test_idx{
 }
 
 my $MODULE_REF = bless {};
+
 sub get_module_ref{
 	return $MODULE_REF;
 }
