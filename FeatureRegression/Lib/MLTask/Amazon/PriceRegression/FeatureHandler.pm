@@ -2,7 +2,7 @@
 #
 # feature handler for price regression task
 #
-package MLTask::Amazon::PriceRegression;
+package MLTask::Amazon::PriceRegression::FeatureHandler;
 
 use strict;
 use warnings;
@@ -22,8 +22,11 @@ my %FEATURE_HANDLER_MAP = (
         "ar" => \&numerical_feature_handler, # average rating
         "br" => \&categorical_feature_handler, # brand
 	"dt" => \&item_production_date_feature_handler, # release date
-	"tf_" => \&numerical_feature_handler,
-	"idf_" => \&numerical_feature_handler
+	"quantity_tt" => \&numerical_feature_handler, # item quantity
+	"sp" => \&numerical_feature_handler, # sales price
+	"pr" => \&numerical_feature_handler, # original price
+	"tf_" => \&numerical_feature_handler, # tf for bow
+	"idf_" => \&numerical_feature_handler # tfidf for bow
     }
 );
 
@@ -36,7 +39,7 @@ my %REQUIRED_FEATURES = (
 sub categorical_feature_handler{
     my($type, $feature, $value) = @_;
     # remove, and space from the value
-    $value =~ s/\s\,//g;
+    $value =~ s/(\s+)|\,//g;
     # to lowercase
     $value = lc $value;
     return ([join("_", ($type,$feature,$value))],[1]);
@@ -61,8 +64,8 @@ sub item_production_date_feature_handler{
 
 sub map_feature_name{
 	my ($feature) = @_;	
-	$feature =~ m/tf_/ and return "tf";
-	$feature =~ m/tfidf_/ and return "tfidf";
+	$feature =~ m/tf_/ and return "tf_";
+	$feature =~ m/tfidf_/ and return "tfidf_";
 	return $feature;
 }
 
@@ -77,7 +80,8 @@ sub new {
 sub generate_feature{
 	my($self,$type,$attribute_map) = @_;
 	my %required_attr_map = ();
-	@required_attr_map{@REQUIRED_FEATURES} = (0) x scalar @REQUIRED_FEATURES;
+	my $entity_required_features = $REQUIRED_FEATURES{$type};
+	@required_attr_map{@$entity_required_features} = (0) x scalar @$entity_required_features;
 	my %result_feat_map = ();
 	while(my($attr_name, $attr_value) = each %$attribute_map){
 		$attr_name = map_feature_name($attr_name);

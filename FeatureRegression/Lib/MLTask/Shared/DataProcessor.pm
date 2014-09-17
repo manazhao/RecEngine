@@ -13,6 +13,7 @@ use JSON;
 use Data::Dumper;
 use MLTask::Shared::FeatureDict;
 use MLTask::Shared::FeatureIndexer;
+use MLTask::Shared::Utility;
 
 our $VERSION = 1.00;
 our @ISA = qw(Exporter);
@@ -31,17 +32,29 @@ sub index_feature{
 	# $attr_file: entity attribute file
 	# $feat_dict_file: feature dictionary file
 	# $feature_handler: feature handler object
-	my ($self, $entity_type, $attr_file, $feature_file, $feat_dict_file, $feature_handler) = @_;
-	-f $attr_file or die "entity attribute file - $attr_file does not exist";
-	-f $feat_dict_file or die "feature dictionary file - $feat_dict_file does not exist";
+	my ($self, %args) = @_;
+	my @arg_keys = qw(entity_type attribute_file feature_file feature_dict_file feature_handler);
+	my %default_args = ();
+	@default_args{@arg_keys} = (undef) x scalar @arg_keys;
+	# overwrite the values
+	@default_args{@arg_keys} = @args{@arg_keys};
+	my $err_msg = MLTask::Shared::Utility::check_func_args("index_feature",\%default_args);
+	$err_msg and die $err_msg;
+
+	my ($entity_type, $attribute_file, $feature_file, $feature_dict_file, $feature_handler) = @default_args{@arg_keys};
+
+	-f $attribute_file or die "entity attribute file - $attribute_file does not exist";
+	-f $feature_dict_file or die "feature dictionary file - $feature_dict_file does not exist";
 	# create feature dictionary
-	my $feat_dict = MLTask::Shared::FeatureDict::get_instance(file => $feat_dict_file);
+	my $feat_dict = MLTask::Shared::FeatureDict::get_instance(file => $feature_dict_file);
+	# create feature handler
+	my $cfg = $self->{cfg};
 	my $feature_indexer = new MLTask::Shared::FeatureIndexer(
-		type => $entity_type,
-		attribute_file => $attr_file,
+		entity_type => $entity_type,
+		attribute_file => $attribute_file,
 		feature_file => $feature_file,
 		feature_handler => $feature_handler,
-		feature_dict => $feat_dict_file
+		feature_dict_file => $feature_dict_file
 	);
 	$feature_indexer->index();
 }

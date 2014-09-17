@@ -23,7 +23,7 @@ sub _load_from_file{
 	open my $fd1, "<" , $file or die $!;
 	while(<$fd1>){
 		chomp;
-		my($name,$id) = split /\,/;
+		my($name,$id) = split /\t/;
 		if($id > $max_id){
 			$max_id = $id;
 		}
@@ -54,7 +54,7 @@ sub index_feature{
 		$id_map->{$name} = $max_id;
 		$name_map->{$max_id} = $name;
 		# print to file
-		print $fd join(",",($name,$max_id)) . "\n";
+		print $fd join("\t",($name,$max_id)) . "\n";
 	}
 	return $id_map->{$name};
 }

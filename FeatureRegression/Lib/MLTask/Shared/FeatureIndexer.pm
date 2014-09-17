@@ -14,6 +14,7 @@ use JSON;
 use Data::Dumper;
 # feature dictionary object
 use MLTask::Shared::FeatureDict;
+use MLTask::Shared::Utility;
 
 # use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
@@ -22,50 +23,41 @@ our @ISA = qw(Exporter);
 
 sub new {
 	my($class,%args) = @_;
-	my $self = {};
-	# set the arguments, 
-	@{$self->{keys %args}} = values %args;
-	# entity type and file
-	$self->{type} and $self->{attribute_file} and $self->{feature_file} and $self->{feature_dict} and $self->{feature_handler} or usage();
-	-f $self->{attribute_file} or die "attribute file must exist";
-	-d dirname($self->{feature_file}) or die "invalid folder for feature file";
+	my @arg_keys = qw(entity_type attribute_file feature_file feature_dict_file feature_handler);
+	my %class_members = ();
+	@class_members{@arg_keys} = @args{@arg_keys};
+	MLTask::Shared::Utility::check_func_args("new", \%class_members);
+	
+	-f $class_members{attribute_file} or die "attribute file must exist";
+	-d dirname($class_members{feature_file}) or die "invalid folder for feature file";
+	my $self = \%class_members;
+	$self->{feature_dict} = MLTask::Shared::FeatureDict::get_instance( file => $self->{feature_dict_file} );
 	bless $self, $class;
 	return $self;
 }
 
-sub usage{
-	my %args = (
-		type => "entity type",
-		attribute_file => "attribute_file",
-		feature_file => "resutled feature file",
-		feature_handler => "feature handler object",
-		"feature_dict" => "feature dictionary object"
-	);
-	my $arg_str = join(" ",map { "$_=<$args{$_}>"} keys %args);
-	print "new FeatureIndexer($arg_str)";
-	exit 1;
-	
-}
 
 sub index{
 	my $self = shift;
 	open FILE, "<" , $self->{attribute_file} or die "failed to open file - $self->{attribute_file}";
 	open RESULT_FILE, ">", $self->{feature_file} or die "failed to open file - $self->{feature_file}";
+	print ">>> load entity profile from - " . $self->{attribute_file} . " and index attribute as features\n";
 	while(<FILE>){
 		chomp;
 		my $json_obj = decode_json($_);
 		# get the id field
 		exists $json_obj->{"id"} or (warn "object id is not defined" and next);
-		my $entity_id = join("_", ($self->{type},$json_obj->{"id"}));
+		my $entity_id = join("_", ($self->{entity_type},$json_obj->{"id"}));
+		# remove entity id so only attributes remain
 		delete $json_obj->{"id"};
-		my $featname_val_map = $self->{feature_handler}->generate_feature($self->{type},$json_obj);
+		my $featname_val_map = $self->{feature_handler}->generate_feature($self->{entity_type},$json_obj);
 		my %featidx_val_map = ();
 		while(my ($feat_name, $feat_val) = each %{$featname_val_map}){
 			my $feat_id = $self->{feature_dict}->index_feature($feat_name);
 			$featidx_val_map{$feat_id} = $feat_val;
 		}
 		my $feat_str = join(",", map {$_ . ":" . $featidx_val_map{$_}} keys %featidx_val_map);
-		print RESULT_FILE join(",",($self->{type}. "_" . $entity_id, $feat_str)) . "\n";
+		print RESULT_FILE join(",",($self->{entity_type}. "_" . $entity_id, $feat_str)) . "\n";
 	}
 	close RESULT_FILE;
 	close FILE;
