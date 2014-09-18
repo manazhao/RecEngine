@@ -11,6 +11,7 @@ use lib "$FindBin::Bin/../../";
 use Exporter;
 our $VERSION = 1.00;
 our @ISA = qw(Exporter);
+our @EXPORT = qw(check_func_args);
 
 sub check_func_args{
 	my ($func_name,$arg_map) = @_;

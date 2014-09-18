@@ -25,7 +25,6 @@ sub new {
 	return $self;
 }
 
-
 sub index_feature{
 	# $self: object itself
 	# $entity_type: entity type e.g. user or item
@@ -76,4 +75,4 @@ sub load_feature{
 	return \%entity_feat_map;
 }
 
-;
+1;

@@ -10,10 +10,12 @@ use Exporter;
 
 use vars qw($VERSION @ISA @EXPORT);
 
-$VERSION = 1.0;
-@ISA = qw (Exporter);
-# export nothing. avoid clash
-@EXPORT = ();
+our $VERSION = 1.0;
+our @ISA = qw (Exporter);
+our @EXPORT = ();
+
+
+# now train the model
 
 
 1;

@@ -32,6 +32,12 @@ sub new{
 }
 
 
+# get machine learning task configuration
+sub get_task_cfg{
+	my $self = shift;
+	return $self->{cfg};
+}
+
 sub process_data{
 	my $self = shift;
 	my $cfg = $self->{cfg};
@@ -59,7 +65,7 @@ sub process_data{
 	foreach my $entity (@$entities){
 		# index each type of entity
 		my $type = $entity->{"type"};
-		my $json_file = $entity->{"json.file"};
+		my $json_file = $entity->{"attribute.file"};
 		my $feature_file = $entity->{"feature.file"};
 		$type and $json_file and $feature_file or die "type, json_file, feature_file must be specified for each entity:$!";
 		$json_file = $input_folder . "/" . $json_file;

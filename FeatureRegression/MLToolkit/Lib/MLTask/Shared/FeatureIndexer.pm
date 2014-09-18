@@ -57,7 +57,7 @@ sub index{
 			$featidx_val_map{$feat_id} = $feat_val;
 		}
 		my $feat_str = join(",", map {$_ . ":" . $featidx_val_map{$_}} keys %featidx_val_map);
-		print RESULT_FILE join(",",($self->{entity_type}. "_" . $entity_id, $feat_str)) . "\n";
+		print RESULT_FILE join(",",($entity_id, $feat_str)) . "\n";
 	}
 	close RESULT_FILE;
 	close FILE;
