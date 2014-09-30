@@ -27,6 +27,7 @@ my $item_file = $home_dir . "/Dropbox/data/amazon_book_rating/items.list";
 foreach (@pred_files){
     my $tmp_file = $pred_folder . "/" . $_;
     my $pred_result_file = $tmp_file . ".pred";
+    -f $pred_result_file and next;
     my $cmd = "liblinear_predict -b 1 $tmp_file $model_file $pred_result_file";
     print $cmd . "\n";
     `$cmd`;
