@@ -30,7 +30,8 @@ my %FEATURE_HANDLER_MAP = (
 );
 
 my %REQUIRED_FEATURES = (
-	"i" => [ "br","dt", "ar", "rc"]
+	"i" => [ "br","dt", "ar", "rc"],
+	"u" => [ "age","gender","race"]
 );
 
 # process feature name by replacing multiple spaces with single space

@@ -21,7 +21,8 @@ sub run{
 	-f $config_file or die "configuration file - $config_file does not exist: $!";
 	my $driver = new MLTask::Shared::Driver($config_file);
 # process data
-	$driver->process_data();
+	$driver->init_data();
+	$driver->train_model();
 }
 
 sub usage{

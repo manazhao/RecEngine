@@ -55,24 +55,43 @@ sub index_feature{
 		feature_handler => $feature_handler,
 		feature_dict_file => $feature_dict_file
 	);
-	$feature_indexer->index();
+	$feature_indexer->index_file();
 }
 
-# entity indexed features given an entity
-sub load_feature{
-	my($self,$feature_file) = @_;
-	open FEATURE_FILE, "<" , $feature_file or die $!;
-	my %entity_feat_map = ();
-	while(<FEATURE_FILE>){
+
+sub load_rating{
+	my($self,$rating_file) = @_;
+	open FILE, "<", $rating_file or die $!;
+	my $user_rating_map = {};
+	while(<FILE>){
 		chomp;
-		my ($type_entity_id, @feats) = split /\,/;
-		my ($type,$id) = split /\_/, $type_entity_id;
-		foreach(@feats){
-			push @{$entity_feat_map{$id}}, [split /\:/, $_];
+		my($uid,$iid,$rate,$time) = split /\t/;
+		push @{$user_rating_map->{$uid}}, [$iid,$rate,$time];
+	}
+	# sort ratings
+	while(my($uid,$tmp_ratings) = each %$user_rating_map){
+		my @sort_ratings = sort {$a->[2] <=> $b->[2]} @$tmp_ratings;
+		$user_rating_map->{$uid} = \@sort_ratings;
+	}
+	return $user_rating_map;
+}
+
+
+# only keep ratings of given items
+sub filter_rating_by_items{
+	my($self,$user_rating_map,$items) = @_;
+	my %item_map = ();
+	@item_map{@$items} = (1) x scalar @$items;
+	while(my($uid,$tmp_ratings) = each %$user_rating_map){
+		# check whether the items rated by current user are present in $items
+		# each of $tmp_ratings is tuple <item id, rating, time>
+		my @filtered_ratings = grep {$item_map{$_->[0]}} @$tmp_ratings;
+		if(scalar @filtered_ratings > 0){
+			$user_rating_map->{$uid} = \@filtered_ratings;
+		}else{
+			# delete user with none ratings
+			delete $user_rating_map->{$uid};
 		}
 	}
-	close FEATURE_FILE;
-	return \%entity_feat_map;
 }
-
 1;
