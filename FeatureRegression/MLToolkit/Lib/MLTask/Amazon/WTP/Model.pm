@@ -70,6 +70,7 @@ sub train{
 	my $item_feat_map = $item_feat_indexer->get_feature_map();
 	my $filtered_user_rating_file = $group_result_folder. "/group_i_c-1/$category" . "_rating.csv";
 	my $category_user_rating_map;
+        # generate category rating file if not exists yet
 	if(not -f $filtered_user_rating_file){
 		print ">>> generating category rating file\n";
 		my @category_items = keys %$item_feat_map;
@@ -87,10 +88,7 @@ sub train{
 	print ">>> load user feature\n";
 	my $user_feat_indexer = $driver->get_feature_indexer("user");
 	my $user_feat_map = $user_feat_indexer->get_feature_map();
-
-
 }
-
 
 
 1;

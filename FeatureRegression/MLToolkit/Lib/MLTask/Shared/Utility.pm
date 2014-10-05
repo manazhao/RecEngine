@@ -11,7 +11,7 @@ use lib "$FindBin::Bin/../../";
 use Exporter;
 our $VERSION = 1.00;
 our @ISA = qw(Exporter);
-our @EXPORT = qw(check_func_args);
+our @EXPORT = qw(check_func_args normalize_text);
 
 sub check_func_args{
 	my ($func_name,$arg_map) = @_;
@@ -23,4 +23,14 @@ sub check_func_args{
 		return  "$func_name($arg_str)";
 	}
 	return "";
+}
+
+
+sub normalize_text{
+    my($text) = @_;
+    # remove extra spaces
+    $text =~ s/\s+/ /g;
+    # lower case
+    $text = lc $text;
+    return $text;
 }
