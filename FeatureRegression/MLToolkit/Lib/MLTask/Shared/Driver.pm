@@ -229,8 +229,10 @@ sub filter_rating_by_users{
 sub train_model{
 	my $self = shift;
 	# create model object
-	print ">>> start model training\n";
-	$self->{model}->train(driver => $self);
+	print ">>> generate sample features\n";
+	$self->{model}->init(driver => $self);
+	$self->{model}->generate_samples();
+	$self->{model}->train();
 }
 
 1;

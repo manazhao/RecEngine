@@ -68,6 +68,10 @@ sub _load_indexed_feature{
 # retrieve feature
 sub get_feature{
 	my($self,$id) = @_;
+	# in case of new entity with no attributes introduced
+	if(not exists $self->{entity_feature}->{$id}){
+		$self->index_entity({id => $id});
+	}
 	return $self->{entity_feature}->{$id};
 }
 

@@ -21,8 +21,8 @@ sub new {
 	my($class,%args) = @_;
 	my $self = {};
 	$self->{feature_dict} = $args{feature_dict};
-	$self->{entity_feature} = $args{entity_feature};
-	($self->{feature_dict} and $self->{entity_feature}) or die "entity feature map and feature dictionary object must be provided";
+	$self->{entity_feature} = $args{entity_feature} ? $args{entity_feature} : {};
+	$self->{feature_dict}  or die "feature dictionary object must be provided";
 	$self->{prefix_fid_map} = {};
 	$self->{prefix_group_map} = {};
 	bless $self, $class;
@@ -133,6 +133,7 @@ sub interact_feature{
 		my $cur_idx = 0;
 		$self->_interact_feature_helper(\@rule_feats,\@idx_arr,$cur_idx,\@result_int_feats);
 	}
+	return @result_int_feats;
 }
 
 
@@ -207,7 +208,7 @@ sub write_group_entity_feature{
 }
 
 
-sub normalize_feature{
+sub normalize_feature_1{
 	my($self,%args) = @_;
 	my @arg_names = qw(feature_list);
 	my %default_args = ();
@@ -222,6 +223,31 @@ sub normalize_feature{
 	while(my($fname,$id) = each %$fname_id_map){
 		my @matched_names = grep { $fname =~ m/$_/ } @feature_list;
 	}
+
+}
+
+sub normalize_feature{
+	my ($self,$feature) = @_;
+	my $fname_id_map = $self->{feature_dict}->get_id_map();
+	my %match_fid_map = ();
+	while(my($name,$id) = each %{$fname_id_map}){
+		$name =~ m/$feature/ and $match_fid_map{$id} = 1;
+	}
+	scalar keys %match_fid_map or (warn "nonexisting feature ids for pattern - $feature" and return);
+	my $min_fval = 0;
+	my $max_fval = 0;
+	my @matched_feats = ();
+	while(my($id,$features) = each %{$self->{entity_feature}}){
+		foreach my $tmp_feat (@$features){
+			my ($fid,$fval) = @$tmp_feat;
+			$match_fid_map{$fid} or next;
+			push @matched_feats, $tmp_feat;
+			$fval > $max_fval and $max_fval = $fval;
+			$fval < $min_fval and $min_fval = $fval;
+		}
+	}
+	my $range = $max_fval - $min_fval;
+	map {$_->[1] = ($_->[1] - $min_fval)/$range} @matched_feats;
 }
 
 sub _build_fprefix_fid_map{

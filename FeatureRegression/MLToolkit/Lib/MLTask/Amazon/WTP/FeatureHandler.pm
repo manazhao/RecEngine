@@ -20,15 +20,14 @@ our @EXPORT = ();
 # feature handlers registration
 my %FEATURE_HANDLER_MAP = (
     "i" => {
-        "rc" => \&numerical_feature_handler, # review count
         "ar" => \&numerical_feature_handler, # average rating
         "br" => \&categorical_feature_handler, # brand
-	"dt" => \&item_production_date_feature_handler, # release date
+#	"dt" => \&item_production_date_feature_handler, # release date
 	"pop" => \&numerical_feature_handler, # item popularity
-	"brand_pop" => \&numerical_feature_handler, # brand popularity
-	"quantity_tt" => \&numerical_feature_handler, # item quantity
+	"br_pop" => \&numerical_feature_handler, # brand popularity
+#	"quantity_tt" => \&numerical_feature_handler, # item quantity
 	"sp" => \&numerical_feature_handler, # sales price
-	"pr" => \&numerical_feature_handler, # original price
+#	"pr" => \&numerical_feature_handler, # original price
 	"tf_" => \&item_tf_feature_handler, # tf for bow
 	#"tfidf_" => \&numerical_feature_handler, # tfidf for bow
 	"lc" => \&item_category_feature_handler# leaf category
@@ -41,7 +40,7 @@ my %FEATURE_HANDLER_MAP = (
 );
 
 my %REQUIRED_FEATURES = (
-	"i" => [ "br","pop","brand_pop", "dt", "ar", "rc","quantity_tt"],
+	"i" => [ "br","pop","br_pop", "ar", "sp"],
 	"u" => [ "age","gender","race"]
 );
 
@@ -203,7 +202,7 @@ sub _load_brand_global_feature{
 	while(<FILE>){
 		chomp;
 		my($brand,$pop) = split /\t/;
-		$self->{brand_pop_map}->{$brand} = $pop;
+		$self->{br_pop_map}->{$brand} = $pop;
 	}
 	close FILE;
 }
