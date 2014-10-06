@@ -24,6 +24,8 @@ my %FEATURE_HANDLER_MAP = (
         "ar" => \&numerical_feature_handler, # average rating
         "br" => \&categorical_feature_handler, # brand
 	"dt" => \&item_production_date_feature_handler, # release date
+	"pop" => \&numerical_feature_handler, # item popularity
+	"brand_pop" => \&numerical_feature_handler, # brand popularity
 	"quantity_tt" => \&numerical_feature_handler, # item quantity
 	"sp" => \&numerical_feature_handler, # sales price
 	"pr" => \&numerical_feature_handler, # original price
@@ -39,7 +41,7 @@ my %FEATURE_HANDLER_MAP = (
 );
 
 my %REQUIRED_FEATURES = (
-	"i" => [ "br","dt", "ar", "rc","quantity_tt"],
+	"i" => [ "br","pop","brand_pop", "dt", "ar", "rc","quantity_tt"],
 	"u" => [ "age","gender","race"]
 );
 
@@ -71,6 +73,7 @@ sub item_tf_feature_handler{
     my($self, $type, $feature, $value) = @_;
     return ([join("_",($type,$feature))],[1]);
 }
+
 
 sub item_category_feature_handler{
 	# $type: entity type
@@ -160,17 +163,68 @@ sub new {
 
 sub init{
 	my($self,%args) = @_;
-	my @required_args = qw(category_tree_file);
-	map {$self->{$_} = undef} @required_args;
-	map {$self->{$_} = $args{$_}} keys %args;
-	check_func_args("MLTask::Amazon::WTP::init",$self);
+	my $driver = $args{driver};
+	$driver or die "MLTask::Shared::Driver reference missing";
+	$self->{driver} = $driver;
+	# get feature handler configuration parameters
+	my $handler_config = $driver->{config}->{feature_handler_config};
+	$self->{category_tree_file} = $driver->get_full_path($handler_config->{category_tree_file});
 	$self->_load_category_tree();
+	# load item popularity and brand popularity
+	$self->_load_item_global_feature();
+	$self->_load_brand_global_feature();
+	# attach brand popularity to each item
+	$self->_set_item_brand_pop();
 }
 
+sub _load_item_global_feature{
+	my $self = shift;
+	my $driver = $self->{driver};
+	my $item_attr_map = $driver->get_entity_attribute("item");
+	my $item_global_file = $driver->get_full_path($driver->get_task_config()->{feature_handler_config}->{item_global_file});
+	open FILE, "<", $item_global_file or die $!;
+	print ">>> load item popularity feature\n";
+	while(<FILE>){
+		chomp;
+		my($item_id,$pop,$ar) = split /\t/;
+		$item_attr_map->{$item_id}->{pop} = $pop;
+		# normalized average rating
+		$item_attr_map->{$item_id}->{ar} = $ar/5.0;
+	}
+	close FILE;
+}
+
+sub _load_brand_global_feature{
+	my $self = shift;
+	my $driver = $self->{driver};
+	my $brand_global_file = $driver->get_full_path($driver->get_task_config()->{feature_handler_config}->{brand_global_file});
+	open FILE, "<", $brand_global_file or die $!;
+	print ">>> load brand popularity feature\n";
+	while(<FILE>){
+		chomp;
+		my($brand,$pop) = split /\t/;
+		$self->{brand_pop_map}->{$brand} = $pop;
+	}
+	close FILE;
+}
+
+sub _set_item_brand_pop{
+	my $self = shift;
+	my $driver = $self->{driver};
+	my $item_attr_map = $driver->get_entity_attribute("item");
+	my $brand_pop_map = $self->{brand_pop_map};
+	print ">>> attach brand popularity to item\n";
+	while(my($id,$tmp_attr) = each %$item_attr_map){
+		my $brand = $tmp_attr->{"br"};
+		$brand or next;
+		my $brand_pop = $brand_pop_map->{$brand};
+		$brand_pop and $tmp_attr->{brand_pop} = $brand_pop;
+	}
+}
 
 sub _load_category_tree{
 	my $self = shift;
-	my $tree_file = $self->{'category.tree.file'};
+	my $tree_file = $self->{'category_tree_file'};
 	open TREE_FILE, "<", $tree_file or die $!;
 	# category tree map
 	my $cat_map = {};

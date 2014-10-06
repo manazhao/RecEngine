@@ -7,14 +7,14 @@ use YAML::Tiny;
 use FindBin;
 
 # library path for feature handlers
-use lib "$FindBin::Bin/../../";
-use Exporter;
+use lib "$FindBin::Bin/../../"; use Exporter;
 use JSON;
 use Data::Dumper;
 use MLTask::Shared::FeatureDict;
 use MLTask::Shared::FeatureIndexer;
+use MLTask::Shared::Utility qw(traverse_variable_recursive);
 use MLTask::Amazon::WTP::Model;
-use Data::Dumper;
+use File::Basename;
 
 our $VERSION = 1.00;
 our @ISA = qw(Exporter);
@@ -25,102 +25,74 @@ sub new{
 	my $self = {};
 	# parse the configuration file
 	my $yaml = YAML::Tiny->read($config_file);
-	my $cfg = $yaml->[0];
-	$self->{yml_cfg} = $cfg;
+	$self->{config} = $yaml->[0];
 	bless $self, $class;
 	$self->_init();
 	return $self;
 }
 
-
 sub _init{
 	# intialize feature handler
 	my $self = shift;
-	my $cfg = $self->{yml_cfg};
-	my $dataset_name = $cfg->{"dataset"};
+	my $cfg = $self->{config};
+	my $work_dir = $cfg->{work_dir};
+	-d $work_dir or die $!;
+	# validate the file paths
+	$self->_validate_task_config();
+	my $dataset_name = $cfg->{dataset};
 	my $task_name = $cfg->{"task"};
 	# import the feature handler 
 	my $feature_handler_class = join("::",("MLTask",$dataset_name,$task_name,"FeatureHandler"));
 	eval "use $feature_handler_class";
-	warn $@ if $@;
+	die $@ if $@;
+	my $feature_handler = eval "new $feature_handler_class()";
+	die  $@ if $@;
+	$feature_handler->init(driver => $self);
+	# import Model module
 	my $model_class = join("::",("MLTask",$dataset_name,$task_name,"Model"));
 	eval "use $model_class";
-	warn $@ if $@;
-	my $input_folder = $cfg->{"input.folder"};
-	my $result_folder = $cfg->{"result.folder"};
-	my $feat_dict_file = $cfg->{"feature.dict.file"};
-	-d $input_folder or die "input data folder - $input_folder does not exist: $!";
-	-d $result_folder or die "result data folder - $result_folder does not exist: $!";
-	$feat_dict_file = $result_folder . "/" . $feat_dict_file;
-	my $entities = $cfg->{"entities"};
-	my $feature_handler_config = $cfg->{"feature.handler.config"};
-	my $feature_handler = eval "new $feature_handler_class()";
-	# initialize feature handler
-	if($feature_handler_config){
-		$feature_handler->init(%$feature_handler_config);
-	}
-	# save model class name
-	$self->{model_class} = $model_class;
+	die $@ if $@;
+	$self->{model} = eval "new $model_class()";
 	$self->{feature_handler} = $feature_handler;
+	my $global_feature_handler_class = join("::",("MLTask",$dataset_name,$task_name,"GlobalFeatureHandler"));
+	eval "use $global_feature_handler_class";
+	die $@ if $@;
+	my $global_feature_handler = eval "new $global_feature_handler_class()";
+	die $@ if $@;
+	$self->{global_feature_handler} = $global_feature_handler;
+	$self->{global_feature_handler}->init(driver => $self);
+}
+
+sub get_full_path{
+	my ($self,$config_path) = @_;
+	my $cfg = $self->{config};
+	return $cfg->{work_dir} . "/" . $config_path;
 }
 
 # get machine learning task configuration
-sub get_task_config{
+sub _validate_task_config{
 	my $self = shift;
-	if(not exists $self->{task_config}){
-		my $yml_cfg = $self->{yml_cfg};
-		my $task_config = {
-			"dataset" => $yml_cfg->{dataset},
-			"task" => $yml_cfg->{task},
-			"input_folder" => $yml_cfg->{'input.folder'},
-			"result_folder" => $yml_cfg->{'result.folder'},
-			"feature_dict_file" => $yml_cfg->{'result.folder'} . "/" . $yml_cfg->{'feature.dict.file'},
-			"rating_file" => $yml_cfg->{'input.folder'} . "/" . $yml_cfg->{'rating.file'}
-
-		};
-		my $input_folder = $task_config->{input_folder};
-		my $result_folder = $task_config->{result_folder};
-		# get entity configuration
-		while(my($entity_name,$entity_config) = each %{$yml_cfg->{entities}}){
-			my $type = $entity_config->{"type"};
-			my $json_file = $entity_config->{"attribute.file"};
-			my $feature_file = $entity_config->{"feature.file"};
-			$type and $json_file and $feature_file or die "type, json_file, feature_file must be specified for each entity:$!";
-			$json_file = $input_folder . "/" . $json_file;
-			$feature_file = $result_folder . "/" . $feature_file;
-			$task_config->{entity_config}->{$entity_name} = {
-				name => $entity_name, type => $type, attribute_file => $json_file, feature_file => $feature_file};
-		}
-		$self->{task_config} = $task_config;
+	my $cfg = $self->{config};
+	# get entity configuration
+	while(my($entity_name,$entity_config) = each %{$cfg->{entities}}){
+		my $type = $entity_config->{"type"};
+		my $attribute_file = $entity_config->{"attribute_file"};
+		my $feature_file = $entity_config->{"feature_file"};
+		$type and $attribute_file and $feature_file or die "type, attribute_file, feature_file must be specified for each entity:$!";
 	}
-	return $self->{task_config};
 }
 
-# original yml config
-sub get_yml_config{
+
+sub get_task_config{
 	my $self = shift;
-	return $self->{yml_cfg};
+	return $self->{config};
 }
 
 sub get_entity_config{
 	my $self = shift;
 	my $entity_name = shift;
-	my $task_config = $self->get_task_config();
-	return $task_config->{entity_config}->{$entity_name};
-}
-
-# create feature indexer given feature file name
-sub load_feature_indexer{
-	my($self,$entity_type, $feature_file) = @_;
-	my $task_config = $self->get_task_config();
-	my $feature_indexer = new MLTask::Shared::FeatureIndexer(
-		entity_type => $entity_type,
-		attribute_file => "",
-		feature_file => $feature_file,
-		feature_handler => $self->{feature_handler},
-		feature_dict_file => $task_config->{feature_dict_file}
-	);
-	return $feature_indexer;
+	my $cfg = $self->{config};
+	return $cfg->{entities}->{$entity_name};
 }
 
 # get feature indexer given entity name
@@ -130,36 +102,56 @@ sub get_feature_indexer{
 	if(not exists $self->{entity_feature_indexer}->{$entity_name}){
 		# otherwise, create one
 		my $entity_config = $self->get_entity_config($entity_name);
-		my $feature_indexer = new MLTask::Shared::FeatureIndexer(
-			entity_type => $entity_config->{type},
-			attribute_file => $entity_config->{attribute_file},
-			feature_file => $entity_config->{feature_file},
-			feature_handler => $self->{feature_handler},
-			feature_dict_file => $task_config->{feature_dict_file}
-		);
+		my $feature_indexer = new MLTask::Shared::FeatureIndexer();
+		$feature_indexer->init(driver => $self, entity_name => $entity_name);
 		$self->{entity_feature_indexer}->{$entity_name} = $feature_indexer;
 	}
 	return $self->{entity_feature_indexer}->{$entity_name};
 }
 
 sub init_data{
-	print ">>> initialize data\n";
 	my $self = shift;
-	my $task_config = $self->get_task_config();
-	# process entity features
-	my $entity_config_map = $task_config->{entity_config};
+	print ">>> initialize data\n";
+	print ">>> generate global feature\n";
+	$self->{global_feature_handler}->run();
+	my $entity_config_map = $self->{config}->{entities};
+	print ">>> generate entity features\n";
 	while(my($entity_name,$entity_config) = each %$entity_config_map){
 		my $entity_indexer = $self->get_feature_indexer($entity_name);
 		my $feature_file = $entity_config->{feature_file};
-		-f $entity_config->{feature_file} and (print "feature file - $feature_file already exists, skip" and next);
-		$entity_indexer->index_file();
+		# already indexed
+		if(scalar keys %{$entity_indexer->get_feature_map()}){
+			print "[info] attribute file already indexed, skip\n";
+		}else{
+			$entity_indexer->index_file();
+		}
 	}
-	# load ratings
-	$self->{user_rating_map} = $self->load_rating_from_file($task_config->{rating_file});
+}
+
+sub get_entity_attribute{
+	my ($self,$entity_name) = @_;
+	my $entity_config = $self->get_entity_config($entity_name);
+	if(not exists $self->{entity_attribute_map}->{$entity_name}){
+		my $entity_file = $self->get_full_path($entity_config->{attribute_file});
+		open FILE , "<", $entity_file or die $!;
+		print ">>> load entity attribute file - $entity_name\n";
+		while(<FILE>){
+			chomp;
+			my $json_obj = decode_json($_);
+			my $id = $json_obj->{id};
+			defined $id or (warn "[warn] entity id not specified" and next);
+			$self->{entity_attribute_map}->{$entity_name}->{$id} = $json_obj;
+		}
+	}
+	return $self->{entity_attribute_map}->{$entity_name};
 }
 
 sub get_user_rating{
 	my $self = shift;
+	if(not exists $self->{user_rating_map}){
+		# load from file
+		$self->{user_rating_map} = $self->load_rating_from_file($self->get_full_path($self->get_task_config()->{rating_file}));
+	}
 	return $self->{user_rating_map};
 }
 
@@ -180,6 +172,15 @@ sub load_rating_from_file{
 		$user_rating_map->{$uid} = \@sort_ratings;
 	}
 	return $user_rating_map;
+}
+
+sub get_feature_dict{
+	my $self = shift;
+	if(not exists $self->{feature_dict}){
+		my $feature_dict_file = $self->get_full_path($self->get_task_config()->{feature_dict_file});
+		$self->{feature_dict} = MLTask::Shared::FeatureDict::get_instance( file => $feature_dict_file );
+	}
+	return $self->{feature_dict};
 }
 
 # write rating to file
@@ -228,8 +229,8 @@ sub filter_rating_by_users{
 sub train_model{
 	my $self = shift;
 	# create model object
-	my $model_obj = eval "new $self->{model_class}()";
-	$model_obj->train($self);
+	print ">>> start model training\n";
+	$self->{model}->train(driver => $self);
 }
 
 1;

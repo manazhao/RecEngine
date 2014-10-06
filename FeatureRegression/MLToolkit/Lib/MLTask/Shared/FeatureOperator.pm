@@ -12,7 +12,6 @@ use Exporter;
 use JSON;
 use Data::Dumper;
 use MLTask::Shared::FeatureDict;
-use MLTask::Shared::FeatureIndexer;
 use MLTask::Shared::Utility qw(check_func_args);
 
 our $VERSION = 1.00;
@@ -20,21 +19,10 @@ our @ISA = qw(Exporter);
 
 sub new {
 	my($class,%args) = @_;
-	my @member_names = qw(feature_file feature_dict_file);
-	my %class_members = ();
-	my $self = \%class_members;
-	@class_members{@member_names} = (undef) x scalar @member_names;
-	@class_members{@member_names} = @args{@member_names};
-	my $err_msg = check_func_args("new $class", $self);
-	$err_msg and die $err_msg;
-	# now load the features
-	if($self->{feature_file}){
-		$self->{entity_feature} = _load_feature($self->{feature_file});
-	}
-	# load the dictionary
-	print ">>> load feature dictionary\n";
-	$self->{feature_dict} = MLTask::Shared::FeatureDict::get_instance( file => $self->{feature_dict_file} );	
-	# feature prefix => feature id mapping
+	my $self = {};
+	$self->{feature_dict} = $args{feature_dict};
+	$self->{entity_feature} = $args{entity_feature};
+	($self->{feature_dict} and $self->{entity_feature}) or die "entity feature map and feature dictionary object must be provided";
 	$self->{prefix_fid_map} = {};
 	$self->{prefix_group_map} = {};
 	bless $self, $class;
@@ -47,7 +35,6 @@ sub get_feature_map{
 	my $self = shift;
 	return $self->{entity_feature};
 }
-
 
 sub register_named_pattern{
 	my($self,%args) = @_;
@@ -149,6 +136,12 @@ sub interact_feature{
 }
 
 
+sub get_group_entities{
+	my($self,$prefix,$fid) = @_;
+	exists $self->{prefix_group_map}->{$prefix}->{$fid} or(warn "[warn] entity group for feature id - $fid does not exist" and return []);
+	return $self->{prefix_group_map}->{$prefix}->{$fid};
+}
+
 # group entities by feature prefix
 sub group_by_feature{
 	my($self,$feature_prefix) = @_;
@@ -198,6 +191,7 @@ sub write_group_entity_feature{
 	-d $result_folder or `mkdir -p $result_folder`;
 	exists $self->{prefix_group_map}->{$prefix} or die "group feature - $prefix is not available";
 	$result_folder = $result_folder . "/group_$prefix";
+	print $result_folder . "\n";
 	-d $result_folder or `mkdir -p $result_folder`;
 	while(my($group, $ids) = each %{$self->{prefix_group_map}->{$prefix}}){
 		my $group_file = $result_folder . "/$group" . "_feat.csv";
@@ -243,21 +237,5 @@ sub _build_fprefix_fid_map{
 	return \%prefix_id_map;
 }
 
-
-# entity indexed features given an entity
-sub _load_feature{
-	my($feature_file) = @_;
-	print ">>> load features from file - $feature_file\n";
-	open FEATURE_FILE, "<" , $feature_file or die $!;
-	my %entity_feat_map = ();
-	while(<FEATURE_FILE>){
-		chomp;
-		my ($type_entity_id, @feats) = split /\,/;
-		$entity_feat_map{$type_entity_id} = [map { [split /\:/] } @feats]
-	}
-	close FEATURE_FILE;
-	print ">>> loading done\n";
-	return \%entity_feat_map;
-}
 
 1;
